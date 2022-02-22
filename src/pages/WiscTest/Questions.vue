@@ -464,7 +464,7 @@ export default defineComponent({
         tryNumber: null,
         time: null,
         examName: { value: 1, label: 'wisc-iv' },
-        url_img: '',
+        url_img: {},
         location_x: null,
         location_y: null,
         height: null,
@@ -860,6 +860,7 @@ export default defineComponent({
           if (Object.keys(this.chosenSound).length !== 0) {
             if (this.chosenSound.type === 'audio/mpeg') {
               fd.append('mediaQuestion', JSON.stringify(this.selectedQuestionToEdit.mediaQuestion))
+              fd.append('files', this.chosenSound)
             } else {
               this.$q.notify({
                 type: 'negative',
@@ -872,6 +873,7 @@ export default defineComponent({
           if (Object.keys(this.chosenFailedSound).length !== 0) {
             if (this.chosenFailedSound.type === 'audio/mpeg') {
               fd.append('mediaFailed', JSON.stringify(this.selectedQuestionToEdit.mediaFailed))
+              fd.append('files', this.chosenFailedSound)
             } else {
               this.$q.notify({
                 type: 'negative',
@@ -881,22 +883,21 @@ export default defineComponent({
               return false
             }
           }
-          fd.append('files', this.chosenSound)
-          fd.append('files', this.chosenFailedSound)
           for (let i = 1; i <= this.numOfUploadedImages; i++) {
+            console.log(this.createQuestionData.url_img[i-1])
             if (this.createQuestionData.url_img[i-1].type === 'image/png' || this.createQuestionData.url_img[i-1].type === 'image/jpeg') {
               fd.append('files', this.createQuestionData.url_img[i-1])
               if (this.selectedQuestionToEdit.mediaQuestion[0]) {
                 this.selectedQuestionToEdit.mediaQuestion[i] = {
-                  Url: this.createQuestionData.url_img[i].__key,
-                  Height: Number(this.images[i].height),
-                  Width: Number(this.images[i].width)
+                  Url: this.createQuestionData.url_img[i-1].__key,
+                  Height: Number(this.images[i-1].height),
+                  Width: Number(this.images[i-1].width)
                 }
               } else {
-                this.selectedQuestionToEdit.mediaQuestion[i] = {
-                  Url: this.createQuestionData.url_img[i].__key,
-                  Height: Number(this.images[i].height),
-                  Width: Number(this.images[i].width)
+                this.selectedQuestionToEdit.mediaQuestion[i-1] = {
+                  Url: this.createQuestionData.url_img[i-1].__key,
+                  Height: Number(this.images[i-1].height),
+                  Width: Number(this.images[i-1].width)
                 }
               }
             } else {
@@ -910,6 +911,7 @@ export default defineComponent({
           /*if (this.selectedQuestionToEdit.mediaQuestion !== null) {
             fd.append('mediaQuestion', JSON.stringify(this.selectedQuestionToEdit.mediaQuestion))
           }*/
+          console.log(this.selectedQuestionToEdit.mediaQuestion)
           fd.append('title', this.selectedQuestionToEdit.title)
           if (this.selectedQuestionToEdit.index !== this.selectedQuestionIndex) {
             fd.append('index', this.selectedQuestionIndex)
