@@ -907,7 +907,9 @@ export default defineComponent({
               this.UpdateLoading = false
             }
           }
-          fd.append('mediaQuestion', JSON.stringify(this.selectedQuestionToEdit.mediaQuestion))
+          /*if (this.selectedQuestionToEdit.mediaQuestion !== null) {
+            fd.append('mediaQuestion', JSON.stringify(this.selectedQuestionToEdit.mediaQuestion))
+          }*/
           fd.append('title', this.selectedQuestionToEdit.title)
           if (this.selectedQuestionToEdit.index !== this.selectedQuestionIndex) {
             fd.append('index', this.selectedQuestionIndex)
