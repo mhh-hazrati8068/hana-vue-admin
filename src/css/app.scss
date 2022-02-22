@@ -1,0 +1,93 @@
+// app global css in SCSS form
+
+@font-face {
+  font-family: 'IranSans';
+  src: url("../assets/font/IRANSansWeb.ttf"), url("../assets/font/IRANSansWeb.eot"),
+  url("../assets/font/IRANSansWeb.woff"), url("../assets/font/IRANSansWeb.woff2");
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'IranSans', sans-serif;
+}
+
+.q-header {
+  background: #FFFFFF !important;
+
+  .q-btn {
+    color: $dark;
+
+    @media (min-width: 1007px) {
+      display: none;
+    }
+  }
+}
+
+.q-router-link--active {
+  background: $primary-light;
+}
+
+.q-expansion-item__content {
+  .q-expansion-item {
+    .q-item {
+      padding-left: 3rem !important;
+    }
+  }
+}
+
+.q-drawer {
+  width: 200px !important;
+
+  .q-list .q-item .q-item__section--side {
+    //padding: 0 !important;
+    min-width: auto !important;
+
+    .q-icon {
+      color: $primary;
+    }
+  }
+}
+
+@media (min-width: 1007px) {
+  .q-page-container {
+    padding-left: 200px !important;
+  }
+}
+
+.q-table__container .q-table tbody tr {
+
+  td {
+    span {
+      cursor: pointer;
+    }
+
+    .row-numbers::before {
+      counter-increment: cssRowCounter;
+      content: counter(cssRowCounter);
+    }
+  }
+}
+
+.q-table__bottom {
+  display: none !important;
+}
+
+.edit-btn {
+  .q-icon {
+    color: $primary;
+  }
+}
+
+.delete-btn {
+  .q-icon {
+    color: $red;
+  }
+}
+
+.q-dialog {
+  .q-card {
+    min-width: 450px !important;
+  }
+}
