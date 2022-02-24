@@ -2,109 +2,6 @@
   <div class="answers-container">
     <div class="row">
       <div class="col-12">
-        <span class="title">افزودن پاسخ</span>
-      </div>
-      <div class="col-12">
-        <div class="create-answer-container">
-          <div class="row">
-            <div class="col-12 col-md-6" v-if="!this.$route.query.questionId || chooseQuestion">
-              <div class="select-test-question">
-                <q-select
-                  dense
-                  outlined
-                  v-model="selectedTest.id"
-                  :options="tests"
-                  :option-value="'id'"
-                  :option-label="'text'"
-                  label="انتخاب تست"
-                  emit-value
-                  map-options
-                  @update:model-value="getQuestions"
-                />
-              </div>
-            </div>
-            <div class="col-12 col-md-6" v-if="!this.$route.query.questionId || chooseQuestion">
-              <div class="select-test-question">
-                <q-select
-                  dense
-                  outlined
-                  v-model="selectedQuestion.id"
-                  :options="questions"
-                  :option-value="'id'"
-                  :option-label="'text'"
-                  label="انتخاب سوال"
-                  emit-value
-                  map-options
-                  class="q-ml-md"
-                  :disable="Object.keys(selectedTest).length === 0"
-                />
-              </div>
-            </div>
-            <div class="col-12 col-md-4 q-mb-md q-mt-lg">
-              <span>قالب پاسخ</span>
-              <q-option-group
-                :options="answerTemplateOptions"
-                v-model="answerTemplate"
-                class="q-mt-md flex justify-between"
-                @update:model-value="saveTemplate"
-              />
-            </div>
-            <div class="col-12">
-              <q-select
-                dense
-                outlined
-                label="الگو پاسخ"
-                v-model="selectedPattern.value"
-                :options="answerPatterns"
-                v-if="answerTemplate === 1"
-                class="q-mb-md"
-                @update:model-value="savePattern"
-              />
-            </div>
-            <div class="col-12">
-              <q-input
-                dense
-                outlined
-                label="متن پاسخ"
-                v-model="answerText"
-                v-if="answerTemplate === 2"
-                class="q-mb-md"
-              />
-            </div>
-            <div class="col-12 col-md-4" v-if="answerTemplate === 2">
-              <span>امتیاز</span>
-              <q-input
-                dense
-                outlined
-                v-model="score"
-                type="number"
-                min="0"
-                class="q-mt-md"
-              />
-            </div>
-            <div
-              class="col-12 q-mt-md flex"
-              :class="{ 'justify-between': this.$route.query.questionId,
-               'justify-end': !this.$route.query.questionId }"
-            >
-              <q-checkbox
-                v-if="this.$route.query.questionId"
-                v-model="chooseQuestion"
-                label="انتخاب سوال&zwnj;های دیگر"
-              />
-              <q-btn
-                dense
-                unelevated
-                label="ثبت"
-                color="primary"
-                style="width: 15%"
-                @click="setAnswer"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 q-mt-xl">
         <div class="flex justify-between" style="align-items: center">
           <span class="title">پاسخ&zwnj;های موجود</span>
           <q-select
@@ -169,6 +66,17 @@
           </q-table>
         </div>
       </div>
+      <div class="col-12 flex justify-end">
+        <q-btn
+          unelevated
+          dense
+          label="افزودن پاسخ"
+          icon-right="add"
+          color="primary"
+          class="btn q-py-sm q-mt-md"
+          @click="createDialog = !createDialog"
+        />
+      </div>
     </div>
   </div>
   <q-dialog v-model="editDialog">
@@ -208,6 +116,100 @@
               color="primary"
               style="width: 25%"
               @click="editAnswer"
+            />
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+  <q-dialog v-model="createDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">افزودن پاسخ</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12 col-md-6 q-mt-md" v-if="!this.$route.query.questionId || chooseQuestion">
+            <div class="select-test-question">
+              <span class="label">انتخاب تست</span>
+              <q-select
+                dense
+                outlined
+                v-model="selectedTest.id"
+                :options="tests"
+                :option-value="'id'"
+                :option-label="'text'"
+                emit-value
+                map-options
+                @update:model-value="getQuestions"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md" v-if="!this.$route.query.questionId || chooseQuestion">
+            <div class="select-test-question second-input">
+              <span class="label">انتخاب سوال</span>
+              <q-select
+                dense
+                outlined
+                v-model="selectedQuestion.id"
+                :options="questions"
+                :option-value="'id'"
+                :option-label="'text'"
+                emit-value
+                map-options
+                :disable="Object.keys(selectedTest).length === 0"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-4 q-mb-md q-mt-lg">
+            <span class="label">قالب پاسخ</span>
+            <q-option-group
+              :options="answerTemplateOptions"
+              v-model="answerTemplate"
+              class="q-mt-md flex justify-between"
+              @update:model-value="saveTemplate"
+            />
+          </div>
+          <div class="col-12" v-if="answerTemplate === 1">
+            <span class="label">الگو پاسخ</span>
+            <q-select
+              dense
+              outlined
+              v-model="selectedPattern.value"
+              :options="answerPatterns"
+              class="q-mb-md"
+              @update:model-value="savePattern"
+            />
+          </div>
+          <div class="col-12" v-if="answerTemplate === 2">
+            <span class="label">متن پاسخ</span>
+            <q-input
+              dense
+              outlined
+              v-model="answerText"
+              class="q-mb-md"
+            />
+          </div>
+          <div class="col-12 col-md-4" v-if="answerTemplate === 2">
+            <span class="label">امتیاز</span>
+            <q-input
+              dense
+              outlined
+              v-model="score"
+              type="number"
+              min="0"
+            />
+          </div>
+          <div class="col-12 q-mt-md flex justify-center">
+            <q-btn
+              dense
+              unelevated
+              label="ثبت پاسخ"
+              color="primary"
+              class="submit-btn"
+              @click="setAnswer"
             />
           </div>
         </div>
@@ -261,7 +263,8 @@ export default defineComponent({
       selectQuestionToShow: {},
       chooseQuestion: false,
       editDialog: false,
-      selectedAnswerToEdit: {}
+      selectedAnswerToEdit: {},
+      createDialog: false
     }
   },
   created () {

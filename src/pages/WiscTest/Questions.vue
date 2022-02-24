@@ -1,6 +1,6 @@
 <template>
   <div class="questions-container">
-    <div class="row">
+<!--    <div class="row">
       <div class="col-12">
         <span class="title">افزودن سوال</span>
       </div>
@@ -146,7 +146,18 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
+    <q-input
+      v-model="search"
+      outlined
+      dense
+      placeholder="جستجو کنید..."
+      class="q-mb-md"
+    >
+      <template v-slot:prepend>
+        <q-icon name="search" />
+      </template>
+    </q-input>
     <div class="existing-questions">
       <div class="row">
         <div class="col-12">
@@ -154,9 +165,9 @@
         </div>
         <div class="col-12">
           <q-table
-            :pagination="pagination"
             :columns="columns"
             :rows="questions"
+            :filter="search"
             class="q-mt-lg"
           >
             <template v-slot:body="props">
@@ -168,11 +179,22 @@
                 >
                   {{ col.value }}
                   <q-btn
+                    v-if="col.field === 'showAnswers'"
+                    unelevated
+                    dense
+                    @click="goToAnswer(props.row.id)"
+                    label="مشاهده پاسخ"
+                    color="primary"
+                    class="button"
+                  />
+                  <q-btn
                     v-if="col.field === 'updateImages'"
                     unelevated
                     dense
                     label="ویرایش تصاویر"
                     color="primary"
+                    class="button"
+                    @click="updateImagesDialog = !updateImagesDialog"
                   />
                   <q-btn
                     v-if="col.field === 'edit'"
@@ -182,6 +204,7 @@
                     icon="edit"
                     class="edit-btn"
                     @click="openEditDialog(props.row)"
+                    title="ویرایش"
                   />
                   <q-btn
                     v-if="col.field === 'delete'"
@@ -192,11 +215,23 @@
                     class="delete-btn"
                     :disable="props.row.hasAnswer"
                     @click="deleteQuestion(props.row)"
+                    title="حذف"
                   />
                 </q-td>
               </q-tr>
             </template>
           </q-table>
+        </div>
+        <div class="col-12 flex justify-end">
+          <q-btn
+            unelevated
+            dense
+            label="افزودن سوال"
+            icon-right="add"
+            color="primary"
+            class="btn q-mt-md"
+            @click="createDialog = !createDialog"
+          />
         </div>
       </div>
     </div>
@@ -238,18 +273,19 @@
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input">
               <span class="label"> فایل صوتی</span>
-              <div v-if="selectedQuestionToEdit.mediaQuestion !== null">
+              <div v-if="selectedQuestionToEdit.soundQuestion !== null">
                 <q-file
                   v-model="chosenSound"
                   v-show="false"
                   outlined
                   dense
                   @input="onDocumentPicked($event)"
+                  ref="file"
                 />
                 <q-input
                   dense
                   outlined
-                  v-model="selectedQuestionToEdit.mediaQuestion[0].fileName"
+                  v-model="selectedQuestionToEdit.soundQuestion[0].Url"
                   readonly
                 />
                 <q-btn
@@ -258,6 +294,7 @@
                   color="primary"
                   label="تغییر فایل صوتی"
                   class="q-mt-md full-width"
+                  @click="changeFile"
                 />
               </div>
               <div v-else>
@@ -280,11 +317,12 @@
                   outlined
                   dense
                   @input="onFailedDocumentPicked($event)"
+                  ref="file"
                 />
                 <q-input
                   dense
                   outlined
-                  v-model="selectedQuestionToEdit.mediaFailed[0].url"
+                  v-model="selectedQuestionToEdit.mediaFailed[0].Url"
                   readonly
                 />
                 <q-btn
@@ -293,6 +331,7 @@
                   color="primary"
                   label="تغییر فایل صوتی"
                   class="q-mt-md full-width"
+                  @click="changeFile"
                 />
               </div>
               <div v-else>
@@ -443,6 +482,305 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="createDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">افزودن سوال</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12">
+            <div class="create-question-wrapper">
+              <div class="row">
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">عنوان سوال</span>
+                    <q-input
+                      v-model="createQuestionData.title"
+                      outlined
+                      dense
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label">نوع سوال</span>
+                    <q-select
+                      v-model="createQuestionData.typeQuestion"
+                      outlined
+                      dense
+                      use-input
+                      use-chips
+                      input-debounce="0"
+                      @new-value="createValue"
+                      :options="typeQuestionOptions"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label"> فایل صوتی</span>
+                    <q-file
+                      v-model="chosenSound"
+                      outlined
+                      dense
+                      @input="onDocumentPicked($event)"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label"> فایل صوتی در صورت عدم موفقیت</span>
+                    <q-file
+                      v-model="chosenFailedSound"
+                      outlined
+                      dense
+                      @input="onFailedDocumentPicked($event)"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">نام آزمون</span>
+                    <q-select
+                      v-model="createQuestionData.examName"
+                      outlined
+                      dense
+                      :options="examNameOptions"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label">تعداد تلاش</span>
+                    <q-input
+                      v-model="createQuestionData.tryNumber"
+                      outlined
+                      dense
+                      type="number"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">زمان (برحسب ثانیه)</span>
+                    <q-input
+                      v-model="createQuestionData.time"
+                      outlined
+                      dense
+                      type="number"
+                      min="0"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label">دسته&zwnj;بندی سوال</span>
+                    <q-select
+                      v-model="createQuestionData.categoryQuestion"
+                      outlined
+                      dense
+                      :options="questionCategoryOptions"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">ترتیب (index)</span>
+                    <q-input
+                      v-model="createQuestionData.index"
+                      outlined
+                      dense
+                      type="number"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label">تعداد سطر</span>
+                    <q-input
+                      v-model="createQuestionData.rows"
+                      outlined
+                      dense
+                      type="number"
+                      min="0"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <q-checkbox
+                    v-model="createQuestionData.showTimer"
+                    label="نمایش زمان"
+                    style="font-size: 1rem"
+                  />
+                </div>
+                <div class="col-12 q-mt-md">
+                  <div class="input">
+                    <span class="label">فایل تصویری (ترتیب انتخاب عکس مهم میباشد)</span>
+                    <q-file
+                      v-model="createQuestionData.image"
+                      outlined
+                      dense
+                      multiple
+                      @input="uploadImages($event)"
+                    />
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="row" v-for="(image, index) in numOfUploadedImages" :key="index">
+                    <div class="col-12 col-md-6 q-mt-md">
+                      <div class="input">
+                        <span class="label">ارتفاع</span>
+                        <q-input
+                          v-model="images[index].height"
+                          outlined
+                          dense
+                          type="number"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-6 q-mt-md">
+                      <div class="input second-input">
+                        <span class="label">عرض</span>
+                        <q-input
+                          v-model="images[index].width"
+                          outlined
+                          dense
+                          type="number"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-6 q-mt-md">
+                      <div class="input">
+                        <span class="label">موقعیت افقی</span>
+                        <q-input
+                          v-model="images[index].locationX"
+                          outlined
+                          dense
+                          type="number"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-6 q-mt-md">
+                      <div class="input second-input">
+                        <span class="label">موقعیت عمودی</span>
+                        <q-input
+                          v-model="images[index].locationY"
+                          outlined
+                          dense
+                          type="number"
+                          min="0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 flex justify-center q-mt-lg">
+                  <q-btn
+                    unelevated
+                    dense
+                    label="ثبت سوال"
+                    color="primary"
+                    class="submit-btn"
+                    style="font-size: 1rem"
+                    @click="setQuestion"
+                  >
+                    <q-inner-loading
+                      :showing="isLoading"
+                    />
+                  </q-btn>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+  <q-dialog v-model="updateImagesDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">ویرایش تصاویر</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="image q-mb-sm">
+          <div class="row flex" style="align-items: flex-start">
+            <div class="col-3">
+              <img src="~assets/images/fargo.svg" style="margin-top: 1.75rem">
+            </div>
+            <div class="col-9">
+              <div class="flex column">
+                <div class="input-wrapper">
+                  <div class="">
+                    <span class="label">موقعیت افقی</span>
+                    <q-input
+                      outlined
+                      dense
+                      type="number"
+                    />
+                  </div>
+                  <div class="q-ml-sm">
+                    <span class="label">موقعیت عمودی</span>
+                    <q-input
+                      outlined
+                      dense
+                      type="number"
+                    />
+                  </div>
+                </div>
+                <div class="input-wrapper q-mt-sm">
+                  <div class="">
+                    <span class="label">طول</span>
+                    <q-input
+                      outlined
+                      dense
+                      type="number"
+                    />
+                  </div>
+                  <div class="q-ml-sm">
+                    <span class="label">عرض</span>
+                    <q-input
+                      outlined
+                      dense
+                      type="number"
+                    />
+                  </div>
+                </div>
+                <q-file
+                  v-show="false"
+                  v-model="changedImage"
+                  ref="changeImage"
+                />
+                <q-btn
+                  unelevated
+                  dense
+                  label="تغییر عکس"
+                  color="primary"
+                  class="q-mt-md"
+                  @click="changeImage"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <q-separator/>
+        <q-btn
+          unelevated
+          dense
+          label="اعمال تغییرات"
+          color="primary"
+          class="submit-btn"
+        />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -464,11 +802,7 @@ export default defineComponent({
         tryNumber: null,
         time: null,
         examName: { value: 1, label: 'wisc-iv' },
-        url_img: {},
-        location_x: null,
-        location_y: null,
-        height: null,
-        width: null,
+        image: {},
         rows: null,
         showTimer: false
       },
@@ -509,7 +843,8 @@ export default defineComponent({
         { name: 'answersCount', align: 'center', label: 'تعداد پاسخ\u200Cها', field: 'answersCount' },
         { name: 'edit', align: 'center', label: '', field: 'edit' },
         { name: 'delete', align: 'center', label: '', field: 'delete' },
-        { name: 'updateImages', align: 'center', label: '', field: 'updateImages' }
+        { name: 'updateImages', align: 'center', label: '', field: 'updateImages' },
+        { name: 'showAnswers', align: 'center', label: '', field: 'showAnswers' }
       ],
       pagination: {
         page: 1,
@@ -522,11 +857,16 @@ export default defineComponent({
       numOfUploadedImages: 0,
       images: [],
       isLoading: false,
-      UpdateLoading: false
+      UpdateLoading: false,
+      createDialog: false,
+      search: '',
+      updateImagesDialog: false,
+      changedImage: {}
     }
   },
   methods: {
     setQuestion () {
+      const today = new Date().toISOString().slice(0, 10)
       this.isLoading = true
       let isReiterativeIndex = false;
       for (let i = 0; i < this.questions.length; i++) {
@@ -534,7 +874,7 @@ export default defineComponent({
           isReiterativeIndex = true
         }
       }
-      const mediaQuestion = [
+      const soundQuestion = [
         {
           Url: this.chosenSound.__key
         }
@@ -544,6 +884,7 @@ export default defineComponent({
           Url: this.chosenFailedSound.__key
         }
       ]
+      let videoQuestion = []
       let fd = new FormData()
       if (!this.createQuestionData.title || !this.createQuestionData.typeQuestion || !this.createQuestionData.index ||
         !this.createQuestionData.categoryQuestion || !this.createQuestionData.tryNumber ||
@@ -557,7 +898,7 @@ export default defineComponent({
         if (!isReiterativeIndex) {
           if (Object.keys(this.chosenSound).length !== 0) {
             if (this.chosenSound.type === 'audio/mpeg') {
-              fd.append('mediaQuestion', JSON.stringify(mediaQuestion))
+              fd.append('soundQuestion', JSON.stringify(soundQuestion))
             } else {
               this.$q.notify({
                 type: 'negative',
@@ -579,6 +920,19 @@ export default defineComponent({
               return false
             }
           }
+          if (Object.keys(this.createQuestionData.image).length !== 0) {
+            for (let i = 0; i < this.numOfUploadedImages; i++) {
+              if (this.createQuestionData.image[i].type === 'image/png' || this.createQuestionData.image[i].type === 'image/jpeg') {
+                videoQuestion[i] = {
+                  url: this.createQuestionData.image[i].__key,
+                  height: this.images[i].height,
+                  width: this.images[i].width,
+                  locationX: this.images[i].locationX,
+                  locationY: this.images[i].locationY
+                }
+              }
+            }
+          }
           fd.append('files', this.chosenSound)
           fd.append('files', this.chosenFailedSound)
           fd.append('title', this.createQuestionData.title)
@@ -590,8 +944,25 @@ export default defineComponent({
           fd.append('examName', this.createQuestionData.examName.label)
           fd.append('rows', this.createQuestionData.rows)
           fd.append('showTimer', this.createQuestionData.showTimer)
+          fd.append('date', today)
 
-          axios.post(vars.api_base + '/api/PsychologicalAssay/UploadQuestion', fd).then(response => {
+          const data = {
+            title: this.createQuestionData.title,
+            typeQuestion: Number(this.createQuestionData.typeQuestion.value),
+            index: this.createQuestionData.index,
+            categoryQuestion: Number(this.createQuestionData.categoryQuestion.value),
+            tryNumber: this.createQuestionData.tryNumber,
+            time: this.createQuestionData.time,
+            examName: this.createQuestionData.examName.label,
+            rows: this.createQuestionData.rows,
+            showTimer: this.createQuestionData.showTimer,
+            date: today,
+            soundQuestion: soundQuestion,
+            mediaFailed: mediaFailed,
+            videoQuestion: videoQuestion
+          }
+
+          axios.post(vars.api_base + '/Questions/CreateQuestion', data).then(response => {
             console.log(response)
             if (response.data.isSuccess) {
               this.getAllQuestion()
@@ -610,6 +981,7 @@ export default defineComponent({
               this.chosenSound = {}
               this.chosenFailedSound = {}
               this.isLoading = false
+              this.createDialog = false
               this.$q.notify({
                 type: 'positive',
                 message: 'سوال با موفقیت اضافه شد.'
@@ -653,13 +1025,23 @@ export default defineComponent({
       this.createQuestionData.soundFailed = URL.createObjectURL(file.target.files[0])
     },
     getAllQuestion () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetHanaAnswer').then(response => {
-        this.answers = response.data.item
+      axios.get(vars.api_base + '/Answer').then(response => {
+        this.answers = response.data.items
       }).catch(error => {
         console.log(error)
       })
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetHanaQuestion').then(response => {
-        this.questions = response.data.item.sort((a, b) => {
+      axios.post(vars.api_base + '/Questions/GetQuestions', {
+        searchQuery: null,
+        index: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
+        // console.log(response.data)
+        this.questions = response.data.items.sort((a, b) => {
           return a.index - b.index
         })
         let answerCount = 0
@@ -847,6 +1229,7 @@ export default defineComponent({
         }]
       }
       let fd = new FormData()
+      console.log(this.selectedQuestionToEdit)
       if (!this.selectedQuestionToEdit.title || !this.selectedQuestionToEdit.typeQuestionLabel || !this.selectedQuestionToEdit.index ||
         !this.selectedQuestionToEdit.categoryQuestionLabel || !this.selectedQuestionToEdit.tryNumber ||
         !this.selectedQuestionToEdit.time) {
@@ -918,8 +1301,8 @@ export default defineComponent({
           } else {
             fd.append('index', this.selectedQuestionToEdit.index)
           }
-          fd.append('tryNumber', this.selectedQuestionToEdit.tryNumber)
-          fd.append('time', this.selectedQuestionToEdit.time)
+          fd.append('tryNumber', Number(this.selectedQuestionToEdit.tryNumber))
+          fd.append('time', Number(this.selectedQuestionToEdit.time))
           fd.append('examName', this.selectedQuestionToEdit.examName)
           fd.append('rows', this.selectedQuestionToEdit.rows)
           fd.append('showTimer', this.selectedQuestionToEdit.showTimer)
@@ -1006,9 +1389,23 @@ export default defineComponent({
       for (let i = 0; i < this.numOfUploadedImages; i++) {
         this.images.push({
           width: null,
-          height: null
+          height: null,
+          locationX: null,
+          locationY: null
         })
       }
+    },
+    goToAnswer(id) {
+      this.$router.push({
+        name: 'wiscAnswers',
+        query: { questionId: id }
+      })
+    },
+    changeFile() {
+      this.$refs.file.pickFiles()
+    },
+    changeImage() {
+      this.$refs.changeImage.pickFiles()
     }
   },
   created() {
@@ -1029,24 +1426,6 @@ export default defineComponent({
 
   .create-question-wrapper {
     margin-top: 2rem;
-
-    .second-input {
-      margin-left: 1rem;
-
-      @media (max-width: 1024px) {
-        margin-left: 0;
-      }
-    }
   }
-
-  .existing-questions {
-
-  }
-}
-
-.label {
-  font-size: 1rem;
-  display: inline-block;
-  margin-bottom: .5rem;
 }
 </style>

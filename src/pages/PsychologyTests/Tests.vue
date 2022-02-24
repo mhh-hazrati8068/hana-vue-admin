@@ -2,76 +2,7 @@
   <div class="tests-container">
     <div class="row">
       <div class="col-12">
-        <span class="title">افزودن تست</span>
-      </div>
-      <div class="col-12">
-        <div class="create-test-container">
-          <div class="row">
-            <div class="col-12 col-md-3">
-              <q-input
-                dense
-                outlined
-                v-model="testData.text"
-                label="عنوان تست"
-                class="q-mt-sm"
-                required
-              />
-            </div>
-            <div class="col-12 col-md-3">
-              <q-input
-                dense
-                outlined
-                v-model="testData.tag1"
-                label="تگ تست"
-                class="q-mt-sm"
-                required
-              />
-            </div>
-            <div class="col-12 col-md-3">
-              <q-input
-                dense
-                outlined
-                v-model="testData.tag2"
-                label="تگ تست"
-                class="q-mt-sm"
-              />
-            </div>
-            <div class="col-12 col-md-3">
-              <q-file
-                dense
-                outlined
-                v-model="testData.img"
-                label="تصویر تست"
-                class="q-mt-sm"
-                readonly
-              />
-            </div>
-            <div class="col-12 q-mt-lg">
-              <span>توضیحات تست</span>
-              <q-input
-                dense
-                outlined
-                v-model="testData.description"
-                placeholder="توضیحات تست را وارد نمایید..."
-                type="textarea"
-                class="q-mt-sm"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 q-mt-md flex justify-end">
-        <q-btn
-          dense
-          unelevated
-          label="ثبت"
-          color="primary"
-          style="width: 15%"
-          @click="setTest"
-        />
-      </div>
-      <div class="col-12">
-        <span class="title q-mt-xl">تست&zwnj;های موجود</span>
+        <span class="title">تست&zwnj;های موجود</span>
       </div>
       <div class="col-12">
         <div class="tests-wrapper">
@@ -126,6 +57,17 @@
             </template>
           </q-table>
         </div>
+      </div>
+      <div class="col-12 flex justify-end">
+        <q-btn
+          unelevated
+          dense
+          label="افزودن تست"
+          icon-right="add"
+          color="primary"
+          class="btn q-py-sm q-mt-md"
+          @click="createDialog = !createDialog"
+        />
       </div>
     </div>
   </div>
@@ -218,6 +160,82 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="createDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">افزودن تست</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12">
+            <div class="create-test-container">
+              <div class="row">
+                <div class="col-12 col-md-6 q-mt-md">
+                  <span class="label">عنوان تست</span>
+                  <q-input
+                    dense
+                    outlined
+                    v-model="testData.text"
+                    required
+                  />
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <span class="label">تگ تست</span>
+                  <q-input
+                    dense
+                    outlined
+                    v-model="testData.tag1"
+                    class="second-input"
+                    required
+                  />
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <span class="label">تگ تست</span>
+                  <q-input
+                    dense
+                    outlined
+                    v-model="testData.tag2"
+                  />
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <span class="label">تصویر تست</span>
+                  <q-file
+                    dense
+                    outlined
+                    v-model="testData.img"
+                    class="second-input"
+                    readonly
+                  />
+                </div>
+                <div class="col-12 q-mt-md">
+                  <span class="label">توضیحات تست</span>
+                  <q-input
+                    dense
+                    outlined
+                    v-model="testData.description"
+                    placeholder="توضیحات تست را وارد نمایید..."
+                    type="textarea"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 q-mt-md flex justify-center">
+            <q-btn
+              dense
+              unelevated
+              label="ثبت تست"
+              color="primary"
+              class="submit-btn"
+              @click="setTest"
+            />
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -257,7 +275,8 @@ export default defineComponent({
       selectedTestToEdit: {},
       deleteData: {
         id: null
-      }
+      },
+      createDialog: false
     }
   },
   created () {

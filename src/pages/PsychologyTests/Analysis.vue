@@ -2,76 +2,6 @@
   <div class="analysis-container">
     <div class="row">
       <div class="col-12">
-        <span class="title">افزودن تحلیل تست&zwnj;ها</span>
-      </div>
-      <div class="col-12">
-        <div class="create-analysis-container">
-          <div class="row">
-            <div class="col-12 col-md-6">
-              <q-select
-                dense
-                outlined
-                v-model="selectTestForAnalysis.id"
-                label="انتخاب تست"
-                :options="tests"
-                :option-label="'text'"
-                :option-value="'id'"
-                emit-value
-                map-options
-                style="min-width: 150px"
-                required
-              />
-            </div>
-            <div class="col-12 col-md-3">
-              <q-input
-                dense
-                outlined
-                v-model="minScore"
-                label="حداقل امتیاز"
-                stack-label
-                class="q-ml-sm"
-                type="number"
-                min="0"
-                required
-              />
-            </div>
-            <div class="col-12 col-md-3">
-              <q-input
-                dense
-                outlined
-                v-model="maxScore"
-                label="حداکثر امتیاز"
-                stack-label
-                class="q-ml-sm"
-                type="number"
-                min="0"
-              />
-            </div>
-            <div class="col-12 q-mt-lg">
-              <span>متن آنالیز:</span>
-              <q-input
-                dense
-                outlined
-                v-model="analysisText"
-                type="textarea"
-                class="q-mt-lg"
-                required
-              />
-            </div>
-            <div class="col-12 q-mt-md flex justify-end">
-              <q-btn
-                dense
-                unelevated
-                label="ثبت"
-                color="primary"
-                style="width: 15%"
-                @click="setAnalysis"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 q-mt-xl">
         <div class="flex justify-between">
           <span class="title">تحلیل&zwnj;های موجود</span>
           <q-select
@@ -134,6 +64,17 @@
           </q-table>
         </div>
       </div>
+      <div class="col-12 flex justify-end">
+        <q-btn
+          unelevated
+          dense
+          label="افزودن تحلیل تست"
+          icon-right="add"
+          color="primary"
+          class="btn q-py-sm q-mt-md"
+          @click="createDialog = !createDialog"
+        />
+      </div>
     </div>
   </div>
   <q-dialog v-model="editDialog">
@@ -195,6 +136,79 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="createDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">افزودن تحلیل تست&zwnj;ها</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12 q-mb-md">
+            <span class="label">انتخاب تست</span>
+            <q-select
+              dense
+              outlined
+              v-model="selectTestForAnalysis.id"
+              :options="tests"
+              :option-label="'text'"
+              :option-value="'id'"
+              emit-value
+              map-options
+              style="min-width: 150px"
+              required
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <span class="label">حداقل امتیاز</span>
+            <q-input
+              dense
+              outlined
+              v-model="minScore"
+              stack-label
+              type="number"
+              min="0"
+              required
+            />
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="second-input">
+              <span class="label">حداکثر امتیاز</span>
+              <q-input
+                dense
+                outlined
+                v-model="maxScore"
+                stack-label
+                type="number"
+                min="0"
+              />
+            </div>
+          </div>
+          <div class="col-12 q-mt-md">
+            <span class="label">متن آنالیز:</span>
+            <q-input
+              dense
+              outlined
+              v-model="analysisText"
+              type="textarea"
+              required
+            />
+          </div>
+          <div class="col-12 q-mt-md flex justify-center">
+            <q-btn
+              dense
+              unelevated
+              label="ثبت تحلیل تست"
+              color="primary"
+              class="submit-btn"
+              @click="setAnalysis"
+            />
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -226,7 +240,8 @@ export default defineComponent({
       maxScore: null,
       analysisText: '',
       editDialog: false,
-      selectedAnalysisToEdit: {}
+      selectedAnalysisToEdit: {},
+      createDialog: false
     }
   },
   created () {

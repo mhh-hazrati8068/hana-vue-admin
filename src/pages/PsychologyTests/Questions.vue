@@ -2,49 +2,6 @@
   <div class="questions-container">
     <div class="row">
       <div class="col-12">
-        <span class="title">افزودن سوال</span>
-      </div>
-      <div class="col-12">
-        <div class="create-question-container">
-          <div class="row">
-            <div class="col-12 col-md-8">
-              <q-input
-                dense
-                outlined
-                v-model="questionData.text"
-                label="متن سوال"
-                autogrow
-                class="q-mt-sm"
-              />
-            </div>
-            <div class="col-12 col-md-4">
-              <q-select
-                dense
-                outlined
-                v-model="questionData.psychologyTestId"
-                :options="tests"
-                :option-value="'id'"
-                :option-label="'text'"
-                label="انتخاب تست"
-                emit-value
-                map-options
-                class="q-mt-sm"
-              />
-            </div>
-            <div class="col-12 q-mt-md flex justify-end">
-              <q-btn
-                dense
-                unelevated
-                label="ثبت"
-                color="primary"
-                style="width: 15%"
-                @click="setQuestion"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-12 q-mt-xl">
         <div class="flex justify-between" style="align-items: center">
           <span class="title">سوال&zwnj;های موجود</span>
           <q-select
@@ -110,6 +67,17 @@
           </q-table>
         </div>
       </div>
+      <div class="col-12 flex justify-end">
+        <q-btn
+          unelevated
+          dense
+          label="افزودن سوال"
+          icon-right="add"
+          color="primary"
+          class="btn q-py-sm q-mt-md"
+          @click="createDialog = !createDialog"
+        />
+      </div>
     </div>
   </div>
   <q-dialog v-model="editDialog">
@@ -139,6 +107,51 @@
               color="primary"
               style="width: 25%"
               @click="updateQuestion"
+            />
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+  <q-dialog v-model="createDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">افزودن سوال</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12 q-mt-sm">
+            <span class="label">متن سوال</span>
+            <q-input
+              dense
+              outlined
+              v-model="questionData.text"
+              autogrow
+            />
+          </div>
+          <div class="col-12 q-mt-sm">
+            <span class="label">انتخاب تست</span>
+            <q-select
+              dense
+              outlined
+              v-model="questionData.psychologyTestId"
+              :options="tests"
+              :option-value="'id'"
+              :option-label="'text'"
+              emit-value
+              map-options
+            />
+          </div>
+          <div class="col-12 q-mt-md flex justify-center">
+            <q-btn
+              dense
+              unelevated
+              label="ثبت سوال"
+              color="primary"
+              class="submit-btn"
+              @click="setQuestion"
             />
           </div>
         </div>
@@ -176,7 +189,8 @@ export default defineComponent({
       selectedTest: {},
       selectOptions: [],
       editDialog: false,
-      selectedQuestionToEdit: {}
+      selectedQuestionToEdit: {},
+      createDialog: false
     }
   },
   created () {

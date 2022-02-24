@@ -13,6 +13,13 @@
   font-family: 'IranSans', sans-serif;
 }
 
+body {
+  ::-webkit-scrollbar {
+    width: 3px !important;
+    background: #c1c1c1;
+  }
+}
+
 .q-header {
   background: #FFFFFF !important;
 
@@ -71,7 +78,11 @@
 }
 
 .q-table__bottom {
-  display: none !important;
+  //display: none !important;
+
+  .q-icon.q-table__bottom-nodata-icon {
+    color: $warning;
+  }
 }
 
 .edit-btn {
@@ -86,8 +97,52 @@
   }
 }
 
+.button {
+  font-size: .75rem;
+  border-radius: .25rem;
+  padding-right: .5rem;
+  padding-left: .5rem;
+}
+
 .q-dialog {
   .q-card {
     min-width: 450px !important;
   }
+}
+
+.btn {
+  border-radius: .5rem;
+  padding-left: .5rem;
+}
+
+.second-input {
+  margin-left: .5rem;
+
+  @media (max-width: 1024px) {
+    margin-left: 0;
+  }
+}
+
+.label {
+  font-size: .9rem;
+  display: inline-block;
+  margin-bottom: .5rem;
+}
+
+.q-option-group {
+  justify-content: flex-start !important;
+}
+
+.q-dialog {
+  .input-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.submit-btn {
+  font-size: 1rem;
+  width: 100%;
+  margin-top: 1rem;
 }

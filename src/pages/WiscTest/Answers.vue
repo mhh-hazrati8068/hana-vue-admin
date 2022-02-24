@@ -1,6 +1,6 @@
 <template>
   <div class="answers-container">
-    <div class="row">
+<!--    <div class="row">
       <div class="col-12">
         <span class="title">افزودن پاسخ</span>
       </div>
@@ -119,7 +119,7 @@
                 />
               </div>
             </div>
-<!--            <div class="col-12 col-md-6 q-mt-md">
+&lt;!&ndash;            <div class="col-12 col-md-6 q-mt-md">
               <div class="input">
                 <span class="label">بارگذاری فایل صوتی</span>
                 <q-file
@@ -128,7 +128,7 @@
                   dense
                 />
               </div>
-            </div>-->
+            </div>&ndash;&gt;
             <div class="col-12 flex justify-end q-mt-lg">
               <q-btn
                 unelevated
@@ -146,15 +146,25 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
     <div class="existing-answers">
       <div class="row">
-        <div class="col-12">
+        <div class="col-12 flex justify-between" style="align-items: center">
           <span class="title">پاسخ&zwnj;های موجود</span>
+          <q-select
+            v-model="selectQuestion.id"
+            outlined
+            dense
+            :options="questionOptions"
+            :option-value="'id'"
+            :option-label="'title'"
+            emit-value
+            map-options
+            style="min-width: 120px"
+          />
         </div>
         <div class="col-12">
           <q-table
-            :pagination="pagination"
             :columns="columns"
             :rows="answers"
             class="q-mt-lg"
@@ -190,6 +200,17 @@
               </q-tr>
             </template>
           </q-table>
+        </div>
+        <div class="col-12 flex justify-end">
+          <q-btn
+            unelevated
+            dense
+            label="افزودن پاسخ"
+            icon-right="add"
+            color="primary"
+            class="btn q-mt-md"
+            @click="createDialog = !createDialog"
+          />
         </div>
       </div>
     </div>
@@ -398,6 +419,164 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="createDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">افزودن پاسخ</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12">
+            <span class="title">افزودن پاسخ</span>
+          </div>
+          <div class="col-12">
+            <div class="create-answer-wrapper">
+              <div class="row">
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">عنوان پاسخ</span>
+                    <q-input
+                      v-model="createAnswerData.title"
+                      outlined
+                      dense
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label">انتخاب سوال</span>
+                    <q-select
+                      v-model="createAnswerData.questionId"
+                      outlined
+                      dense
+                      :options="questions"
+                      :option-value="'id'"
+                      :option-label="'title'"
+                      @update:model-value="getAnswerOptions"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">بارگذاری تصویر پاسخ</span>
+                    <q-file
+                      v-model="createAnswerData.img"
+                      outlined
+                      dense
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label">موقعیت افقی</span>
+                    <q-input
+                      v-model="createAnswerData.location_x"
+                      outlined
+                      dense
+                      type="number"
+                      :disable="Object.keys(createAnswerData.img).length === 0"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">موقعیت عمودی</span>
+                    <q-input
+                      v-model="createAnswerData.location_y"
+                      outlined
+                      dense
+                      type="number"
+                      :disable="Object.keys(createAnswerData.img).length === 0"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label">امتیاز پاسخ</span>
+                    <q-input
+                      v-model="createAnswerData.answerPoint"
+                      outlined
+                      dense
+                      type="number"
+                      min="0"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">ارتفاع</span>
+                    <q-input
+                      v-model="createAnswerData.height"
+                      outlined
+                      dense
+                      type="number"
+                      min="0"
+                      :disable="Object.keys(createAnswerData.img).length === 0"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input second-input">
+                    <span class="label">عرض</span>
+                    <q-input
+                      v-model="createAnswerData.width"
+                      outlined
+                      dense
+                      type="number"
+                      min="0"
+                      :disable="Object.keys(createAnswerData.img).length === 0"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="input">
+                    <span class="label">تطابق با پاسخ&zwnj;های موجود</span>
+                    <q-select
+                      v-model="createAnswerData.matchWith"
+                      outlined
+                      dense
+                      :options="answersOptions"
+                      :option-label="'title'"
+                      :option-value="'id'"
+                      multiple
+                      :disable="createAnswerData.questionId === '' ||
+                            Object.keys(answersOptions).length === 0"
+                    />
+                  </div>
+                </div>
+                <!--            <div class="col-12 col-md-6 q-mt-md">
+                              <div class="input">
+                                <span class="label">بارگذاری فایل صوتی</span>
+                                <q-file
+                                  v-model="createAnswerData.soundQuestion"
+                                  outlined
+                                  dense
+                                />
+                              </div>
+                            </div>-->
+                <div class="col-12 flex justify-end q-mt-lg">
+                  <q-btn
+                    unelevated
+                    dense
+                    label="ثبت پاسخ"
+                    color="primary"
+                    class="submit-btn"
+                    @click="setAnswer"
+                  >
+                    <q-inner-loading
+                      :showing="isLoading"
+                    />
+                  </q-btn>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -445,7 +624,10 @@ export default defineComponent({
         width: null
       },
       selectedAnswerOptions: [],
-      updateLoading: false
+      updateLoading: false,
+      createDialog: false,
+      selectQuestion: {},
+      questionOptions: [],
     }
   },
   methods: {
@@ -526,7 +708,13 @@ export default defineComponent({
     },
     getAllAnswers () {
       axios.post(vars.api_base + '/api/PsychologicalAssay/GetHanaAnswer').then(response => {
-        this.answers = response.data.item
+        if (this.$route.query.questionId) {
+          this.answers = response.data.item.filter(answer => {
+            return answer.questionId === Number(this.$route.query.questionId)
+          })
+        } else {
+          this.answers = response.data.item
+        }
         // console.log(this.answers)
       }).catch(error => {
         console.log(error)
@@ -562,8 +750,27 @@ export default defineComponent({
       })
     },
     getQuestions () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetHanaQuestion').then(response => {
-        this.questions = response.data.item
+      axios.post(vars.api_base + '/Questions/GetQuestions', {
+        searchQuery: null,
+        index: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
+        this.questions = response.data.items
+        this.questionOptions = [{
+          id: 0,
+          title: 'همه'
+        }, ...response.data.items]
+        if (this.$route.query.questionId) {
+          const questionId = Number(this.$route.query.questionId)
+          this.selectQuestion.id = this.questionOptions.find(question => question.id === questionId).id
+        } else {
+          this.selectQuestion.id = this.questionOptions.find(question => question.id === 0).id
+        }
       }).catch(error => {
         console.log(error)
       })
@@ -666,7 +873,7 @@ export default defineComponent({
   .title {
     font-size: 1.1rem;
     display: inline-block;
-    margin-top: 1rem;
+    //margin-top: 1rem;
   }
 
   .create-answer-wrapper {
