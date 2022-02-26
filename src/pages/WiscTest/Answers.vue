@@ -161,6 +161,7 @@
             emit-value
             map-options
             style="min-width: 120px"
+            @update:model-value="changeAnswers"
           />
         </div>
         <div class="col-12">
@@ -194,7 +195,7 @@
                     icon="delete"
                     class="delete-btn"
                     :disable="props.row.hasAnswer"
-                    @click="deleteQuestion(props.row)"
+                    @click="deleteAnswer(props.row)"
                   />
                 </q-td>
               </q-tr>
@@ -235,7 +236,7 @@
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
-            <div class="input q-ml-sm">
+            <div class="input second-input">
               <span class="label">بارگذاری تصویر پاسخ</span>
               <div v-if="selectedAnswerToEdit.mediaAnswer !== null">
                 <q-file
@@ -248,7 +249,7 @@
                 <q-input
                   dense
                   outlined
-                  v-model="selectedAnswerToEdit.mediaAnswer[0].fileName"
+                  v-model="selectedAnswerToEdit.mediaAnswer[0].url"
                   readonly
                 />
                 <q-btn
@@ -284,7 +285,7 @@
                 </div>
               </div>
               <div class="col-12 col-md-6 q-mt-md">
-                <div class="input q-ml-sm">
+                <div class="input second-input">
                   <span class="label">موقعیت عمودی</span>
                   <q-input
                     v-model="newImage.location_y"
@@ -307,7 +308,7 @@
                 </div>
               </div>
               <div class="col-12 col-md-6 q-mt-md">
-                <div class="input q-ml-sm">
+                <div class="input second-input">
                   <span class="label">عرض</span>
                   <q-input
                     v-model="newImage.width"
@@ -335,7 +336,7 @@
                 </div>
               </div>
               <div class="col-12 col-md-6 q-mt-md">
-                <div class="input q-ml-sm">
+                <div class="input second-input">
                   <span class="label">موقعیت عمودی</span>
                   <q-input
                     v-model="newImage.location_y"
@@ -360,7 +361,7 @@
                 </div>
               </div>
               <div class="col-12 col-md-6 q-mt-md">
-                <div class="input  q-ml-sm">
+                <div class="input second-input">
                   <span class="label">عرض</span>
                   <q-input
                     v-model="newImage.width"
@@ -387,7 +388,7 @@
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
-            <div class="input q-ml-sm">
+            <div class="input second-input">
               <span class="label">تطابق با پاسخ&zwnj;های موجود</span>
               <q-select
                 v-model="selectedAnswerToEdit.matchWith"
@@ -637,11 +638,11 @@ export default defineComponent({
       if (Object.keys(this.createAnswerData.img).length !== 0) {
         mediaAnswer = [
           {
-            Url: this.createAnswerData.img.__key,
-            Height: Number(this.createAnswerData.height),
-            Width: Number(this.createAnswerData.width),
-            LocationX: Number(this.createAnswerData.location_x),
-            LocationY: Number(this.createAnswerData.location_y)
+            url: this.createAnswerData.img.__key,
+            height: Number(this.createAnswerData.height),
+            width: Number(this.createAnswerData.width),
+            locationX: Number(this.createAnswerData.location_x),
+            locationY: Number(this.createAnswerData.location_y)
           }
         ]
       } else {
@@ -662,7 +663,19 @@ export default defineComponent({
         fd.append('answerPointPure', Number(this.createAnswerData.answerPoint))
         fd.append('matchWith', JSON.stringify(match))
         // console.log(this.createAnswerData)
-        axios.post(vars.api_base + '/api/PsychologicalAssay/UploadAnswer', fd).then(response => {
+        let data = {
+          title: this.createAnswerData.title,
+          answerPointPure: Number(this.createAnswerData.answerPoint),
+          questionId: this.createAnswerData.questionId.id,
+          matchWith: match
+        }
+        if (mediaAnswer !== null) {
+          data = {
+            mediaAnswer: mediaAnswer,
+            ...data
+          }
+        }
+        axios.post(vars.api_base + '/Answer/CreateAnswer', data).then(response => {
           console.log(response)
           if (response.data.isSuccess) {
             this.getAllAnswers()
@@ -679,6 +692,7 @@ export default defineComponent({
               matchWith: []
             }
             this.isLoading = false
+            this.createDialog = false
             this.$q.notify({
               type: 'positive',
               message: 'پاسخ جدید با موفقیت اضافه شد.'
@@ -707,13 +721,22 @@ export default defineComponent({
       }
     },
     getAllAnswers () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetHanaAnswer').then(response => {
+      axios.post(vars.api_base + '/Answer/GetAnswers', {
+        searchQuery: null,
+        index: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
         if (this.$route.query.questionId) {
-          this.answers = response.data.item.filter(answer => {
+          this.answers = response.data.items.filter(answer => {
             return answer.questionId === Number(this.$route.query.questionId)
           })
         } else {
-          this.answers = response.data.item
+          this.answers = response.data.items
         }
         // console.log(this.answers)
       }).catch(error => {
@@ -723,7 +746,7 @@ export default defineComponent({
     openEditDialog (answer) {
       this.editDialog = !this.editDialog
       this.selectedAnswerToEdit = answer
-      console.log(this.selectedAnswerToEdit)
+      // console.log(this.selectedAnswerToEdit)
       this.selectedAnswerOptions = this.answers.filter(answer => {
         return answer.questionId !== this.selectedAnswerToEdit.questionId
       }).filter(answer => {
@@ -736,10 +759,8 @@ export default defineComponent({
         this.newImage.width = this.selectedAnswerToEdit.mediaAnswer[0].width
       }
     },
-    deleteQuestion (answer) {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/DeleteHanaAnswer', {
-        id: answer.id
-      }).then(response => {
+    deleteAnswer (answer) {
+      axios.delete(vars.api_base + `/Answer/DeleteAnswer?id=${answer.id}`).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -782,22 +803,22 @@ export default defineComponent({
       if (Object.keys(this.newImage.img).length !== 0) {
         mediaAnswer = [
           {
-            Url: this.newImage.img.__key,
-            Height: Number(this.newImage.height),
-            Width: Number(this.newImage.width),
-            LocationX: Number(this.newImage.location_x),
-            LocationY: Number(this.newImage.location_y)
+            url: this.newImage.img.__key,
+            height: Number(this.newImage.height),
+            width: Number(this.newImage.width),
+            locationX: Number(this.newImage.location_x),
+            locationY: Number(this.newImage.location_y)
           }
         ]
         console.log(mediaAnswer[0])
       } else {
         mediaAnswer = [
           {
-            Url: this.selectedAnswerToEdit.mediaAnswer[0].url,
-            Height: Number(this.newImage.height),
-            Width: Number(this.newImage.width),
-            LocationX: Number(this.newImage.location_x),
-            LocationY: Number(this.newImage.location_y)
+            url: this.selectedAnswerToEdit.mediaAnswer[0].url,
+            height: Number(this.newImage.height),
+            width: Number(this.newImage.width),
+            locationX: Number(this.newImage.location_x),
+            locationY: Number(this.newImage.location_y)
           }
         ]
         console.log(mediaAnswer[0])
@@ -818,9 +839,15 @@ export default defineComponent({
       fd.append('answerPointPure', Number(this.selectedAnswerToEdit.answerPointPure))
       fd.append('matchWith', JSON.stringify(match))
       fd.append('id', this.selectedAnswerToEdit.id)
-      console.log(this.selectedAnswerToEdit)
-      console.log(this.selectedAnswerToEdit.mediaAnswer[0])
-      axios.post(vars.api_base + '/api/PsychologicalAssay/UpdateHanaAnswer', fd).then(response => {
+      // console.log(this.selectedAnswerToEdit)
+      let data = {
+        title: this.selectedAnswerToEdit.title,
+        answerPointPure: Number(this.selectedAnswerToEdit.answerPointPure),
+        id: this.selectedAnswerToEdit.id,
+        matchWith: match,
+        mediaAnswer: mediaAnswer
+      }
+      axios.put(vars.api_base + '/Answer/UpdateAnswer', data).then(response => {
         console.log(response)
         if (response.data.isSuccess) {
           this.getAllAnswers()
@@ -850,14 +877,34 @@ export default defineComponent({
       this.$refs.answerImage.pickFiles()
     },
     getAnswerOptions () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetHanaAnswer').then(response => {
-        this.answersOptions = response.data.item.filter(answer => {
+      axios.post(vars.api_base + '/Answer/GetAnswers').then(response => {
+        this.answersOptions = response.data.items.filter(answer => {
           return answer.questionId === this.createAnswerData.questionId.id
         })
       }).catch(error => {
         console.log(error)
       })
     },
+    changeAnswers() {
+      axios.post(vars.api_base + '/Answer/GetAnswers', {
+        searchQuery: null,
+        index: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
+        if (this.selectQuestion.id === 0) {
+          this.answers = response.data.items
+        } else {
+          this.answers = response.data.items.filter(answer => {
+            return answer.questionId === this.selectQuestion.id
+          })
+        }
+      })
+    }
   },
   created() {
     this.getAllAnswers()

@@ -256,7 +256,7 @@
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
-            <div class="input q-ml-sm">
+            <div class="input second-input">
               <span class="label">نوع سوال</span>
               <q-select
                 v-model="selectedQuestionToEdit.typeQuestionLabel"
@@ -280,12 +280,12 @@
                   outlined
                   dense
                   @input="onDocumentPicked($event)"
-                  ref="file"
+                  ref="file1"
                 />
                 <q-input
                   dense
                   outlined
-                  v-model="selectedQuestionToEdit.soundQuestion[0].Url"
+                  v-model="selectedQuestionToEdit.soundQuestion[0].url"
                   readonly
                 />
                 <q-btn
@@ -294,7 +294,7 @@
                   color="primary"
                   label="تغییر فایل صوتی"
                   class="q-mt-md full-width"
-                  @click="changeFile"
+                  @click="changeFile1"
                 />
               </div>
               <div v-else>
@@ -308,7 +308,7 @@
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
-            <div class="input q-ml-sm">
+            <div class="input second-input">
               <span class="label"> فایل صوتی در صورت عدم موفقیت</span>
               <div v-if="selectedQuestionToEdit.mediaFailed !== null">
                 <q-file
@@ -317,12 +317,12 @@
                   outlined
                   dense
                   @input="onFailedDocumentPicked($event)"
-                  ref="file"
+                  ref="file2"
                 />
                 <q-input
                   dense
                   outlined
-                  v-model="selectedQuestionToEdit.mediaFailed[0].Url"
+                  v-model="selectedQuestionToEdit.mediaFailed[0].url"
                   readonly
                 />
                 <q-btn
@@ -331,7 +331,7 @@
                   color="primary"
                   label="تغییر فایل صوتی"
                   class="q-mt-md full-width"
-                  @click="changeFile"
+                  @click="changeFile2"
                 />
               </div>
               <div v-else>
@@ -367,7 +367,7 @@
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
-            <div class="input q-ml-sm">
+            <div class="input second-input">
               <span class="label">زمان (برحسب ثانیه)</span>
               <q-input
                 v-model="selectedQuestionToEdit.time"
@@ -390,7 +390,7 @@
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
-            <div class="input q-ml-sm">
+            <div class="input second-input">
               <span class="label">ترتیب (index)</span>
               <q-input
                 v-model="selectedQuestionIndex"
@@ -400,7 +400,7 @@
               />
             </div>
           </div>
-          <div class="col-12 q-mt-md">
+<!--          <div class="col-12 q-mt-md">
               <div class="input">
                 <span class="label">فایل تصویری (ترتیب انتخاب عکس مهم میباشد)</span>
                 <q-file
@@ -411,7 +411,7 @@
                   @input="uploadImages($event)"
                 />
               </div>
-            </div>
+            </div>-->
 <!--          <div class="col-12 col-md-6 q-mt-md">
             <div class="input q-ml-sm">
               <span class="label">موقعیت افقی</span>
@@ -436,7 +436,7 @@
               />
             </div>
           </div>-->
-          <div class="col-12">
+<!--          <div class="col-12">
             <div class="row" v-for="(image, index) in numOfUploadedImages" :key="index">
               <div class="col-12 col-md-6 q-mt-md">
                 <div class="input">
@@ -463,7 +463,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div>-->
           <div class="col-12 q-mt-lg flex justify-center">
             <q-btn
               unelevated
@@ -756,7 +756,7 @@
                 <q-file
                   v-show="false"
                   v-model="changedImage"
-                  ref="changeImage"
+                  :ref="`image`"
                 />
                 <q-btn
                   unelevated
@@ -874,16 +874,7 @@ export default defineComponent({
           isReiterativeIndex = true
         }
       }
-      const soundQuestion = [
-        {
-          Url: this.chosenSound.__key
-        }
-      ]
-      const mediaFailed = [
-        {
-          Url: this.chosenFailedSound.__key
-        }
-      ]
+      let soundQuestion = [], mediaFailed = []
       let videoQuestion = []
       let fd = new FormData()
       if (!this.createQuestionData.title || !this.createQuestionData.typeQuestion || !this.createQuestionData.index ||
@@ -920,19 +911,6 @@ export default defineComponent({
               return false
             }
           }
-          if (Object.keys(this.createQuestionData.image).length !== 0) {
-            for (let i = 0; i < this.numOfUploadedImages; i++) {
-              if (this.createQuestionData.image[i].type === 'image/png' || this.createQuestionData.image[i].type === 'image/jpeg') {
-                videoQuestion[i] = {
-                  url: this.createQuestionData.image[i].__key,
-                  height: this.images[i].height,
-                  width: this.images[i].width,
-                  locationX: this.images[i].locationX,
-                  locationY: this.images[i].locationY
-                }
-              }
-            }
-          }
           fd.append('files', this.chosenSound)
           fd.append('files', this.chosenFailedSound)
           fd.append('title', this.createQuestionData.title)
@@ -946,7 +924,7 @@ export default defineComponent({
           fd.append('showTimer', this.createQuestionData.showTimer)
           fd.append('date', today)
 
-          const data = {
+          let data = {
             title: this.createQuestionData.title,
             typeQuestion: Number(this.createQuestionData.typeQuestion.value),
             index: this.createQuestionData.index,
@@ -956,10 +934,44 @@ export default defineComponent({
             examName: this.createQuestionData.examName.label,
             rows: this.createQuestionData.rows,
             showTimer: this.createQuestionData.showTimer,
-            date: today,
-            soundQuestion: soundQuestion,
-            mediaFailed: mediaFailed,
-            videoQuestion: videoQuestion
+            date: today
+          }
+
+          if (Object.keys(this.createQuestionData.image).length !== 0) {
+            for (let i = 0; i < this.numOfUploadedImages; i++) {
+              if (this.createQuestionData.image[i].type === 'image/png' || this.createQuestionData.image[i].type === 'image/jpeg') {
+                videoQuestion[i] = {
+                  url: this.createQuestionData.image[i].__key,
+                  height: this.images[i].height,
+                  width: this.images[i].width,
+                  locationX: this.images[i].locationX,
+                  locationY: this.images[i].locationY
+                }
+              }
+            }
+            data = {
+              videoQuestion: videoQuestion,
+              ...data
+            }
+          }
+
+          if (Object.keys(this.chosenSound).length !== 0) {
+            soundQuestion = [{
+              url: this.chosenSound.__key
+            }]
+            data = {
+              soundQuestion: soundQuestion,
+              ...data
+            }
+          }
+          if (Object.keys(this.chosenFailedSound).length !== 0) {
+            mediaFailed = [{
+              url: this.chosenFailedSound.__key
+            }]
+            data = {
+              mediaFailed: mediaFailed,
+              ...data
+            }
           }
 
           axios.post(vars.api_base + '/Questions/CreateQuestion', data).then(response => {
@@ -1025,7 +1037,16 @@ export default defineComponent({
       this.createQuestionData.soundFailed = URL.createObjectURL(file.target.files[0])
     },
     getAllQuestion () {
-      axios.get(vars.api_base + '/Answer').then(response => {
+      axios.post(vars.api_base + '/Answer/GetAnswers', {
+        searchQuery: null,
+        index: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
         this.answers = response.data.items
       }).catch(error => {
         console.log(error)
@@ -1203,6 +1224,9 @@ export default defineComponent({
     updateQuestion () {
       this.UpdateLoading = true
       let isReiterativeIndex = false;
+      const today = new Date().toISOString().slice(0, 10)
+      let sound = [], failed = []
+
       for (let i = 0; i < this.questions.length; i++) {
         if (this.selectedQuestionToEdit.index !== this.selectedQuestionIndex) {
           if (this.questions[i].index === Number(this.selectedQuestionIndex)) {
@@ -1210,26 +1234,11 @@ export default defineComponent({
           }
         }
       }
-      if (this.selectedQuestionToEdit.mediaQuestion !== null) {
-        this.selectedQuestionToEdit.mediaQuestion[0] = {
-          Url: this.selectedQuestionToEdit.mediaQuestion[0].url
-        }
-      } else if (Object.keys(this.chosenSound).length !== 0) {
-        this.selectedQuestionToEdit.mediaQuestion = [{
-          Url: this.chosenSound.__key
-        }]
-      }
-      if (this.selectedQuestionToEdit.mediaFailed !== null) {
-        this.selectedQuestionToEdit.mediaFailed[0] = {
-          Url: this.chosenFailedSound.__key
-        }
-      } else if (Object.keys(this.chosenFailedSound).length !== 0) {
-        this.selectedQuestionToEdit.mediaFailed = [{
-          Url: this.chosenFailedSound.__key
-        }]
-      }
+
       let fd = new FormData()
-      console.log(this.selectedQuestionToEdit)
+      let newIndex
+      let newTypeQuestion
+      let newCategoryQuestion
       if (!this.selectedQuestionToEdit.title || !this.selectedQuestionToEdit.typeQuestionLabel || !this.selectedQuestionToEdit.index ||
         !this.selectedQuestionToEdit.categoryQuestionLabel || !this.selectedQuestionToEdit.tryNumber ||
         !this.selectedQuestionToEdit.time) {
@@ -1266,7 +1275,7 @@ export default defineComponent({
               return false
             }
           }
-          for (let i = 1; i <= this.numOfUploadedImages; i++) {
+          /*for (let i = 1; i <= this.numOfUploadedImages; i++) {
             console.log(this.createQuestionData.url_img[i-1])
             if (this.createQuestionData.url_img[i-1].type === 'image/png' || this.createQuestionData.url_img[i-1].type === 'image/jpeg') {
               fd.append('files', this.createQuestionData.url_img[i-1])
@@ -1290,16 +1299,14 @@ export default defineComponent({
               })
               this.UpdateLoading = false
             }
-          }
-          /*if (this.selectedQuestionToEdit.mediaQuestion !== null) {
-            fd.append('mediaQuestion', JSON.stringify(this.selectedQuestionToEdit.mediaQuestion))
           }*/
-          console.log(this.selectedQuestionToEdit.mediaQuestion)
           fd.append('title', this.selectedQuestionToEdit.title)
           if (this.selectedQuestionToEdit.index !== this.selectedQuestionIndex) {
             fd.append('index', this.selectedQuestionIndex)
+            newIndex = Number(this.selectedQuestionIndex)
           } else {
             fd.append('index', this.selectedQuestionToEdit.index)
+            newIndex = Number(this.selectedQuestionToEdit.index)
           }
           fd.append('tryNumber', Number(this.selectedQuestionToEdit.tryNumber))
           fd.append('time', Number(this.selectedQuestionToEdit.time))
@@ -1309,15 +1316,62 @@ export default defineComponent({
           fd.append('id', this.selectedQuestionToEdit.id)
           if (this.selectedQuestionToEdit.typeQuestionLabel.constructor === Object) {
             fd.append('typeQuestion', Number(this.selectedQuestionToEdit.typeQuestionLabel.value))
+            newTypeQuestion = Number(this.selectedQuestionToEdit.typeQuestionLabel.value)
           } else {
             fd.append('typeQuestion', Number(this.selectedQuestionToEdit.typeQuestion))
+            newTypeQuestion = Number(this.selectedQuestionToEdit.typeQuestion)
           }
           if (this.selectedQuestionToEdit.categoryQuestionLabel.constructor === Object) {
             fd.append('categoryQuestion', this.selectedQuestionToEdit.categoryQuestionLabel.value)
+            newCategoryQuestion = Number(this.selectedQuestionToEdit.categoryQuestionLabel.value)
           } else {
             fd.append('categoryQuestion', Number(this.selectedQuestionToEdit.categoryQuestion))
+            newCategoryQuestion = Number(this.selectedQuestionToEdit.categoryQuestion)
           }
-          axios.post(vars.api_base + '/api/PsychologicalAssay/UpdateHanaQuestion', fd).then(response => {
+          let data = {
+            title: this.selectedQuestionToEdit.title,
+            index: newIndex,
+            tryNumber: Number(this.selectedQuestionToEdit.tryNumber),
+            time: Number(this.selectedQuestionToEdit.time),
+            examName: this.selectedQuestionToEdit.examName,
+            rows: Number(this.selectedQuestionToEdit.rows),
+            showTimer: this.selectedQuestionToEdit.showTimer,
+            id: this.selectedQuestionToEdit.id,
+            typeQuestion: newTypeQuestion,
+            categoryQuestion: newCategoryQuestion,
+            date: today,
+          }
+
+          if (Object.keys(this.chosenSound).length !== 0) {
+            sound = [{
+              url: this.chosenSound.__key
+            }]
+            data = {
+              soundQuestion: sound,
+              ...data
+            }
+          } else {
+            data = {
+              soundQuestion: this.selectedQuestionToEdit.soundQuestion,
+              ...data
+            }
+          }
+          if (Object.keys(this.chosenFailedSound).length !== 0) {
+            failed = [{
+              url: this.chosenFailedSound.__key
+            }]
+            data = {
+              mediaFailed: failed,
+              ...data
+            }
+          } else {
+            data = {
+              mediaFailed: this.selectedQuestionToEdit.mediaFailed,
+              ...data
+            }
+          }
+
+          axios.put(vars.api_base + '/Questions/UpdateQuestion', data).then(response => {
             console.log(response)
             if (response.data.isSuccess) {
               this.getAllQuestion()
@@ -1330,7 +1384,6 @@ export default defineComponent({
                 categoryQuestion: null,
                 tryNumber: null,
                 time: null,
-                examName: '',
                 rowCount: null,
                 showTime: false,
                 height: null,
@@ -1370,9 +1423,10 @@ export default defineComponent({
       }
     },
     deleteQuestion (question) {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/DeleteHanaQuestion', {
+      const payload = {
         id: question.id
-      }).then(response => {
+      }
+      axios.delete(vars.api_base + `/Questions/DeleteQuestion?id=${question.id}`).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -1401,11 +1455,14 @@ export default defineComponent({
         query: { questionId: id }
       })
     },
-    changeFile() {
-      this.$refs.file.pickFiles()
+    changeFile1() {
+      this.$refs.file1.pickFiles()
+    },
+    changeFile2() {
+      this.$refs.file2.pickFiles()
     },
     changeImage() {
-      this.$refs.changeImage.pickFiles()
+      this.$refs.image.pickFiles()
     }
   },
   created() {
