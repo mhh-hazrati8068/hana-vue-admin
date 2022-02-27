@@ -168,7 +168,12 @@
           <q-table
             :columns="columns"
             :rows="answers"
+            :row-key="name"
+            :loading="loading"
+            v-model:pagination="pagination"
+            :rows-per-page-options="[20,30,40,50]"
             class="q-mt-lg"
+            @request="getAllAnswers"
           >
             <template v-slot:body="props">
               <q-tr :props="props">
@@ -610,7 +615,8 @@ export default defineComponent({
       ],
       pagination: {
         page: 1,
-        rowsPerPage: 0
+        rowsPerPage: 20,
+        rowsNumber: 0
       },
       questions: [],
       editDialog: false,
@@ -629,6 +635,12 @@ export default defineComponent({
       createDialog: false,
       selectQuestion: {},
       questionOptions: [],
+      qBody: {
+        take: 20,
+        skip: 0
+      },
+      loading: false,
+      count: 1,
     }
   },
   methods: {
@@ -720,7 +732,7 @@ export default defineComponent({
         })
       }
     },
-    getAllAnswers () {
+    getAnswerCount() {
       axios.post(vars.api_base + '/Answer/GetAnswers', {
         searchQuery: null,
         index: null,
@@ -731,6 +743,26 @@ export default defineComponent({
         fromDateTime: null,
         toDateTime: null
       }).then(response => {
+        this.count = response.data.items.length
+      })
+    },
+    getAllAnswers (reqProps) {
+      this.loading = true
+      this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
+      this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
+      this.pagination.rowsPerPage = this.qBody.take
+      axios.post(vars.api_base + '/Answer/GetAnswers', {
+        searchQuery: null,
+        index: null,
+        take: this.qBody.take,
+        skip: this.qBody.skip,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
+        this.pagination.rowsNumber = this.count
+        this.pagination.page = reqProps?.pagination.page ?? 1;
         if (this.$route.query.questionId) {
           this.answers = response.data.items.filter(answer => {
             return answer.questionId === Number(this.$route.query.questionId)
@@ -741,6 +773,9 @@ export default defineComponent({
         // console.log(this.answers)
       }).catch(error => {
         console.log(error)
+      }).then(() => {
+        // always executed
+        this.loading = false;
       })
     },
     openEditDialog (answer) {
@@ -748,7 +783,7 @@ export default defineComponent({
       this.selectedAnswerToEdit = answer
       // console.log(this.selectedAnswerToEdit)
       this.selectedAnswerOptions = this.answers.filter(answer => {
-        return answer.questionId !== this.selectedAnswerToEdit.questionId
+        return answer.id !== this.selectedAnswerToEdit.id
       }).filter(answer => {
         return answer.questionId === this.selectedAnswerToEdit.questionId
       })
@@ -799,7 +834,7 @@ export default defineComponent({
     updateAnswer () {
       this.updateLoading = true
       let mediaAnswer
-      console.log(this.newImage)
+      // console.log(this.newImage)
       if (Object.keys(this.newImage.img).length !== 0) {
         mediaAnswer = [
           {
@@ -810,7 +845,6 @@ export default defineComponent({
             locationY: Number(this.newImage.location_y)
           }
         ]
-        console.log(mediaAnswer[0])
       } else {
         mediaAnswer = [
           {
@@ -821,31 +855,31 @@ export default defineComponent({
             locationY: Number(this.newImage.location_y)
           }
         ]
-        console.log(mediaAnswer[0])
       }
       this.selectedAnswerToEdit.mediaAnswer = mediaAnswer
-      let match = []
-      match = this.selectedAnswerToEdit.matchWith
-      /*if (this.selectedAnswerToEdit.matchWith !== this.selectedAnswerToEdit.matchWith.id) {
-        for (let i = 0; i < this.selectedAnswerToEdit.matchWith.length; i++) {
-          match.push(this.selectedAnswerToEdit.matchWith[i])
+      let match = this.selectedAnswerToEdit.matchWith
+      for (let i = 0; i < match.length; i++) {
+        if (match[i].constructor === Object) {
+          match[i] = match[i].id
         }
-      }*/
+      }
+      this.selectedAnswerToEdit.matchWith = match
+      console.log(this.selectedAnswerToEdit.matchWith)
       let fd = new FormData()
       fd.append('files', this.newImage.img)
       fd.append('title', this.selectedAnswerToEdit.title)
       fd.append('questionId', this.selectedAnswerToEdit.questionId)
-      fd.append('mediaAnswer', JSON.stringify(mediaAnswer))
+      fd.append('mediaAnswer', JSON.stringify(this.selectedAnswerToEdit.mediaAnswer))
       fd.append('answerPointPure', Number(this.selectedAnswerToEdit.answerPointPure))
-      fd.append('matchWith', JSON.stringify(match))
+      fd.append('matchWith', JSON.stringify(this.selectedAnswerToEdit.matchWith))
       fd.append('id', this.selectedAnswerToEdit.id)
       // console.log(this.selectedAnswerToEdit)
       let data = {
         title: this.selectedAnswerToEdit.title,
         answerPointPure: Number(this.selectedAnswerToEdit.answerPointPure),
         id: this.selectedAnswerToEdit.id,
-        matchWith: match,
-        mediaAnswer: mediaAnswer
+        matchWith: this.selectedAnswerToEdit.matchWith,
+        mediaAnswer: this.selectedAnswerToEdit.mediaAnswer
       }
       axios.put(vars.api_base + '/Answer/UpdateAnswer', data).then(response => {
         console.log(response)
@@ -877,7 +911,16 @@ export default defineComponent({
       this.$refs.answerImage.pickFiles()
     },
     getAnswerOptions () {
-      axios.post(vars.api_base + '/Answer/GetAnswers').then(response => {
+      axios.post(vars.api_base + '/Answer/GetAnswers', {
+        searchQuery: null,
+        index: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
         this.answersOptions = response.data.items.filter(answer => {
           return answer.questionId === this.createAnswerData.questionId.id
         })
@@ -907,9 +950,10 @@ export default defineComponent({
     }
   },
   created() {
+    this.getAnswerCount()
     this.getAllAnswers()
     this.getQuestions()
-  }
+  },
 })
 </script>
 

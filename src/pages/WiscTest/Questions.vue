@@ -169,6 +169,9 @@
             :rows="questions"
             :filter="search"
             class="q-mt-lg"
+            v-model:pagination="pagination"
+            :loading="loading"
+            @request="getAllQuestion"
           >
             <template v-slot:body="props">
               <q-tr :props="props">
@@ -194,7 +197,7 @@
                     label="ویرایش تصاویر"
                     color="primary"
                     class="button"
-                    @click="updateImagesDialog = !updateImagesDialog"
+                    @click="openUpdateImagesDialog(props.row)"
                   />
                   <q-btn
                     v-if="col.field === 'edit'"
@@ -399,6 +402,25 @@
                 type="number"
               />
             </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input">
+              <span class="label">تعداد سطر</span>
+              <q-input
+                v-model="selectedQuestionToEdit.rows"
+                outlined
+                dense
+                type="number"
+                min="0"
+              />
+            </div>
+          </div>
+          <div class="col-12 q-mt-md">
+            <q-checkbox
+              v-model="selectedQuestionToEdit.showTimer"
+              label="نمایش زمان"
+              style="font-size: 1rem"
+            />
           </div>
 <!--          <div class="col-12 q-mt-md">
               <div class="input">
@@ -710,8 +732,8 @@
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
       <q-card-section>
-        <div class="image q-mb-sm">
-          <div class="row flex" style="align-items: flex-start">
+        <div class="image q-mb-sm" v-for="(image, index) in selectedQuestionToEdit.videoQuestion" :key="index">
+          <div class="row">
             <div class="col-3">
               <img src="~assets/images/fargo.svg" style="margin-top: 1.75rem">
             </div>
@@ -724,6 +746,7 @@
                       outlined
                       dense
                       type="number"
+                      v-model="image.locationX"
                     />
                   </div>
                   <div class="q-ml-sm">
@@ -732,6 +755,7 @@
                       outlined
                       dense
                       type="number"
+                      v-model="image.locationY"
                     />
                   </div>
                 </div>
@@ -742,6 +766,7 @@
                       outlined
                       dense
                       type="number"
+                      v-model="image.height"
                     />
                   </div>
                   <div class="q-ml-sm">
@@ -750,6 +775,7 @@
                       outlined
                       dense
                       type="number"
+                      v-model="image.width"
                     />
                   </div>
                 </div>
@@ -769,14 +795,15 @@
               </div>
             </div>
           </div>
+          <q-separator class="q-mt-sm"/>
         </div>
-        <q-separator/>
         <q-btn
           unelevated
           dense
           label="اعمال تغییرات"
           color="primary"
           class="submit-btn"
+          @click="updateQuestionImages"
         />
       </q-card-section>
     </q-card>
@@ -848,7 +875,8 @@ export default defineComponent({
       ],
       pagination: {
         page: 1,
-        rowsPerPage: 0
+        rowsPerPage: 20,
+        rowsNumber: 0
       },
       answers: [],
       editDialog: false,
@@ -861,7 +889,14 @@ export default defineComponent({
       createDialog: false,
       search: '',
       updateImagesDialog: false,
-      changedImage: {}
+      changedImage: {},
+      loading: false,
+      qBody: {
+        take: 20,
+        skip: 0
+      },
+      count: 8,
+      questionImages: []
     }
   },
   methods: {
@@ -942,10 +977,10 @@ export default defineComponent({
               if (this.createQuestionData.image[i].type === 'image/png' || this.createQuestionData.image[i].type === 'image/jpeg') {
                 videoQuestion[i] = {
                   url: this.createQuestionData.image[i].__key,
-                  height: this.images[i].height,
-                  width: this.images[i].width,
-                  locationX: this.images[i].locationX,
-                  locationY: this.images[i].locationY
+                  height: Number(this.images[i].height),
+                  width: Number(this.images[i].width),
+                  locationX: Number(this.images[i].locationX),
+                  locationY: Number(this.images[i].locationY)
                 }
               }
             }
@@ -1036,7 +1071,11 @@ export default defineComponent({
     onFailedDocumentPicked (file) {
       this.createQuestionData.soundFailed = URL.createObjectURL(file.target.files[0])
     },
-    getAllQuestion () {
+    getAllQuestion (reqProps) {
+      this.loading = true
+      this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
+      this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
+      this.pagination.rowsPerPage = this.qBody.take
       axios.post(vars.api_base + '/Answer/GetAnswers', {
         searchQuery: null,
         index: null,
@@ -1047,6 +1086,8 @@ export default defineComponent({
         fromDateTime: null,
         toDateTime: null
       }).then(response => {
+        this.pagination.rowsNumber = this.count
+        this.pagination.page = reqProps?.pagination.page ?? 1
         this.answers = response.data.items
       }).catch(error => {
         console.log(error)
@@ -1054,8 +1095,8 @@ export default defineComponent({
       axios.post(vars.api_base + '/Questions/GetQuestions', {
         searchQuery: null,
         index: null,
-        take: null,
-        skip: null,
+        take: this.qBody.take,
+        skip: this.qBody.skip,
         isExportFile: false,
         exportColumns: {},
         fromDateTime: null,
@@ -1146,12 +1187,14 @@ export default defineComponent({
         }
       }).catch(error => {
         console.log(error)
+      }).then(() => {
+        this.loading = false
       })
     },
     openEditDialog (question) {
       this.editDialog = !this.editDialog
       this.selectedQuestionToEdit = question
-      console.log(this.selectedQuestionToEdit)
+      // console.log(this.selectedQuestionToEdit)
       switch (this.selectedQuestionToEdit.typeQuestion) {
         case 1:
           this.selectedQuestionToEdit = { typeQuestionLabel: 'قرار دادنی', ...this.selectedQuestionToEdit }
@@ -1340,6 +1383,7 @@ export default defineComponent({
             typeQuestion: newTypeQuestion,
             categoryQuestion: newCategoryQuestion,
             date: today,
+            videoQuestion: this.selectedQuestionToEdit.videoQuestion
           }
 
           if (Object.keys(this.chosenSound).length !== 0) {
@@ -1372,7 +1416,7 @@ export default defineComponent({
           }
 
           axios.put(vars.api_base + '/Questions/UpdateQuestion', data).then(response => {
-            console.log(response)
+            // console.log(response)
             if (response.data.isSuccess) {
               this.getAllQuestion()
               this.selectedQuestionToEdit = {
@@ -1463,6 +1507,42 @@ export default defineComponent({
     },
     changeImage() {
       this.$refs.image.pickFiles()
+    },
+    openUpdateImagesDialog(question) {
+      this.questionImages = question.videoQuestion
+      this.selectedQuestionToEdit = question
+      this.updateImagesDialog = !this.updateImagesDialog
+    },
+    updateQuestionImages () {
+      for (let i = 0; i < this.selectedQuestionToEdit.videoQuestion.length; i++) {
+        this.selectedQuestionToEdit.videoQuestion[i] = {
+          url: this.selectedQuestionToEdit.videoQuestion[i].url,
+          height: Number(this.selectedQuestionToEdit.videoQuestion[i].height),
+          width: Number(this.selectedQuestionToEdit.videoQuestion[i].width),
+          locationX: Number(this.selectedQuestionToEdit.videoQuestion[i].locationX),
+          locationY: Number(this.selectedQuestionToEdit.videoQuestion[i].locationY)
+        }
+      }
+      axios.put(vars.api_base + '/Questions/UpdateQuestion', this.selectedQuestionToEdit).then(response => {
+        if (response.data.isSuccess) {
+          this.updateImagesDialog = !this.updateImagesDialog
+          this.$q.notify({
+            type: 'positive',
+            message: 'تصاویر با موفقیت بروزرسانی شدند.'
+          })
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: response.data.exceptions[0].persianDescription
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+        this.$q.notify({
+          type: 'negative',
+          message: 'مشکلی پیش آمد.'
+        })
+      })
     }
   },
   created() {
