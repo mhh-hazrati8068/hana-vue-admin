@@ -10,7 +10,9 @@
             :table-style="'counter-reset: cssRowCounter ' + ((pagination.page - 1) * pagination.rowsPerPage) + ';'"
             :columns="columns"
             :rows="tests"
-            :pagination="pagination"
+            v-model:pagination="pagination"
+            :loading="loading"
+            @request="getTest"
           >
             <template v-slot:body="props">
               <q-tr
@@ -267,7 +269,8 @@ export default defineComponent({
       ],
       pagination: {
         page: 1,
-        rowsPerPage: 0
+        rowsPerPage: 20,
+        rowsNumber: 0
       },
       showDescription: false,
       descriptionText: '',
@@ -276,7 +279,12 @@ export default defineComponent({
       deleteData: {
         id: null
       },
-      createDialog: false
+      createDialog: false,
+      loading: false,
+      qBody: {
+        take: 20,
+        skip:0
+      }
     }
   },
   created () {
@@ -291,7 +299,7 @@ export default defineComponent({
           message: 'لطفا مقادیر ضروری را وارد نمایید.'
         })
       } else {
-        axios.post(vars.api_base + '/api/PsychologicalAssay/CreatePsychologyTest', this.testData).then(response => {
+        axios.post(vars.api_base + '/PsychologyTest/CreateTest', this.testData).then(response => {
           // console.log(response)
           this.$q.notify({
             type: 'positive',
@@ -310,11 +318,27 @@ export default defineComponent({
         })
       }
     },
-    getTest () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetPsychologyTest').then(response => {
-        this.tests = response.data.item
+    getTest (reqProps) {
+      this.loading = true
+      this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
+      this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
+      this.pagination.rowsPerPage = this.qBody.take
+      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
+        searchQuery: null,
+        tag1: null,
+        tag2: null,
+        take: this.qBody.take,
+        skip: this.qBody.skip,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
+        this.pagination.rowsNumber = response.data.count
+        this.pagination.page = reqProps?.pagination.page ?? 1
+        this.tests = response.data.items
       }).catch(error => {
         console.log(error)
+      }).then(() => {
+        this.loading = false
       })
     },
     goToQuestions (testId) {
@@ -355,7 +379,7 @@ export default defineComponent({
     },
     deleteTest (testId) {
       const payload = { id: testId }
-      axios.post(vars.api_base + '/api/PsychologicalAssay/DeletePsychologyTest', payload).then(response => {
+      axios.delete(vars.api_base + '/PsychologyTest/DeleteTest', { data: payload }).then(response => {
         this.$q.notify({
           type: 'info',
           message: 'تست حذف شد.'

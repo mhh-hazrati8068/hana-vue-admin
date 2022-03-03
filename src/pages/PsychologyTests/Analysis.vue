@@ -250,12 +250,20 @@ export default defineComponent({
   },
   methods: {
     getTests () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetPsychologyTest').then(response => {
+      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
+        searchQuery: null,
+        tag1: null,
+        tag2: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
         this.testOptions = [{
           id: 0,
           text: 'همه'
-        }, ...response.data.item]
-        this.tests = response.data.item
+        }, ...response.data.items]
+        this.tests = response.data.items
         // console.log(this.tests)
         this.selectedTest.id = this.testOptions.find(test => test.id === 0).id
       }).catch(error => {
@@ -263,18 +271,32 @@ export default defineComponent({
       })
     },
     getAnalyses () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetTypeQuestion').then(response => {
-        this.analyses = response.data.item
+      axios.post(vars.api_base2 + '/TypeQuestion/GetTypeQuestion', {
+        searchQuery: null,
+        psychologyTestId: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
+        this.analyses = response.data.items
       }).catch(error => {
         console.log(error)
       })
     },
     changeAnalyses () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetTypeQuestion').then(response => {
+      axios.post(vars.api_base2 + '/TypeQuestion/GetTypeQuestion', {
+        searchQuery: null,
+        psychologyTestId: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
         if (this.selectedTest.id === 0) {
-          this.analyses = response.data.item
+          this.analyses = response.data.items
         } else {
-          this.analyses = response.data.item.filter(analysis => {
+          this.analyses = response.data.items.filter(analysis => {
             return analysis.psychologytestid === this.selectedTest.id
           })
         }

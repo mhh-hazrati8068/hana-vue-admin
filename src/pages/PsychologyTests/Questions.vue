@@ -202,8 +202,15 @@ export default defineComponent({
   },
   methods: {
     getQuestions () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetQuestion').then(response => {
-        this.questions = response.data.item
+      axios.post(vars.api_base2 + '/Question/GetQuestion', {
+        searchQuery: null,
+        psychologyTestId: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
+        this.questions = response.data.items
         if (this.testId !== null) {
           this.questions = this.questions.filter(question => {
             return question.psychologytestid === this.testId
@@ -215,13 +222,21 @@ export default defineComponent({
       })
     },
     getTest () {
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetPsychologyTest').then(response => {
-        this.tests = response.data.item
+      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
+        searchQuery: null,
+        tag1: null,
+        tag2: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
+        this.tests = response.data.items
         // console.log(this.tests)
         this.selectOptions = [{
           id: 0,
           text: 'همه'
-        }, ...response.data.item
+        }, ...response.data.items
         ]
         if (this.testId !== null) {
           this.selectedTest.id = this.tests.find(test => test.id === this.testId).id
