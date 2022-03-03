@@ -260,7 +260,7 @@
                 <q-btn
                   unelevated
                   dense
-                  label="تعویض تصویر"
+                  label="تغییر تصویر"
                   color="primary"
                   class="full-width q-mt-md"
                   @click="changeImage"
@@ -640,7 +640,6 @@ export default defineComponent({
         skip: 0
       },
       loading: false,
-      count: 1,
     }
   },
   methods: {
@@ -732,20 +731,6 @@ export default defineComponent({
         })
       }
     },
-    getAnswerCount() {
-      axios.post(vars.api_base + '/Answer/GetAnswers', {
-        searchQuery: null,
-        index: null,
-        take: null,
-        skip: null,
-        isExportFile: false,
-        exportColumns: {},
-        fromDateTime: null,
-        toDateTime: null
-      }).then(response => {
-        this.count = response.data.items.length
-      })
-    },
     getAllAnswers (reqProps) {
       this.loading = true
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
@@ -761,7 +746,7 @@ export default defineComponent({
         fromDateTime: null,
         toDateTime: null
       }).then(response => {
-        this.pagination.rowsNumber = this.count
+        this.pagination.rowsNumber = response.data.count
         this.pagination.page = reqProps?.pagination.page ?? 1;
         if (this.$route.query.questionId) {
           this.answers = response.data.items.filter(answer => {
@@ -950,7 +935,6 @@ export default defineComponent({
     }
   },
   created() {
-    this.getAnswerCount()
     this.getAllAnswers()
     this.getQuestions()
   },

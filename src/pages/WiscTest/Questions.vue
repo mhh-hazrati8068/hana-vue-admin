@@ -299,6 +299,7 @@
                   class="q-mt-md full-width"
                   @click="changeFile1"
                 />
+                <span class="q-pt-sm block">{{ chosenSound.name }}</span>
               </div>
               <div v-else>
                 <q-file
@@ -336,6 +337,7 @@
                   class="q-mt-md full-width"
                   @click="changeFile2"
                 />
+                <span class="q-pt-sm block">{{ chosenFailedSound.name }}</span>
               </div>
               <div v-else>
                 <q-file
@@ -782,7 +784,8 @@
                 <q-file
                   v-show="false"
                   v-model="changedImage"
-                  :ref="`image`"
+                  :ref="`index`"
+                  @update:model-value="addNewImage(index)"
                 />
                 <q-btn
                   unelevated
@@ -790,8 +793,9 @@
                   label="تغییر عکس"
                   color="primary"
                   class="q-mt-md"
-                  @click="changeImage"
+                  @click="changeImage(index)"
                 />
+                <span class="q-pt-sm block" v-if="changedImages[index]">{{ changedImages[index].name }}</span>
               </div>
             </div>
           </div>
@@ -890,13 +894,12 @@ export default defineComponent({
       search: '',
       updateImagesDialog: false,
       changedImage: {},
+      changedImages: [],
       loading: false,
       qBody: {
         take: 20,
         skip: 0
       },
-      count: 8,
-      questionImages: []
     }
   },
   methods: {
@@ -1086,8 +1089,6 @@ export default defineComponent({
         fromDateTime: null,
         toDateTime: null
       }).then(response => {
-        this.pagination.rowsNumber = this.count
-        this.pagination.page = reqProps?.pagination.page ?? 1
         this.answers = response.data.items
       }).catch(error => {
         console.log(error)
@@ -1103,6 +1104,8 @@ export default defineComponent({
         toDateTime: null
       }).then(response => {
         // console.log(response.data)
+        this.pagination.rowsNumber = response.data.count
+        this.pagination.page = reqProps?.pagination.page ?? 1
         this.questions = response.data.items.sort((a, b) => {
           return a.index - b.index
         })
@@ -1505,12 +1508,20 @@ export default defineComponent({
     changeFile2() {
       this.$refs.file2.pickFiles()
     },
-    changeImage() {
-      this.$refs.image.pickFiles()
+    changeImage(index) {
+      for (let i = 0; i < this.$refs.index.length; i++) {
+        if (i === index) {
+          this.$refs.index[index].pickFiles()
+        }
+      }
+    },
+    addNewImage (index) {
+      this.changedImages[index] = this.changedImage
+      this.selectedQuestionToEdit.videoQuestion[index].url = this.changedImage.__key
     },
     openUpdateImagesDialog(question) {
-      this.questionImages = question.videoQuestion
       this.selectedQuestionToEdit = question
+      console.log(this.selectedQuestionToEdit.videoQuestion)
       this.updateImagesDialog = !this.updateImagesDialog
     },
     updateQuestionImages () {
@@ -1526,6 +1537,7 @@ export default defineComponent({
       axios.put(vars.api_base + '/Questions/UpdateQuestion', this.selectedQuestionToEdit).then(response => {
         if (response.data.isSuccess) {
           this.updateImagesDialog = !this.updateImagesDialog
+          this.changedImages = []
           this.$q.notify({
             type: 'positive',
             message: 'تصاویر با موفقیت بروزرسانی شدند.'
