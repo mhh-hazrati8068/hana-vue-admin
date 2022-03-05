@@ -1,5 +1,17 @@
 <template>
   <div class="tests-container">
+    <q-input
+      v-model="search"
+      outlined
+      dense
+      placeholder="جستجو کنید..."
+      class="q-mb-md"
+      @update:model-value="getSearchItems"
+    >
+      <template v-slot:prepend>
+        <q-icon name="search" />
+      </template>
+    </q-input>
     <div class="row">
       <div class="col-12">
         <span class="title">تست&zwnj;های موجود</span>
@@ -95,47 +107,44 @@
           <div class="col-12">
             <div class="create-test-container q-mt-md">
               <div class="row">
-                <div class="col-12">
+                <div class="col-12 q-mt-md">
+                  <span class="label">عنوان تست</span>
                   <q-input
                     dense
                     outlined
                     v-model="selectedTestToEdit.text"
-                    label="عنوان تست"
-                    class="q-mt-sm"
                     required
                   />
                 </div>
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-6 q-mt-md">
+                  <span class="label">تگ تست</span>
                   <q-input
                     dense
                     outlined
                     v-model="selectedTestToEdit.tag1"
-                    label="تگ تست"
-                    class="q-mt-sm q-mr-sm"
                     required
                   />
                 </div>
-                <div class="col-12 col-md-6">
+                <div class="col-12 col-md-6 q-mt-md">
+                  <span class="label">تگ تست</span>
                   <q-input
                     dense
                     outlined
                     v-model="selectedTestToEdit.tag2"
-                    label="تگ تست"
-                    class="q-mt-sm q-ml-sm"
+                    class="second-input"
                   />
                 </div>
-                <div class="col-12">
+                <div class="col-12 q-mt-md">
+                  <span class="label">تصویر تست</span>
                   <q-file
                     dense
                     outlined
                     v-model="selectedTestToEdit.img"
-                    label="تصویر تست"
-                    class="q-mt-sm"
                     readonly
                   />
                 </div>
-                <div class="col-12 q-mt-lg">
-                  <span>توضیحات تست</span>
+                <div class="col-12 q-mt-lg q-mt-md">
+                  <span class="label">توضیحات تست</span>
                   <q-input
                     dense
                     outlined
@@ -154,9 +163,13 @@
               unelevated
               label="ثبت"
               color="primary"
-              style="width: 15%"
+              class="submit-btn"
               @click="updateTest"
-            />
+            >
+              <q-inner-loading
+                :showing="updateLoading"
+              />
+            </q-btn>
           </div>
         </div>
       </q-card-section>
@@ -232,7 +245,11 @@
               color="primary"
               class="submit-btn"
               @click="setTest"
-            />
+            >
+              <q-inner-loading
+                :showing="isLoading"
+              />
+            </q-btn>
           </div>
         </div>
       </q-card-section>
@@ -284,7 +301,10 @@ export default defineComponent({
       qBody: {
         take: 20,
         skip:0
-      }
+      },
+      isLoading: false,
+      updateLoading: false,
+      search: ''
     }
   },
   created () {
@@ -293,28 +313,44 @@ export default defineComponent({
   methods: {
     setTest () {
       // console.log(this.testData)
+      this.isLoading = true
       if (this.testData.text === '' || this.testData.tag1 === '') {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا مقادیر ضروری را وارد نمایید.'
         })
       } else {
-        axios.post(vars.api_base + '/PsychologyTest/CreateTest', this.testData).then(response => {
+        axios.post(vars.api_base2 + '/PsychologyTest/CreateTest', this.testData).then(response => {
           // console.log(response)
-          this.$q.notify({
-            type: 'positive',
-            message: 'تست جدید اضافه شد.'
-          })
-          this.testData = {
-            img: '',
-            tag1: '',
-            tag2: null,
-            text: '',
-            description: ''
+          if (response.data.isSuccess) {
+            this.$q.notify({
+              type: 'positive',
+              message: 'تست جدید اضافه شد.'
+            })
+            this.testData = {
+              img: '',
+              tag1: '',
+              tag2: null,
+              text: '',
+              description: ''
+            }
+            this.createDialog = false
+            this.isLoading = false
+            this.getTest()
+          } else {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[0].persianDescription
+            })
+            this.isLoading = false
           }
-          this.getTest()
         }).catch(error => {
           console.log(error)
+          this.$q.notify({
+            type: 'negative',
+            message: 'مشکلی پیش آمد.'
+          })
+          this.isLoading = false
         })
       }
     },
@@ -358,20 +394,30 @@ export default defineComponent({
       // console.log(this.selectedTestToEdit)
     },
     updateTest () {
+      this.updateLoading = true
       if (this.selectedTestToEdit.text === '' || this.selectedTestToEdit.tag1 === '') {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا مقادیر ضروری را وارد نمایید.'
         })
       } else {
-        axios.post(vars.api_base + '/api/PsychologicalAssay/UpdatePsychologyTest', this.selectedTestToEdit).then(response => {
+        axios.put(vars.api_base2 + '/PsychologyTest/UpdateTest', this.selectedTestToEdit).then(response => {
           // console.log(response)
-          this.$q.notify({
-            type: 'positive',
-            message: 'تست با موفقیت ویرایش شد.'
-          })
-          this.getTest()
-          this.editDialog = !this.editDialog
+          if (response.data.isSuccess) {
+            this.$q.notify({
+              type: 'positive',
+              message: 'تست با موفقیت ویرایش شد.'
+            })
+            this.getTest()
+            this.editDialog = !this.editDialog
+            this.updateLoading = false
+          } else {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[0].persianDescription
+            })
+            this.updateLoading = false
+          }
         }).catch(error => {
           console.log(error)
         })
@@ -379,18 +425,40 @@ export default defineComponent({
     },
     deleteTest (testId) {
       const payload = { id: testId }
-      axios.delete(vars.api_base + '/PsychologyTest/DeleteTest', { data: payload }).then(response => {
-        this.$q.notify({
-          type: 'info',
-          message: 'تست حذف شد.'
-        })
-        this.getTest()
+      axios.delete(vars.api_base2 + '/PsychologyTest/DeleteTest', { data: payload }).then(response => {
+        if (response.data.isSuccess) {
+          this.$q.notify({
+            type: 'info',
+            message: 'تست حذف شد.'
+          })
+          this.getTest()
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: response.data.exceptions[0].persianDescription
+          })
+        }
       }).catch(error => {
         console.log(error)
         this.$q.notify({
           type: 'negative',
           message: 'مشکلی پیش آمد.'
         })
+      })
+    },
+    getSearchItems () {
+      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
+        searchQuery: this.search,
+        tag1: null,
+        tag2: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
+        this.tests = response.data.items
+      }).catch(error => {
+        console.log(error)
       })
     }
   }

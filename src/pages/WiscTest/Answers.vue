@@ -1,5 +1,17 @@
 <template>
   <div class="answers-container">
+    <q-input
+      v-model="search"
+      outlined
+      dense
+      placeholder="جستجو کنید..."
+      class="q-mb-md"
+      @update:model-value="getSearchItems"
+    >
+      <template v-slot:prepend>
+        <q-icon name="search" />
+      </template>
+    </q-input>
 <!--    <div class="row">
       <div class="col-12">
         <span class="title">افزودن پاسخ</span>
@@ -417,7 +429,7 @@
               @click="updateAnswer"
             >
               <q-inner-loading
-                :showing="isLoading"
+                :showing="updateLoading"
               />
             </q-btn>
           </div>
@@ -640,6 +652,7 @@ export default defineComponent({
         skip: 0
       },
       loading: false,
+      search: ''
     }
   },
   methods: {
@@ -931,6 +944,22 @@ export default defineComponent({
             return answer.questionId === this.selectQuestion.id
           })
         }
+      })
+    },
+    getSearchItems () {
+      axios.post(vars.api_base + '/Answer/GetAnswers', {
+        searchQuery: this.search,
+        index: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
+        this.answers = response.data.items
+      }).catch(error => {
+        console.log(error)
       })
     }
   },

@@ -1,5 +1,17 @@
 <template>
   <div class="questions-container">
+    <q-input
+      v-model="search"
+      outlined
+      dense
+      placeholder="جستجو کنید..."
+      class="q-mb-md"
+      @update:model-value="getSearchItems"
+    >
+      <template v-slot:prepend>
+        <q-icon name="search" />
+      </template>
+    </q-input>
     <div class="row">
       <div class="col-12">
         <div class="flex justify-between" style="align-items: center">
@@ -26,7 +38,9 @@
             :table-style="'counter-reset: cssRowCounter ' + ((pagination.page - 1) * pagination.rowsPerPage) + ';'"
             :columns="columns"
             :rows="questions"
-            :pagination="pagination"
+            v-model:pagination="pagination"
+            :loading="loading"
+            @request="getQuestions"
           >
             <template v-slot:body="props">
               <q-tr
@@ -90,13 +104,12 @@
       <q-card-section>
         <div class="row">
           <div class="col-12">
+            <span class="label">متن سوال</span>
             <q-input
               dense
               outlined
               v-model="selectedQuestionToEdit.text"
-              label="متن سوال"
               autogrow
-              class="q-mt-sm"
             />
           </div>
           <div class="col-12 q-mt-md flex justify-end">
@@ -105,9 +118,13 @@
               unelevated
               label="ثبت"
               color="primary"
-              style="width: 25%"
+              class="submit-btn"
               @click="updateQuestion"
-            />
+            >
+              <q-inner-loading
+                :showing="updateLoading"
+              />
+            </q-btn>
           </div>
         </div>
       </q-card-section>
@@ -152,7 +169,11 @@
               color="primary"
               class="submit-btn"
               @click="setQuestion"
-            />
+            >
+              <q-inner-loading
+                :showing="isLoading"
+              />
+            </q-btn>
           </div>
         </div>
       </q-card-section>
@@ -178,7 +199,8 @@ export default defineComponent({
       tests: [],
       pagination: {
         page: 1,
-        rowsPerPage: 0
+        rowsPerPage: 20,
+        rowsNumber: 0
       },
       columns: [
         { name: 'counter', align: 'left', label: 'ردیف', field: 'counter' },
@@ -190,7 +212,15 @@ export default defineComponent({
       selectOptions: [],
       editDialog: false,
       selectedQuestionToEdit: {},
-      createDialog: false
+      createDialog: false,
+      loading: false,
+      qBody: {
+        take: 20,
+        skip: 0
+      },
+      isLoading: false,
+      updateLoading: false,
+      search: ''
     }
   },
   created () {
@@ -201,15 +231,21 @@ export default defineComponent({
     this.getTest()
   },
   methods: {
-    getQuestions () {
+    getQuestions (reqProps) {
+      this.loading = true
+      this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
+      this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
+      this.pagination.rowsPerPage = this.qBody.take
       axios.post(vars.api_base2 + '/Question/GetQuestion', {
         searchQuery: null,
         psychologyTestId: null,
-        take: null,
-        skip: null,
+        take: this.qBody.take,
+        skip: this.qBody.skip,
         isExportFile: false,
         exportColumns: {}
       }).then(response => {
+        this.pagination.rowsNumber = response.data.count
+        this.pagination.page = reqProps?.pagination.page ?? 1
         this.questions = response.data.items
         if (this.testId !== null) {
           this.questions = this.questions.filter(question => {
@@ -219,6 +255,8 @@ export default defineComponent({
         // console.log(this.questions)
       }).catch(error => {
         console.log(error)
+      }).then(() => {
+        this.loading = false
       })
     },
     getTest () {
@@ -250,35 +288,59 @@ export default defineComponent({
     },
     setQuestion () {
       // console.log(this.questionData)
+      this.isLoading = true
       if (this.questionData.text !== '' && this.questionData.psychologyTestId !== null) {
-        axios.post(vars.api_base + '/api/PsychologicalAssay/CreateQuestion', this.questionData).then(response => {
+        axios.post(vars.api_base2 + '/Question/CreateQuestion', this.questionData).then(response => {
           // console.log(response)
-          this.$q.notify({
-            type: 'positive',
-            message: 'سوال جدید اضافه شد.'
-          })
-          this.getQuestions()
-          this.questionData = {
-            psychologyTestId: null,
-            text: ''
+          if (response.data.isSuccess) {
+            this.$q.notify({
+              type: 'positive',
+              message: 'سوال جدید اضافه شد.'
+            })
+            this.createDialog = false
+            this.getQuestions()
+            this.questionData = {
+              psychologyTestId: null,
+              text: ''
+            }
+            this.isLoading = false
+          } else {
+            this.isLoading = false
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[0].persianDescription
+            })
           }
         }).catch(error => {
           console.log(error)
+          this.isLoading = false
+          this.$q.notify({
+            type: 'negative',
+            message: 'مشکلی پیش آمد.'
+          })
         })
       } else {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا مقادیر ضروری را وارد نمایید.'
         })
+        this.isLoading = false
       }
     },
     changeQuestions () {
       // console.log(this.selectedTest)
-      axios.post(vars.api_base + '/api/PsychologicalAssay/GetQuestion').then(response => {
+      axios.post(vars.api_base2 + '/Question/GetQuestion', {
+        searchQuery: null,
+        psychologyTestId: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
         if (this.selectedTest.id === 0) {
-          this.questions = response.data.item
+          this.questions = response.data.items
         } else {
-          this.questions = response.data.item.filter(question => {
+          this.questions = response.data.items.filter(question => {
             return question.psychologytestid === this.selectedTest.id
           })
         }
@@ -298,39 +360,76 @@ export default defineComponent({
       this.selectedQuestionToEdit = question
     },
     updateQuestion () {
+      this.updateLoading = true
       if (this.selectedQuestionToEdit.text !== '') {
-        axios.post(vars.api_base + '/api/PsychologicalAssay/UpdateQuestion', this.selectedQuestionToEdit).then(response => {
+        axios.put(vars.api_base2 + '/Question/UpdateQuestion', this.selectedQuestionToEdit).then(response => {
           // console.log(response)
-          this.$q.notify({
-            type: 'positive',
-            message: 'سوال با موفقیت ویرایش شد.'
-          })
-          this.getQuestions()
-          this.editDialog = !this.editDialog
+          if (response.data.isSuccess) {
+            this.$q.notify({
+              type: 'positive',
+              message: 'سوال با موفقیت ویرایش شد.'
+            })
+            this.getQuestions()
+            this.editDialog = !this.editDialog
+            this.updateLoading = false
+          } else {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[0].persianDescription
+            })
+            this.updateLoading = false
+          }
         }).catch(error => {
           console.log(error)
+          this.$q.notify({
+            type: 'negative',
+            message: 'مشکلی پیش آمد.'
+          })
+          this.updateLoading = false
         })
       } else {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا مقادیر ضروری را وارد نمایید.'
         })
+        this.updateLoading = false
       }
     },
     deleteQuestion (questionId) {
       const payload = { id: questionId }
-      axios.post(vars.api_base + '/api/PsychologicalAssay/DeleteQuestion', payload).then(response => {
-        this.$q.notify({
-          type: 'info',
-          message: 'سوال حذف شد.'
-        })
-        this.getQuestions()
+      axios.delete(vars.api_base2 + '/Question/DeleteQuestion', { data: payload }).then(response => {
+        if (response.data.isSuccess) {
+          this.$q.notify({
+            type: 'info',
+            message: 'سوال حذف شد.'
+          })
+          this.getQuestions()
+        } else {
+          this.$q.notify({
+            type: 'negative',
+            message: response.data.exceptions[0].persianDescription
+          })
+        }
       }).catch(error => {
         console.log(error)
         this.$q.notify({
           type: 'negative',
           message: 'مشکلی پیش آمد.'
         })
+      })
+    },
+    getSearchItems () {
+      axios.post(vars.api_base2 + '/Question/GetQuestion', {
+        searchQuery: this.search,
+        take: null,
+        skip: null,
+        psychologyTestId: null,
+        isExportFile: false,
+        exportColumns: {}
+      }).then(response => {
+        this.questions = response.data.items
+      }).catch(error => {
+        console.log(error)
       })
     }
   }

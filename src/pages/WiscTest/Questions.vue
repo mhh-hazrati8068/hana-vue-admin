@@ -153,6 +153,7 @@
       dense
       placeholder="جستجو کنید..."
       class="q-mb-md"
+      @update:model-value="getSearchItems"
     >
       <template v-slot:prepend>
         <q-icon name="search" />
@@ -167,7 +168,6 @@
           <q-table
             :columns="columns"
             :rows="questions"
-            :filter="search"
             class="q-mt-lg"
             v-model:pagination="pagination"
             :loading="loading"
@@ -498,7 +498,7 @@
               @click="updateQuestion"
             >
               <q-inner-loading
-                :showing="UpdateLoading"
+                :showing="updateLoading"
               />
             </q-btn>
           </div>
@@ -889,7 +889,7 @@ export default defineComponent({
       numOfUploadedImages: 0,
       images: [],
       isLoading: false,
-      UpdateLoading: false,
+      updateLoading: false,
       createDialog: false,
       search: '',
       updateImagesDialog: false,
@@ -1268,7 +1268,7 @@ export default defineComponent({
       this.selectedQuestionIndex = this.selectedQuestionToEdit.index
     },
     updateQuestion () {
-      this.UpdateLoading = true
+      this.updateLoading = true
       let isReiterativeIndex = false;
       const today = new Date().toISOString().slice(0, 10)
       let sound = [], failed = []
@@ -1292,7 +1292,7 @@ export default defineComponent({
           type: 'negative',
           message: 'لطفا مقادیر ضروری را وارد کنید.'
         })
-        this.UpdateLoading = false
+        this.updateLoading = false
       } else {
         if (!isReiterativeIndex) {
           if (Object.keys(this.chosenSound).length !== 0) {
@@ -1304,7 +1304,7 @@ export default defineComponent({
                 type: 'negative',
                 message: 'فایل صوتی به درستی انتخاب نشده است.'
               })
-              this.isLoading = false
+              this.updateLoading = false
               return false
             }
           }
@@ -1317,7 +1317,7 @@ export default defineComponent({
                 type: 'negative',
                 message: 'فایل صوتی به درستی انتخاب نشده است.'
               })
-              this.isLoading = false
+              this.updateLoading = false
               return false
             }
           }
@@ -1439,14 +1439,14 @@ export default defineComponent({
               this.createQuestionData.url_img = ''
               this.chosenSound = {}
               this.chosenFailedSound = {}
-              this.UpdateLoading = false
+              this.updateLoading = false
               this.$q.notify({
                 type: 'positive',
                 message: 'سوال با موفقیت بروزرسانی شد.'
               })
               this.editDialog = !this.editDialog
             } else {
-              this.UpdateLoading = false
+              this.updateLoading = false
               this.$q.notify({
                 type: 'negative',
                 message: response.data.exceptions[0].exception.persianDescription
@@ -1454,7 +1454,7 @@ export default defineComponent({
             }
           }).catch(error => {
             console.log(error)
-            this.UpdateLoading = false
+            this.updateLoading = false
             this.$q.notify({
               type: 'negative',
               message: 'مشکلی پیش آمد.'
@@ -1465,14 +1465,14 @@ export default defineComponent({
             type: 'negative',
             message: 'ترتیب سوال تکراری است.'
           })
-          this.UpdateLoading = false
+          this.updateLoading = false
         }
       }
     },
     deleteQuestion (question) {
-      const payload = {
+      /*const payload = {
         id: question.id
-      }
+      }*/
       axios.delete(vars.api_base + `/Questions/DeleteQuestion?id=${question.id}`).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
@@ -1554,6 +1554,22 @@ export default defineComponent({
           type: 'negative',
           message: 'مشکلی پیش آمد.'
         })
+      })
+    },
+    getSearchItems () {
+      axios.post(vars.api_base + '/Questions/GetQuestions', {
+        searchQuery: this.search,
+        index: null,
+        take: null,
+        skip: null,
+        isExportFile: false,
+        exportColumns: {},
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
+        this.questions = response.data.items
+      }).catch(error => {
+        console.log(error)
       })
     }
   },
