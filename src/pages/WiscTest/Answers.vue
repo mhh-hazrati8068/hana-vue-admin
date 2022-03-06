@@ -178,12 +178,13 @@
         </div>
         <div class="col-12">
           <q-table
+            :table-style="'counter-reset: cssRowCounter ' + ((pagination.page - 1) * pagination.rowsPerPage) + ';'"
             :columns="columns"
             :rows="answers"
             :row-key="name"
             :loading="loading"
             v-model:pagination="pagination"
-            :rows-per-page-options="[20,30,40,50]"
+            :rows-per-page-options="[10,20,30,40,50]"
             class="q-mt-lg"
             @request="getAllAnswers"
           >
@@ -194,7 +195,9 @@
                   :key="col.name"
                   :props="props"
                 >
-                  {{ col.value }}
+                  <span :class="{ 'row-numbers': col.field === 'counter' }">
+                    {{ col.value }}
+                  </span>
                   <q-btn
                     v-if="col.field === 'edit'"
                     unelevated
@@ -277,6 +280,7 @@
                   class="full-width q-mt-md"
                   @click="changeImage"
                 />
+                <span class="q-pt-sm block">{{ newImage.img.name }}</span>
               </div>
               <div v-else>
                 <q-file
@@ -425,7 +429,7 @@
               dense
               label="ثبت"
               color="primary"
-              style="width: 20%"
+              class="submit-btn"
               @click="updateAnswer"
             >
               <q-inner-loading
@@ -446,9 +450,6 @@
       </q-card-section>
       <q-card-section>
         <div class="row">
-          <div class="col-12">
-            <span class="title">افزودن پاسخ</span>
-          </div>
           <div class="col-12">
             <div class="create-answer-wrapper">
               <div class="row">
@@ -620,6 +621,7 @@ export default defineComponent({
       },
       answers: [],
       columns: [
+        { name: 'counter', align: 'center', label: 'ردیف', field: 'counter' },
         { name: 'title', align: 'center', label: 'عنوان پاسخ', field: 'title' },
         { name: 'answerPointPure', align: 'center', label: 'امتیاز پاسخ', field: 'answerPointPure' },
         { name: 'edit', align: 'center', label: '', field: 'edit' },
@@ -809,7 +811,7 @@ export default defineComponent({
         index: null,
         take: null,
         skip: null,
-        isExportFile: false,
+        isExportFile: true,
         exportColumns: {},
         fromDateTime: null,
         toDateTime: null
@@ -914,7 +916,7 @@ export default defineComponent({
         index: null,
         take: null,
         skip: null,
-        isExportFile: false,
+        isExportFile: true,
         exportColumns: {},
         fromDateTime: null,
         toDateTime: null

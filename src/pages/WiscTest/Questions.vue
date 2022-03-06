@@ -172,6 +172,7 @@
             v-model:pagination="pagination"
             :loading="loading"
             @request="getAllQuestion"
+            :rows-per-page-options="[10,20,30,40,50]"
           >
             <template v-slot:body="props">
               <q-tr :props="props">
@@ -494,7 +495,7 @@
               dense
               label="ثبت"
               color="primary"
-              style="width: 20%"
+              class="submit-btn"
               @click="updateQuestion"
             >
               <q-inner-loading
@@ -711,7 +712,6 @@
                     label="ثبت سوال"
                     color="primary"
                     class="submit-btn"
-                    style="font-size: 1rem"
                     @click="setQuestion"
                   >
                     <q-inner-loading
@@ -1567,7 +1567,9 @@ export default defineComponent({
         fromDateTime: null,
         toDateTime: null
       }).then(response => {
-        this.questions = response.data.items
+        this.questions = response.data.items.sort((a, b) => {
+          return a.index - b.index
+        })
       }).catch(error => {
         console.log(error)
       })

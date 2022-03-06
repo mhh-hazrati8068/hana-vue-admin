@@ -41,6 +41,7 @@
             v-model:pagination="pagination"
             :loading="loading"
             @request="getQuestions"
+            :rows-per-page-options="[10,20,30,40,50]"
           >
             <template v-slot:body="props">
               <q-tr
@@ -266,7 +267,7 @@ export default defineComponent({
         tag2: null,
         take: null,
         skip: null,
-        isExportFile: false,
+        isExportFile: true,
         exportColumns: {}
       }).then(response => {
         this.tests = response.data.items
