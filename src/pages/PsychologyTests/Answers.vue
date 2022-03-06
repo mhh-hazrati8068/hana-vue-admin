@@ -177,19 +177,31 @@
                 emit-value
                 map-options
                 :disable="Object.keys(selectedTest).length === 0"
+                @update:model-value="getAnswerOptions"
               />
             </div>
           </div>
-          <div class="col-12 col-md-4 q-mb-md q-mt-lg">
-            <span class="label">قالب پاسخ</span>
+          <div class="col-12 col-md-6 q-mt-md">
+            <span class="label">انتخاب پاسخ&zwnj;های موجود</span>
             <q-option-group
-              :options="answerTemplateOptions"
-              v-model="answerTemplate"
-              class="q-mt-md flex justify-between"
-              @update:model-value="saveTemplate"
+              :options="answersOfSelectedQuestion"
+              v-model="selectedAnswers"
+              type="checkbox"
             />
           </div>
-          <div class="col-12" v-if="answerTemplate === 1">
+          <div class="col-12 col-md-4 q-mb-md q-mt-md">
+            <div class="second-input">
+              <span class="label">قالب پاسخ</span>
+              <q-option-group
+                :options="answerTemplateOptions"
+                v-model="answerTemplate"
+                class="q-mt-md flex justify-between"
+                @update:model-value="saveTemplate"
+                :disable="selectedAnswers.length > 0"
+              />
+            </div>
+          </div>
+          <div class="col-12 q-mt-md" v-if="answerTemplate === 1">
             <span class="label">الگو پاسخ</span>
             <q-select
               dense
@@ -198,15 +210,17 @@
               :options="answerPatterns"
               class="q-mb-md"
               @update:model-value="savePattern"
+              :disable="selectedAnswers.length > 0"
             />
           </div>
-          <div class="col-12" v-if="answerTemplate === 2">
+          <div class="col-12 q-mt-md" v-if="answerTemplate === 2">
             <span class="label">متن پاسخ</span>
             <q-input
               dense
               outlined
               v-model="answerText"
               class="q-mb-md"
+              :disable="selectedAnswers.length > 0"
             />
           </div>
           <div class="col-12 col-md-4" v-if="answerTemplate === 2">
@@ -217,6 +231,7 @@
               v-model="score"
               type="number"
               min="0"
+              :disable="selectedAnswers.length > 0"
             />
           </div>
           <div class="col-12 q-mt-md flex justify-center">
@@ -262,7 +277,7 @@ export default defineComponent({
         { label: 'دو گزینه\u200Cای', value: 2, options: [{ label: 'بله', score: 1 }, { label: 'خیر', score: 0 }] },
         { label: 'سه گزینه\u200Cای', value: 3, options: [{ label: 'زیاد', score: 2 }, { label: 'متوسط', score: 1 }, { label: 'کم', score: 0 }] },
         { label: 'چهار گزینه\u200Cای', value: 4, options: [{ label: 'زیاد', score: 3 }, { label: 'متوسط', score: 2 }, { label: 'کم', score: 1 }, { label: 'نظری ندارم', score: 0 }] },
-        { label: 'پنج گزینه\u200Cای', value: 5, options: [{ label: 'کاملا موافقم', score: 4 }, { label: 'موافقم', score: 3 }, { label: 'خنثی', score: 2 }, { label: 'مخافم', score: 1 }, { label: 'کاملا مخالفم', score: 0 }] }
+        { label: 'پنج گزینه\u200Cای', value: 5, options: [{ label: 'کاملا موافقم', score: 4 }, { label: 'موافقم', score: 3 }, { label: 'خنثی', score: 2 }, { label: 'مخالفم', score: 1 }, { label: 'کاملا مخالفم', score: 0 }] }
       ],
       selectedPattern: {},
       questions: [],
@@ -294,7 +309,10 @@ export default defineComponent({
       },
       isLoading: false,
       updateLoading: false,
-      search: ''
+      search: '',
+      answersOfSelectedQuestion: [],
+      selectedAnswers: [],
+      allAnswers: {}
     }
   },
   created () {
@@ -307,6 +325,7 @@ export default defineComponent({
     this.getQuestions()
     this.getQuestionOptions()
     this.getLocalStorage()
+    this.getAnswerOptions()
   },
   methods: {
     getCurrentQuestion () {
@@ -366,6 +385,8 @@ export default defineComponent({
             type: 'negative',
             message: 'لطفا سوال را انتخاب کنید.'
           })
+          this.isLoading = false
+          return false
         }
       }
       if (this.answerTemplate === 0 || (this.answerTemplate === 1 &&
@@ -374,21 +395,69 @@ export default defineComponent({
           type: 'negative',
           message: 'لطفا الگوی پاسخ را انتخاب کنید.'
         })
+        this.isLoading = false
+        return false
       }
       if (this.answerTemplate === 2 && this.answerText === '') {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا متن پاسخ را وارد کنید.'
         })
+        this.isLoading = false
+        return false
       }
       if (this.answerTemplate === 2 && this.score === null) {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا امتیاز پاسخ را وارد کنید.'
         })
+        this.isLoading = false
+        return false
       }
       // console.log(this.selectedPattern.value.label)
       // console.log(this.selectedQuestion.id)
+      if (this.selectedAnswers.length > 0) {
+        this.answerTemplate = 0
+        for (let i = 0; i < this.selectedAnswers.length; i++) {
+          const answer = this.allAnswers.filter(answer => {
+            return answer.id === this.selectedAnswers[i]
+          })
+          axios.post(vars.api_base2 + '/Answer/CreateAnswer', {
+            questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
+            text: answer[0].text,
+            score: answer[0].score
+          }).then(response => {
+            // console.log(response)
+            if (response.data.isSuccess) {
+              this.$q.notify({
+                type: 'positive',
+                message: 'پاسخ جدید اضافه شد.'
+              })
+              this.selectedTest = {}
+              this.selectedQuestion = {}
+              this.selectedPattern = {}
+              this.createDialog = false
+              this.selectedAnswers = []
+              this.getAnswers()
+              this.isLoading = false
+            } else {
+              this.isLoading = false
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[0].persianDescription
+              })
+            }
+          }).catch(error => {
+            console.log(error)
+            this.isLoading = false
+            this.$q.notify({
+              type: 'negative',
+              message: 'مشکلی پیش آمد.'
+            })
+          })
+        }
+        return true
+      }
       if (this.answerTemplate === 2) {
         axios.post(vars.api_base2 + '/Answer/CreateAnswer', {
           questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
@@ -631,6 +700,28 @@ export default defineComponent({
         score: null
       }).then(response => {
         this.answers = response.data.items
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    getAnswerOptions() {
+      axios.post(vars.api_base2 + '/Answer/GetAnswer', {
+        searchQuery: null,
+        questionId: null,
+        take: null,
+        skip: null,
+        isExportFile: true,
+        exportColumns: {},
+        score: null
+      }).then(response => {
+        this.allAnswers = response.data.items
+        this.answersOfSelectedQuestion = response.data.items.filter(answer => {
+          return answer.questionid === this.selectedQuestion.id
+        })
+        for (let i = 0; i < this.answersOfSelectedQuestion.length; i++) {
+          this.answersOfSelectedQuestion[i].label = this.answersOfSelectedQuestion[i].text
+          this.answersOfSelectedQuestion[i].value = this.answersOfSelectedQuestion[i].id
+        }
       }).catch(error => {
         console.log(error)
       })
