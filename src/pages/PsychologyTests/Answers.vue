@@ -177,7 +177,6 @@
                 emit-value
                 map-options
                 :disable="Object.keys(selectedTest).length === 0"
-                @update:model-value="getAnswerOptions"
               />
             </div>
           </div>
@@ -325,7 +324,6 @@ export default defineComponent({
     this.getQuestions()
     this.getQuestionOptions()
     this.getLocalStorage()
-    this.getAnswerOptions()
   },
   methods: {
     getCurrentQuestion () {
@@ -376,6 +374,19 @@ export default defineComponent({
       }).catch(error => {
         console.log(error)
       })
+
+      if (this.selectedTest.id) {
+        axios.get(vars.api_base2 + `/GetAllAnswers?PsychologyTestId=${this.selectedTest.id}`).then(response => {
+          this.allAnswers = response.data.items
+          this.answersOfSelectedQuestion = response.data.items
+          for (let i = 0; i < this.answersOfSelectedQuestion.length; i++) {
+            this.answersOfSelectedQuestion[i].label = this.answersOfSelectedQuestion[i].text
+            this.answersOfSelectedQuestion[i].value = this.answersOfSelectedQuestion[i].id
+          }
+        }).catch(error => {
+          console.log(error)
+        })
+      }
     },
     setAnswer () {
       this.isLoading = true
@@ -700,28 +711,6 @@ export default defineComponent({
         score: null
       }).then(response => {
         this.answers = response.data.items
-      }).catch(error => {
-        console.log(error)
-      })
-    },
-    getAnswerOptions() {
-      axios.post(vars.api_base2 + '/Answer/GetAnswer', {
-        searchQuery: null,
-        questionId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
-        exportColumns: {},
-        score: null
-      }).then(response => {
-        this.allAnswers = response.data.items
-        this.answersOfSelectedQuestion = response.data.items.filter(answer => {
-          return answer.questionid === this.selectedQuestion.id
-        })
-        for (let i = 0; i < this.answersOfSelectedQuestion.length; i++) {
-          this.answersOfSelectedQuestion[i].label = this.answersOfSelectedQuestion[i].text
-          this.answersOfSelectedQuestion[i].value = this.answersOfSelectedQuestion[i].id
-        }
       }).catch(error => {
         console.log(error)
       })
