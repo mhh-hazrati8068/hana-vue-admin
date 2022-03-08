@@ -311,7 +311,7 @@ export default defineComponent({
       search: '',
       answersOfSelectedQuestion: [],
       selectedAnswers: [],
-      allAnswers: {}
+      allAnswers: []
     }
   },
   created () {
@@ -376,9 +376,12 @@ export default defineComponent({
       })
 
       if (this.selectedTest.id) {
-        axios.get(vars.api_base2 + `/GetAllAnswers?PsychologyTestId=${this.selectedTest.id}`).then(response => {
+        axios.post(vars.api_base2 + '/Answer/GetAnswersByPsychologyTestId', {
+          psychologyTestId: this.selectedTest.id
+        }).then(response => {
           this.allAnswers = response.data.items
           this.answersOfSelectedQuestion = response.data.items
+          console.log(this.answersOfSelectedQuestion)
           for (let i = 0; i < this.answersOfSelectedQuestion.length; i++) {
             this.answersOfSelectedQuestion[i].label = this.answersOfSelectedQuestion[i].text
             this.answersOfSelectedQuestion[i].value = this.answersOfSelectedQuestion[i].id
@@ -433,6 +436,8 @@ export default defineComponent({
           const answer = this.allAnswers.filter(answer => {
             return answer.id === this.selectedAnswers[i]
           })
+          // console.log(this.selectedAnswers)
+          // console.log(answer)
           axios.post(vars.api_base2 + '/Answer/CreateAnswer', {
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
             text: answer[0].text,
