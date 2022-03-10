@@ -99,6 +99,19 @@ const linksList = [
         name: 'wiscAnswers'
       }
     ]
+  },
+  {
+    title: 'تاجر ایرانی',
+    icon: '',
+    name: 'iranianMerchant',
+    children: [
+      {
+        title: 'کشورها',
+        icon: 'flag',
+        link: '/countries',
+        name: 'countries'
+      }
+    ]
   }
 ]
 import { defineComponent, ref } from 'vue'

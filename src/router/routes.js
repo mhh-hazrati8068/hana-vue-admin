@@ -10,7 +10,8 @@ const routes = [
       { name: 'answers', path: '/answers', component: () => import('pages/PsychologyTests/Answers') },
       { name: 'analysis', path: '/analysis', component: () => import('pages/PsychologyTests/Analysis') },
       { name: 'wiscQuestions', path: '/wisc-questions', component: () => import('pages/WiscTest/Questions.vue') },
-      { name: 'wiscAnswers', path: '/wisc-answers', component: () => import('pages/WiscTest/Answers.vue') }
+      { name: 'wiscAnswers', path: '/wisc-answers', component: () => import('pages/WiscTest/Answers.vue') },
+      { name: 'countries', path: '/countries', component: () => import('pages/IranianMerchant/Country.vue') }
     ]
   },
 
