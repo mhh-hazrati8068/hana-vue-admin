@@ -177,6 +177,8 @@
 
 <script>
 import { defineComponent } from "vue";
+import * as axios from "axios";
+import vars from '../../vars';
 
 export default defineComponent({
   name: 'Countries',
@@ -208,7 +210,45 @@ export default defineComponent({
     }
   },
   methods: {
-    setCountry() {}
+    setCountry() {
+      let fd = new FormData()
+      fd.append("capital", this.countryData.capital)
+      fd.append("countryCode", this.countryData.countryCode)
+      fd.append("currency", this.countryData.currency)
+      fd.append("iso3", this.countryData.iso3)
+      fd.append("capital", this.countryData.capital)
+      fd.append("name", this.countryData.name)
+      fd.append("language", this.countryData.language)
+      fd.append("population", this.countryData.population)
+      fd.append("importation", this.countryData.importation)
+      fd.append("export", this.countryData.exportation)
+      fd.append("file", this.countryData.picture)
+      fd.append("file", this.countryData.nationalAnthem)
+      axios.post(vars.api_base3 + '/Country/CreateCountry', fd).then(response => {
+        if (response.data.isSuccess) {
+          this.$q.notify({
+            type: 'positive',
+            message: 'اطلاعات کشور با موفقیت ثبت شد.'
+          })
+          this.countryData = {
+            countryCode: null,
+              iso3: '',
+              name: '',
+              currency: '',
+              capital: '',
+              language: '',
+              population: '',
+              exportation: [],
+              importation: [],
+              picture: '',
+              nationalAnthem: ''
+          }
+          this.createDialog = false
+        }
+      }).catch(error => {
+        console.log(error)
+      })
+    }
   }
 })
 </script>
