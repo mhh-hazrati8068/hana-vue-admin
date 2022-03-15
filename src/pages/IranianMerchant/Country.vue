@@ -141,7 +141,7 @@
           </div>
           <div class="col-12 q-mt-md">
             <div class="input">
-              <span class="label">صادرات</span>
+              <span class="label">صادرات (هریک از موارد را با * جدا کنید)</span>
               <q-input
                 outlined
                 dense
@@ -151,7 +151,7 @@
           </div>
           <div class="col-12 q-mt-md">
             <div class="input">
-              <span class="label">واردات</span>
+              <span class="label">واردات (هریک از موارد را با * جدا کنید)</span>
               <q-input
                 outlined
                 dense
@@ -167,7 +167,11 @@
               color="primary"
               class="submit-btn"
               @click="setCountry"
-            />
+            >
+              <q-inner-loading
+                :showing="isLoading"
+              />
+            </q-btn>
           </div>
         </div>
       </q-card-section>
@@ -206,32 +210,45 @@ export default defineComponent({
         importation: [],
         picture: '',
         nationalAnthem: ''
-      }
+      },
+      isLoading: false,
     }
   },
   methods: {
     setCountry() {
+      this.isLoading = true
+      this.countryData.importation = this.countryData.importation.split('*')
+      this.countryData.exportation = this.countryData.exportation.split('*')
       let fd = new FormData()
       fd.append("capital", this.countryData.capital)
       fd.append("countryCode", this.countryData.countryCode)
       fd.append("currency", this.countryData.currency)
       fd.append("iso3", this.countryData.iso3)
-      fd.append("capital", this.countryData.capital)
       fd.append("name", this.countryData.name)
       fd.append("language", this.countryData.language)
       fd.append("population", this.countryData.population)
-      fd.append("importation", this.countryData.importation)
-      fd.append("export", this.countryData.exportation)
+      fd.append("importation", JSON.stringify(this.countryData.importation))
+      fd.append("export", JSON.stringify(this.countryData.exportation))
       fd.append("file", this.countryData.picture)
       fd.append("file", this.countryData.nationalAnthem)
-      axios.post(vars.api_base3 + '/Country/CreateCountry', fd).then(response => {
-        if (response.data.isSuccess) {
-          this.$q.notify({
-            type: 'positive',
-            message: 'اطلاعات کشور با موفقیت ثبت شد.'
-          })
-          this.countryData = {
-            countryCode: null,
+      console.log(this.countryData.nationalAnthem)
+      /*if (!this.countryData.capital || !this.countryData.countryCode || !this.countryData.currency || !this.countryData.iso3 || !this.countryData.name ||
+          !this.countryData.language || !this.countryData.population || !this.countryData.importation || !this.countryData.exportation ||
+          !this.countryData.picture || !this.countryData.nationalAnthem) {
+        this.$q.notify({
+          type: 'negative',
+          message: 'لطفا مقادیر ضروری را وارد کنید.'
+        })
+        this.isLoading = false
+      } else {
+        axios.post(vars.api_base3 + '/Country/CreateCountry', fd).then(response => {
+          if (response.data.isSuccess) {
+            this.$q.notify({
+              type: 'positive',
+              message: 'اطلاعات کشور با موفقیت ثبت شد.'
+            })
+            this.countryData = {
+              countryCode: null,
               iso3: '',
               name: '',
               currency: '',
@@ -242,13 +259,31 @@ export default defineComponent({
               importation: [],
               picture: '',
               nationalAnthem: ''
+            }
+            this.createDialog = false
+            this.isLoading = false
           }
-          this.createDialog = false
-        }
-      }).catch(error => {
+        }).catch(error => {
+          console.log(error)
+          this.$q.notify({
+            type: 'negative',
+            message: 'مشکلی پیش آمد.'
+          })
+          this.isLoading = false
+        })
+      }*/
+    },
+    getCountries() {
+      axios.post(vars.api_base3 + '/Country/GetCountry').then(response => {
+        this.countries = response.data.items
+        console.log(this.countries)
+      }).catch(error =>{
         console.log(error)
       })
     }
+  },
+  created() {
+    this.getCountries()
   }
 })
 </script>
