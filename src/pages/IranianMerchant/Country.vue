@@ -40,6 +40,8 @@
                     round
                     icon="visibility"
                     class="detail-btn"
+                    title="جزئیات"
+                    @click="openDetailDialog(props.row)"
                   />
                   <q-btn
                     v-if="col.field === 'edit'"
@@ -48,6 +50,8 @@
                     round
                     icon="edit"
                     class="edit-btn"
+                    title="ویرایش"
+                    @click="openEditDialog(props.row)"
                   />
                   <q-btn
                     v-if="col.field === 'delete'"
@@ -56,6 +60,8 @@
                     round
                     icon="delete"
                     class="delete-btn"
+                    title="حذف"
+                    @click="deleteCountry(props.row.id)"
                   />
                 </q-td>
               </q-tr>
@@ -215,6 +221,249 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="detailDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">جزئیات کشور</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12 col-md-6 q-mt-md">
+            <div>
+              کد: {{ selectedCountryToShow.countryCode }}
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div>
+              کد سه حرفی: {{ selectedCountryToShow.iso3 }}
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div>
+              نام: {{ selectedCountryToShow.name }}
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div>
+              پایتخت: {{ selectedCountryToShow.capital }}
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div>
+              زبان: {{ selectedCountryToShow.language }}
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div>
+              جمعیت: {{ selectedCountryToShow.population }}
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div>
+              واحد پول: {{ selectedCountryToShow.currency }}
+            </div>
+          </div>
+          <div class="col-12 q-mt-md">
+            <div>
+              صادرات:
+              <span v-for="(item, index) of selectedCountryToShow.export" :key="index">
+                {{ item }} <span v-if="index !== selectedCountryToShow.export.length - 1 && selectedCountryToShow.export.length !== 1"> ,</span>
+              </span>
+            </div>
+          </div>
+          <div class="col-12 q-mt-md">
+            <div>
+              واردات:
+              <span v-for="(item, index) of selectedCountryToShow.importation" :key="index">
+                {{ item }} <span v-if="index !== selectedCountryToShow.importation.length - 1 && selectedCountryToShow.importation.length !== 1"> ,</span>
+              </span>
+            </div>
+          </div>
+          <div class="col-12 q-mt-md">
+            <div>
+              <p>پرچم کشور</p>
+              <img :src="selectedCountryToShow.picture"/>
+            </div>
+          </div>
+          <div class="col-12 q-mt-md">
+            <div>
+              <p>سرود ملی</p>
+              <audio :src="selectedCountryToShow.nationalAnthem"/>
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+  <q-dialog v-model="editDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">ویرایش کشور</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="row">
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input">
+              <span class="label">نام</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.name"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input second-input">
+              <span class="label">پایتخت</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.capital"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input">
+              <span class="label">زبان</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.language"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input second-input">
+              <span class="label">واحد پول</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.currency"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input">
+              <span class="label">جمعیت</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.population"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input second-input">
+              <span class="label">کد سه حرفی</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.iso3"
+                maxlength="3"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input">
+              <span class="label">کد</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.countryCode"
+                type="number"
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input second-input">
+              <span class="label">فایل تصویری</span>
+              <div class="q-mt-sm">
+                <img :src="selectedCountryToEdit.picture"/>
+              </div>
+              <q-btn
+                unelevated
+                dense
+                label="تغییر فایل تصویری"
+                class="full-width"
+                color="primary"
+                @click="changePictureFile"
+              />
+              <q-file
+                outlined
+                dense
+                v-show="false"
+                v-model="newCountryPicture"
+                ref="flag"
+              />
+              <span v-if="Object.keys(newCountryPicture).length !== 0">{{ newCountryPicture.name }}</span>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mt-md">
+            <div class="input">
+              <span class="label">فایل سرود ملی</span>
+              <div class="q-mt-sm">
+                <audio :src="selectedCountryToEdit.nationalAnthem"/>
+              </div>
+              <q-btn
+                unelevated
+                dense
+                label="تغییر فایل سرود ملی"
+                class="full-width"
+                color="primary"
+                @click="changeAudioFile"
+              />
+              <q-file
+                outlined
+                dense
+                v-show="false"
+                v-model="newNationalAnthem"
+                ref="audio"
+              />
+              <span v-if="Object.keys(newNationalAnthem).length !== 0">{{ newNationalAnthem.name }}</span>
+            </div>
+          </div>
+          <div class="col-12 q-mt-md">
+            <div class="input">
+              <span class="label">صادرات (هریک از موارد را با \ جدا کنید)</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.export"
+              />
+            </div>
+          </div>
+          <div class="col-12 q-mt-md">
+            <div class="input">
+              <span class="label">واردات (هریک از موارد را با \ جدا کنید)</span>
+              <q-input
+                outlined
+                dense
+                v-model="selectedCountryToEdit.importation"
+              />
+            </div>
+          </div>
+          <div class="col-12">
+            <q-btn
+              unelevated
+              dense
+              label="ثبت"
+              color="primary"
+              class="submit-btn"
+              @click="updateCountry"
+            >
+              <q-inner-loading
+                :showing="isLoading"
+              />
+            </q-btn>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -262,6 +511,12 @@ export default defineComponent({
         take: 20,
         skip: 0
       },
+      detailDialog: false,
+      editDialog: false,
+      selectedCountryToShow: {},
+      selectedCountryToEdit: {},
+      newCountryPicture: '',
+      newNationalAnthem: ''
     }
   },
   methods: {
@@ -271,8 +526,6 @@ export default defineComponent({
       let isIso3Reiterative = false;
       let importation = []
       let exportation = []
-      importation = this.countryData.importation.split('\\')
-      exportation = this.countryData.exportation.split('\\')
       let fd = new FormData()
       if (!this.countryData.capital || !this.countryData.countryCode || !this.countryData.currency || !this.countryData.iso3 || !this.countryData.name ||
           !this.countryData.language || !this.countryData.population || !this.countryData.importation || !this.countryData.exportation ||
@@ -283,6 +536,8 @@ export default defineComponent({
         })
         this.isLoading = false
       } else {
+        // importation = this.countryData.importation.split('\\')
+        // exportation = this.countryData.exportation.split('\\')
         fd.append("capital", this.countryData.capital)
         fd.append("countryCode", this.countryData.countryCode)
         fd.append("currency", this.countryData.currency)
@@ -290,8 +545,8 @@ export default defineComponent({
         fd.append("name", this.countryData.name)
         fd.append("language", this.countryData.language)
         fd.append("population", this.countryData.population)
-        fd.append("importation", JSON.stringify(importation))
-        fd.append("export", JSON.stringify(exportation))
+        fd.append("importation", this.countryData.importation)
+        fd.append("export", this.countryData.exportation)
         fd.append("picture", this.countryData.picture)
         fd.append("nationalAnthem", this.countryData.nationalAnthem)
 
@@ -300,7 +555,7 @@ export default defineComponent({
             console.log(this.countries[i].countryCode)
             isCountryCodeReiterative = true;
           }
-          if (this.countries[i].iso3 === Number(this.countryData.iso3)) {
+          if (this.countries[i].iso3.toLowerCase() === this.countryData.iso3.toLowerCase()) {
             isIso3Reiterative = true;
           }
         }
@@ -316,13 +571,13 @@ export default defineComponent({
             message: 'نوع فایل تصویری باید بصورت png باشد.'
           })
           this.isLoading = false
-        } else if (this.countryData.nationalAnthem.type !== 'audio/mpeg') {
+        } /*else if (this.countryData.nationalAnthem.type !== 'audio/mpeg') {
           this.$q.notify({
             type: 'negative',
             message: 'نوع فایل صوتی باید بصورت mp3 باشد.'
           })
           this.isLoading = false
-        } else {
+        }*/ else {
           axios.post(vars.api_base3 + '/Country/CreateCountry', fd).then(response => {
             if (response.data.isSuccess) {
               this.$q.notify({
@@ -342,6 +597,7 @@ export default defineComponent({
                 picture: '',
                 nationalAnthem: ''
               }
+              this.getCountries()
               this.createDialog = false
               this.isLoading = false
             }
@@ -375,6 +631,36 @@ export default defineComponent({
       }).catch(error =>{
         console.log(error)
       })
+    },
+    openDetailDialog(country) {
+      this.detailDialog = !this.editDialog
+      this.selectedCountryToShow = country
+    },
+    openEditDialog(country) {
+      this.editDialog = !this.editDialog
+      this.selectedCountryToEdit = country
+    },
+    updateCountry() {
+      console.log(this.selectedCountryToEdit.export)
+    },
+    deleteCountry(countryId) {
+      axios.delete(vars.api_base3 + `/Country/DeleteCountry?id=${countryId}`).then(response => {
+        if (response.data.isSuccess) {
+          this.$q.notify({
+            type: 'info',
+            message: 'کشور با موفقیت حذف شد.'
+          })
+          this.getCountries()
+        }
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    changePictureFile() {
+      this.$refs.flag.pickFiles();
+    },
+    changeAudioFile() {
+      this.$refs.audio.pickFiles();
     }
   },
   created() {
