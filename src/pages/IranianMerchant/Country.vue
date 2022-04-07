@@ -22,8 +22,45 @@
             :rows="countries"
             v-model:pagination="pagination"
             :loading="loading"
+            @request="getCountries"
             class="q-mt-lg"
-          />
+          >
+            <template v-slot:body="props">
+              <q-tr :props="props">
+                <q-td
+                  v-for="col in props.cols"
+                  :key="col.name"
+                  :props="props"
+                >
+                  {{ col.value }}
+                  <q-btn
+                    v-if="col.field === 'detail'"
+                    unelevated
+                    dense
+                    round
+                    icon="visibility"
+                    class="detail-btn"
+                  />
+                  <q-btn
+                    v-if="col.field === 'edit'"
+                    unelevated
+                    dense
+                    round
+                    icon="edit"
+                    class="edit-btn"
+                  />
+                  <q-btn
+                    v-if="col.field === 'delete'"
+                    unelevated
+                    dense
+                    round
+                    icon="delete"
+                    class="delete-btn"
+                  />
+                </q-td>
+              </q-tr>
+            </template>
+          </q-table>
         </div>
         <div class="col-12 flex justify-end">
           <q-btn
@@ -105,6 +142,7 @@
                 outlined
                 dense
                 v-model="countryData.iso3"
+                maxlength="3"
               />
             </div>
           </div>
@@ -141,7 +179,7 @@
           </div>
           <div class="col-12 q-mt-md">
             <div class="input">
-              <span class="label">صادرات (هریک از موارد را با * جدا کنید)</span>
+              <span class="label">صادرات (هریک از موارد را با \ جدا کنید)</span>
               <q-input
                 outlined
                 dense
@@ -151,7 +189,7 @@
           </div>
           <div class="col-12 q-mt-md">
             <div class="input">
-              <span class="label">واردات (هریک از موارد را با * جدا کنید)</span>
+              <span class="label">واردات (هریک از موارد را با \ جدا کنید)</span>
               <q-input
                 outlined
                 dense
@@ -189,7 +227,15 @@ export default defineComponent({
   data() {
     return {
       search: '',
-      columns: [],
+      columns: [
+        { name: 'countryCode', align: 'center', label: 'کد', field: 'countryCode'},
+        { name: 'iso3', align: 'center', label: 'کد سه حرفی', field: 'iso3'},
+        { name: 'name', align: 'center', label: 'نام کشور', field: 'name'},
+        { name: 'capital', align: 'center', label: 'پایتخت', field: 'capital'},
+        { name: 'detail', align: 'center', label: '', field: 'detail'},
+        { name: 'edit', align: 'center', label: '', field: 'edit'},
+        { name: 'delete', align: 'center', label: '', field: 'delete'},
+      ],
       countries: [],
       pagination: {
         page: 1,
@@ -212,27 +258,23 @@ export default defineComponent({
         nationalAnthem: ''
       },
       isLoading: false,
+      qBody: {
+        take: 20,
+        skip: 0
+      },
     }
   },
   methods: {
     setCountry() {
       this.isLoading = true
-      this.countryData.importation = this.countryData.importation.split('*')
-      this.countryData.exportation = this.countryData.exportation.split('*')
+      let isCountryCodeReiterative = false;
+      let isIso3Reiterative = false;
+      let importation = []
+      let exportation = []
+      importation = this.countryData.importation.split('\\')
+      exportation = this.countryData.exportation.split('\\')
       let fd = new FormData()
-      fd.append("capital", this.countryData.capital)
-      fd.append("countryCode", this.countryData.countryCode)
-      fd.append("currency", this.countryData.currency)
-      fd.append("iso3", this.countryData.iso3)
-      fd.append("name", this.countryData.name)
-      fd.append("language", this.countryData.language)
-      fd.append("population", this.countryData.population)
-      fd.append("importation", JSON.stringify(this.countryData.importation))
-      fd.append("export", JSON.stringify(this.countryData.exportation))
-      fd.append("file", this.countryData.picture)
-      fd.append("file", this.countryData.nationalAnthem)
-      console.log(this.countryData.nationalAnthem)
-      /*if (!this.countryData.capital || !this.countryData.countryCode || !this.countryData.currency || !this.countryData.iso3 || !this.countryData.name ||
+      if (!this.countryData.capital || !this.countryData.countryCode || !this.countryData.currency || !this.countryData.iso3 || !this.countryData.name ||
           !this.countryData.language || !this.countryData.population || !this.countryData.importation || !this.countryData.exportation ||
           !this.countryData.picture || !this.countryData.nationalAnthem) {
         this.$q.notify({
@@ -241,42 +283,95 @@ export default defineComponent({
         })
         this.isLoading = false
       } else {
-        axios.post(vars.api_base3 + '/Country/CreateCountry', fd).then(response => {
-          if (response.data.isSuccess) {
-            this.$q.notify({
-              type: 'positive',
-              message: 'اطلاعات کشور با موفقیت ثبت شد.'
-            })
-            this.countryData = {
-              countryCode: null,
-              iso3: '',
-              name: '',
-              currency: '',
-              capital: '',
-              language: '',
-              population: '',
-              exportation: [],
-              importation: [],
-              picture: '',
-              nationalAnthem: ''
-            }
-            this.createDialog = false
-            this.isLoading = false
+        fd.append("capital", this.countryData.capital)
+        fd.append("countryCode", this.countryData.countryCode)
+        fd.append("currency", this.countryData.currency)
+        fd.append("iso3", this.countryData.iso3)
+        fd.append("name", this.countryData.name)
+        fd.append("language", this.countryData.language)
+        fd.append("population", this.countryData.population)
+        fd.append("importation", JSON.stringify(importation))
+        fd.append("export", JSON.stringify(exportation))
+        fd.append("picture", this.countryData.picture)
+        fd.append("nationalAnthem", this.countryData.nationalAnthem)
+
+        for (let i = 0; i < this.countries.length; i++) {
+          if (this.countries[i].countryCode === Number(this.countryData.countryCode)) {
+            console.log(this.countries[i].countryCode)
+            isCountryCodeReiterative = true;
           }
-        }).catch(error => {
-          console.log(error)
+          if (this.countries[i].iso3 === Number(this.countryData.iso3)) {
+            isIso3Reiterative = true;
+          }
+        }
+        if (isCountryCodeReiterative || isIso3Reiterative) {
           this.$q.notify({
             type: 'negative',
-            message: 'مشکلی پیش آمد.'
+            message: 'کد کشور و یا کد سه حرفی تکراری میباشد.'
           })
           this.isLoading = false
-        })
-      }*/
+        } else if (this.countryData.picture.type !== 'image/png') {
+          this.$q.notify({
+            type: 'negative',
+            message: 'نوع فایل تصویری باید بصورت png باشد.'
+          })
+          this.isLoading = false
+        } else if (this.countryData.nationalAnthem.type !== 'audio/mpeg') {
+          this.$q.notify({
+            type: 'negative',
+            message: 'نوع فایل صوتی باید بصورت mp3 باشد.'
+          })
+          this.isLoading = false
+        } else {
+          axios.post(vars.api_base3 + '/Country/CreateCountry', fd).then(response => {
+            if (response.data.isSuccess) {
+              this.$q.notify({
+                type: 'positive',
+                message: 'اطلاعات کشور با موفقیت ثبت شد.'
+              })
+              this.countryData = {
+                countryCode: null,
+                iso3: '',
+                name: '',
+                currency: '',
+                capital: '',
+                language: '',
+                population: '',
+                exportation: [],
+                importation: [],
+                picture: '',
+                nationalAnthem: ''
+              }
+              this.createDialog = false
+              this.isLoading = false
+            }
+          }).catch(error => {
+            console.log(error)
+            this.$q.notify({
+              type: 'negative',
+              message: 'مشکلی پیش آمد.'
+            })
+            this.isLoading = false
+          })
+        }
+      }
     },
-    getCountries() {
-      axios.post(vars.api_base3 + '/Country/GetCountry').then(response => {
+    getCountries(reqProps) {
+      this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
+      this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
+      this.pagination.rowsPerPage = this.qBody.take
+      axios.post(vars.api_base3 + '/Country/GetCountry', {
+        searchQuery: null,
+        countryCode: null,
+        take: this.qBody.take,
+        skip: this.qBody.skip,
+        isExportFile: false,
+        fromDateTime: null,
+        toDateTime: null
+      }).then(response => {
+        this.pagination.rowsNumber = response.data.count
+        this.pagination.page = reqProps?.pagination.page ?? 1
         this.countries = response.data.items
-        console.log(this.countries)
       }).catch(error =>{
         console.log(error)
       })

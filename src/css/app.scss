@@ -98,6 +98,12 @@ body {
   }
 }
 
+.detail-btn {
+  .q-icon {
+    color: $green;
+  }
+}
+
 .button {
   font-size: .75rem;
   border-radius: .25rem;
