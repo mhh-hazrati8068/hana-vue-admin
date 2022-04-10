@@ -456,7 +456,7 @@
               @click="updateCountry"
             >
               <q-inner-loading
-                :showing="isLoading"
+                :showing="updateLoading"
               />
             </q-btn>
           </div>
@@ -516,7 +516,10 @@ export default defineComponent({
       selectedCountryToShow: {},
       selectedCountryToEdit: {},
       newCountryPicture: '',
-      newNationalAnthem: ''
+      newNationalAnthem: '',
+      updateLoading: false,
+      selectedCountryCountryCode: null,
+      selectedCountryIso3: ''
     }
   },
   methods: {
@@ -571,13 +574,13 @@ export default defineComponent({
             message: 'نوع فایل تصویری باید بصورت png باشد.'
           })
           this.isLoading = false
-        } /*else if (this.countryData.nationalAnthem.type !== 'audio/mpeg') {
+        } else if (this.countryData.nationalAnthem.type !== 'audio/mpeg') {
           this.$q.notify({
             type: 'negative',
             message: 'نوع فایل صوتی باید بصورت mp3 باشد.'
           })
           this.isLoading = false
-        }*/ else {
+        } else {
           axios.post(vars.api_base3 + '/Country/CreateCountry', fd).then(response => {
             if (response.data.isSuccess) {
               this.$q.notify({
@@ -635,13 +638,94 @@ export default defineComponent({
     openDetailDialog(country) {
       this.detailDialog = !this.editDialog
       this.selectedCountryToShow = country
+      console.log(this.selectedCountryToShow)
     },
     openEditDialog(country) {
       this.editDialog = !this.editDialog
       this.selectedCountryToEdit = country
+      this.selectedCountryCountryCode = this.selectedCountryToEdit.countryCode
+      this.selectedCountryIso3 = this.selectedCountryToEdit.iso3
+      this.selectedCountryToEdit.export = this.selectedCountryToEdit.export.toString().replaceAll(',', '\\')
+      this.selectedCountryToEdit.importation = this.selectedCountryToEdit.importation.toString().replaceAll(',', '\\')
     },
     updateCountry() {
-      console.log(this.selectedCountryToEdit.export)
+      this.updateLoading = true
+      let isCountryCodeReiterative = false;
+      let isIso3Reiterative = false;
+      let fd = new FormData()
+      this.countries = this.countries.filter(country => {
+        return country.id !== this.selectedCountryToEdit.id
+      })
+
+      for (let i = 0; i < this.countries.length; i++) {
+        if (Number(this.countries[i].countryCode) === Number(this.selectedCountryToEdit.countryCode)) {
+          isCountryCodeReiterative = true;
+        }
+        if (this.countries[i].iso3.toLowerCase() === this.selectedCountryToEdit.iso3.toLowerCase()) {
+          isIso3Reiterative = true;
+        }
+      }
+
+      fd.append("capital", this.selectedCountryToEdit.capital)
+      fd.append("countryCode", this.selectedCountryToEdit.countryCode)
+      fd.append("currency", this.selectedCountryToEdit.currency)
+      fd.append("iso3", this.selectedCountryToEdit.iso3)
+      fd.append("name", this.selectedCountryToEdit.name)
+      fd.append("language", this.selectedCountryToEdit.language)
+      fd.append("population", this.selectedCountryToEdit.population)
+      fd.append("importation", this.selectedCountryToEdit.importation)
+      fd.append("export", this.selectedCountryToEdit.export)
+      fd.append("id", this.selectedCountryToEdit.id)
+      fd.append("picture", this.newCountryPicture)
+      fd.append("nationalAnthem", this.newNationalAnthem)
+
+      if (isCountryCodeReiterative || isIso3Reiterative) {
+        this.$q.notify({
+          type: 'negative',
+          message: 'کد کشور و یا کد سه حرفی تکراری میباشد.'
+        })
+        this.updateLoading = false
+      } else {
+        if (this.newCountryPicture) {
+          if (this.newCountryPicture.type !== 'image/png') {
+            this.$q.notify({
+              type: 'negative',
+              message: 'نوع فایل تصویری باید بصورت png باشد.'
+            })
+            this.updateLoading = false
+          }
+        }
+        if (this.newNationalAnthem) {
+          if (this.newNationalAnthem.type !== 'audio/mpeg') {
+            this.$q.notify({
+              type: 'negative',
+              message: 'نوع فایل صوتی باید بصورت mp3 باشد.'
+            })
+            this.updateLoading = false
+          }
+        }
+
+        axios.put(vars.api_base3 + '/Country/UpdateCountry', fd).then(response => {
+          if (response.data.isSuccess) {
+            this.$q.notify({
+              type: 'positive',
+              message: 'اطلاعات کشور با موفقیت ثبت شد.'
+            })
+            this.getCountries()
+            this.editDialog = false
+            this.updateLoading = false
+            this.newNationalAnthem = ''
+            this.newCountryPicture = ''
+          }
+        }).catch(error => {
+          console.log(error)
+          this.$q.notify({
+            type: 'negative',
+            message: 'مشکلی پیش آمد.'
+          })
+          this.updateLoading = false
+        })
+      }
     },
     deleteCountry(countryId) {
       axios.delete(vars.api_base3 + `/Country/DeleteCountry?id=${countryId}`).then(response => {
