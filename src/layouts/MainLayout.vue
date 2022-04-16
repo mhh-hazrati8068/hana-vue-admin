@@ -110,6 +110,11 @@ const linksList = [
         icon: 'flag',
         link: '/countries',
         name: 'countries'
+      },
+      {
+        title: 'استان\u200Cها',
+        link: '/states',
+        name: 'states'
       }
     ]
   }
