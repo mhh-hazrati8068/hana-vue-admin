@@ -540,7 +540,7 @@
               <q-input
                 outlined
                 dense
-                v-model="selectedStateToEdit.exportation"
+                v-model="selectedStateToEdit.export"
               />
             </div>
           </div>
@@ -774,6 +774,8 @@ export default defineComponent({
       this.selectedStateCode = this.selectedStateToEdit.stateCode
       this.selectedStateToEdit.export = this.selectedStateToEdit.export.toString().replaceAll(',', '\\')
       this.selectedStateToEdit.importation = this.selectedStateToEdit.importation.toString().replaceAll(',', '\\')
+      this.selectedStateToEdit.capacityAndLimitations = this.selectedStateToEdit.capacityAndLimitations.toString().replaceAll(',', '\\')
+      this.selectedStateToEdit.products = this.selectedStateToEdit.products.toString().replaceAll(',', '\\')
       console.log(this.selectedStateToEdit)
     },
     updateState() {
@@ -790,8 +792,6 @@ export default defineComponent({
         }
       }
 
-      fd.append("picture_state", this.newStatePicture)
-      fd.append("native_song", this.newNativeSong)
       fd.append("countryId", this.selectedStateToEdit.countryId)
       fd.append("stateCode", this.selectedStateToEdit.stateCode)
       fd.append("dialect", this.selectedStateToEdit.dialect)
@@ -821,6 +821,8 @@ export default defineComponent({
               message: 'نوع فایل تصویری باید بصورت png باشد.'
             })
             this.updateLoading = false
+          } else {
+            fd.append("picture_state", this.newStatePicture)
           }
         }
         if (this.newNativeSong) {
@@ -830,6 +832,8 @@ export default defineComponent({
               message: 'نوع فایل صوتی باید بصورت mp3 باشد.'
             })
             this.updateLoading = false
+          } else {
+            fd.append("native_song", this.newNativeSong)
           }
         }
 
