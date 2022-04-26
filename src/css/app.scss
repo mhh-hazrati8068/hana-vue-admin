@@ -157,3 +157,9 @@ body {
 .q-option-group {
   margin-top: 0;
 }
+
+.q-field {
+  &.color .q-field__native {
+    direction: ltr;
+  }
+}

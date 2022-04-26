@@ -50,6 +50,16 @@
                     {{ col.value }}
                   </span>
                   <q-btn
+                    v-if="col.field === 'detail'"
+                    unelevated
+                    dense
+                    round
+                    icon="visibility"
+                    class="detail-btn"
+                    title="جزئیات"
+                    @click="openDetailDialog(props.row)"
+                  />
+                  <q-btn
                     v-if="col.field === 'edit'"
                     unelevated
                     dense
@@ -108,43 +118,64 @@
           <div class="col-12">
             <div class="create-test-container q-mt-md">
               <div class="row">
-                <div class="col-12 q-mt-md">
-                  <span class="label">عنوان تست</span>
-                  <q-input
-                    dense
-                    outlined
-                    v-model="selectedTestToEdit.text"
-                    required
-                  />
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="">
+                    <span class="label">عنوان تست</span>
+                    <q-input
+                      dense
+                      outlined
+                      v-model="selectedTestToEdit.text"
+                    />
+                  </div>
                 </div>
                 <div class="col-12 col-md-6 q-mt-md">
-                  <span class="label">تگ تست</span>
-                  <q-input
-                    dense
-                    outlined
-                    v-model="selectedTestToEdit.tag1"
-                    required
-                  />
+                  <div class="second-input">
+                    <span class="label">تگ تست</span>
+                    <q-select
+                      dense
+                      outlined
+                      v-model="selectedTestToEdit.tag_id"
+                      :options="tags"
+                      :option-label="'text'"
+                      :option-value="'id'"
+                      emit-value
+                      map-options
+                    />
+                  </div>
                 </div>
                 <div class="col-12 col-md-6 q-mt-md">
-                  <span class="label">تگ تست</span>
-                  <q-input
-                    dense
-                    outlined
-                    v-model="selectedTestToEdit.tag2"
-                    class="second-input"
-                  />
+                  <div class="flex column">
+                    <span class="label" style="opacity: 0">قیمت تست</span>
+                    <q-checkbox
+                      dense
+                      outlined
+                      v-model="selectedTestToEdit.being_monetary"
+                      label="پولی"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 q-mt-md">
+                  <div class="second-input">
+                    <span class="label">قیمت تست</span>
+                    <q-input
+                      dense
+                      outlined
+                      v-model="selectedTestToEdit.cost"
+                      :disable="!selectedTestToEdit.being_monetary"
+                    />
+                  </div>
                 </div>
                 <div class="col-12 q-mt-md">
-                  <span class="label">تصویر تست</span>
-                  <q-file
-                    dense
-                    outlined
-                    v-model="selectedTestToEdit.img"
-                    readonly
-                  />
+                  <div class="">
+                    <span class="label">تصویر تست (لینک تصویر آپلود شده را قرار دهید)</span>
+                    <q-input
+                      dense
+                      outlined
+                      v-model="selectedTestToEdit.img"
+                    />
+                  </div>
                 </div>
-                <div class="col-12 q-mt-lg q-mt-md">
+                <div class="col-12 q-mt-md">
                   <span class="label">توضیحات تست</span>
                   <q-input
                     dense
@@ -152,7 +183,6 @@
                     v-model="selectedTestToEdit.description"
                     placeholder="توضیحات تست را وارد نمایید..."
                     type="textarea"
-                    class="q-mt-sm"
                   />
                 </div>
               </div>
@@ -189,41 +219,63 @@
             <div class="create-test-container">
               <div class="row">
                 <div class="col-12 col-md-6 q-mt-md">
-                  <span class="label">عنوان تست</span>
-                  <q-input
-                    dense
-                    outlined
-                    v-model="testData.text"
-                    required
-                  />
+                  <div class="">
+                    <span class="label">عنوان تست</span>
+                    <q-input
+                      dense
+                      outlined
+                      v-model="testData.text"
+                      required
+                    />
+                  </div>
                 </div>
                 <div class="col-12 col-md-6 q-mt-md">
-                  <span class="label">تگ تست</span>
-                  <q-input
-                    dense
-                    outlined
-                    v-model="testData.tag1"
-                    class="second-input"
-                    required
-                  />
+                  <div class="second-input">
+                    <span class="label">تگ تست</span>
+                    <q-select
+                      dense
+                      outlined
+                      v-model="testData.tagId"
+                      :options="tags"
+                      :option-label="'text'"
+                      :option-value="'id'"
+                      emit-value
+                      map-options
+                      required
+                    />
+                  </div>
                 </div>
                 <div class="col-12 col-md-6 q-mt-md">
-                  <span class="label">تگ تست</span>
-                  <q-input
-                    dense
-                    outlined
-                    v-model="testData.tag2"
-                  />
+                  <div class="flex column">
+                    <span class="label" style="opacity: 0">قیمت تست</span>
+                    <q-checkbox
+                      dense
+                      outlined
+                      v-model="testData.beingMonetary"
+                      label="پولی"
+                    />
+                  </div>
                 </div>
                 <div class="col-12 col-md-6 q-mt-md">
-                  <span class="label">تصویر تست</span>
-                  <q-file
-                    dense
-                    outlined
-                    v-model="testData.img"
-                    class="second-input"
-                    readonly
-                  />
+                  <div class="second-input">
+                    <span class="label">قیمت تست</span>
+                    <q-input
+                      dense
+                      outlined
+                      v-model="testData.cost"
+                      :disable="!testData.beingMonetary"
+                    />
+                  </div>
+                </div>
+                <div class="col-12 q-mt-md">
+                  <div class="">
+                    <span class="label">تصویر تست (لینک تصویر آپلود شده را قرار دهید)</span>
+                    <q-input
+                      dense
+                      outlined
+                      v-model="testData.img"
+                    />
+                  </div>
                 </div>
                 <div class="col-12 q-mt-md">
                   <span class="label">توضیحات تست</span>
@@ -270,18 +322,19 @@ export default defineComponent({
       tests: [],
       testData: {
         text: '',
-        tag1: '',
-        tag2: null,
         img: '',
-        description: ''
+        description: '',
+        cost: null,
+        beingMonetary: false,
+        tagId: null
       },
       columns: [
         { name: 'counter', align: 'center', label: 'ردیف', field: 'counter' },
         { name: 'text', align: 'center', label: 'عنوان تست', field: 'text' },
-        { name: 'description', align: 'center', label: 'توضیحات', field: 'description' },
-        { name: 'tag1', align: 'center', label: 'تگ تست', field: 'tag1' },
-        { name: 'tag2', align: 'center', label: 'تگ تست', field: 'tag2' },
-        { name: 'img', align: 'center', label: 'تصویر تست', field: 'img' },
+        // { name: 'description', align: 'center', label: 'توضیحات', field: 'description' },
+        { name: 'tag', align: 'center', label: 'تگ تست', field: 'tag' },
+        // { name: 'img', align: 'center', label: 'تصویر تست', field: 'img' },
+        { name: 'detail', align: 'center', label: '', field: 'detail'},
         { name: 'edit', align: 'center', label: '', field: 'edit' },
         { name: 'delete', align: 'center', label: '', field: 'delete' }
       ],
@@ -305,23 +358,26 @@ export default defineComponent({
       },
       isLoading: false,
       updateLoading: false,
-      search: ''
+      search: '',
+      tags: []
     }
   },
   created () {
     this.getTest()
+    this.getTags()
   },
   methods: {
     setTest () {
       // console.log(this.testData)
       this.isLoading = true
-      if (this.testData.text === '' || this.testData.tag1 === '') {
+      if (!this.testData.text || !this.testData.tagId || !this.testData.img || !this.testData.description) {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا مقادیر ضروری را وارد نمایید.'
         })
+        this.isLoading = false
       } else {
-        axios.post(vars.api_base2 + '/PsychologyTest/CreateTest', this.testData).then(response => {
+        axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/CreateTest', this.testData).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -339,18 +395,22 @@ export default defineComponent({
             this.isLoading = false
             this.getTest()
           } else {
-            this.$q.notify({
-              type: 'negative',
-              message: response.data.exceptions[0].persianDescription
-            })
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
             this.isLoading = false
           }
         }).catch(error => {
           console.log(error)
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
           this.isLoading = false
         })
       }
@@ -360,14 +420,12 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
+      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
         searchQuery: null,
-        tag1: null,
-        tag2: null,
+        tagId: null,
         take: this.qBody.take,
         skip: this.qBody.skip,
         isExportFile: false,
-        exportColumns: {}
       }).then(response => {
         this.pagination.rowsNumber = response.data.count
         this.pagination.page = reqProps?.pagination.page ?? 1
@@ -396,13 +454,22 @@ export default defineComponent({
     },
     updateTest () {
       this.updateLoading = true
-      if (this.selectedTestToEdit.text === '' || this.selectedTestToEdit.tag1 === '') {
+      if (!this.selectedTestToEdit.text || !this.selectedTestToEdit.tag_id || !this.selectedTestToEdit.img || !this.selectedTestToEdit.description) {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا مقادیر ضروری را وارد نمایید.'
         })
+        this.updateLoading = false
       } else {
-        axios.put(vars.api_base2 + '/PsychologyTest/UpdateTest', this.selectedTestToEdit).then(response => {
+        axios.put(vars.api_base2 + '/FargoTest/PsychologyTest/UpdateTest', {
+          text: this.selectedTestToEdit.text,
+          img: this.selectedTestToEdit.img,
+          description: this.selectedTestToEdit.description,
+          cost: this.selectedTestToEdit.being_monetary ? Number(this.selectedTestToEdit.cost) : null,
+          beingMonetary: this.selectedTestToEdit.being_monetary,
+          id: this.selectedTestToEdit.id,
+          tagId: this.selectedTestToEdit.tag_id
+        }).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -413,38 +480,50 @@ export default defineComponent({
             this.editDialog = !this.editDialog
             this.updateLoading = false
           } else {
-            this.$q.notify({
-              type: 'negative',
-              message: response.data.exceptions[0].persianDescription
-            })
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
             this.updateLoading = false
           }
         }).catch(error => {
           console.log(error)
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
+          this.updateLoading = false
         })
       }
     },
     deleteTest (testId) {
-      const payload = { id: testId }
-      axios.delete(vars.api_base2 + '/PsychologyTest/DeleteTest', { data: payload }).then(response => {
+      axios.delete(vars.api_base2 + `/FargoTest/PsychologyTest/DeleteTest?id_=${testId}`).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
-            message: 'تست حذف شد.'
+            message: 'تست با موفقیت حذف شد.'
           })
           this.getTest()
         } else {
-          this.$q.notify({
-            type: 'negative',
-            message: response.data.exceptions[0].persianDescription
-          })
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
-        this.$q.notify({
-          type: 'negative',
-          message: 'مشکلی پیش آمد.'
-        })
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     getSearchItems () {
@@ -461,7 +540,31 @@ export default defineComponent({
       }).catch(error => {
         console.log(error)
       })
-    }
+    },
+    openDetailDialog(test) {},
+    getTags() {
+      axios.post(vars.api_base2 + '/FargoTest/Tag/GetTag', {
+        searchQuery: null,
+        take: null,
+        skip: null,
+        isExportFile: true,
+        categoryId: null
+      }).then(res => {
+        this.tags = res.data.items
+        for (let i = 0; i < this.tests.length; i++) {
+          for (let j = 0; j < this.tags.length; j++) {
+            if (this.tests[i].tag_id === this.tags[j].id) {
+              this.tests[i].tag = this.tags[j].text
+            }
+          }
+        }
+        // console.log(this.tests)
+      }).catch(err => {
+        console.log(err)
+      }).then(() => {
+        this.loading = false
+      })
+    },
   }
 })
 </script>

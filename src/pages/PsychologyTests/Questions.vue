@@ -6,7 +6,7 @@
       dense
       placeholder="جستجو کنید..."
       class="q-mb-md"
-      @update:model-value="getSearchItems"
+      @update:model-value="getQuestions"
     >
       <template v-slot:prepend>
         <q-icon name="search" />
@@ -111,6 +111,19 @@
               outlined
               v-model="selectedQuestionToEdit.text"
               autogrow
+            />
+          </div>
+          <div class="col-12 q-mt-lg">
+            <span class="label">انتخاب تست</span>
+            <q-select
+              dense
+              outlined
+              v-model="selectedQuestionToEdit.psychology_test_id"
+              :options="tests"
+              :option-value="'id'"
+              :option-label="'text'"
+              emit-value
+              map-options
             />
           </div>
           <div class="col-12 q-mt-md flex justify-end">
@@ -237,20 +250,19 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/Question/GetQuestion', {
-        searchQuery: null,
+      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
+        searchQuery: this.search ? this.search : null,
         psychologyTestId: null,
         take: this.qBody.take,
         skip: this.qBody.skip,
         isExportFile: false,
-        exportColumns: {}
       }).then(response => {
         this.pagination.rowsNumber = response.data.count
         this.pagination.page = reqProps?.pagination.page ?? 1
         this.questions = response.data.items
         if (this.testId !== null) {
           this.questions = this.questions.filter(question => {
-            return question.psychologytestid === this.testId
+            return question.psychology_test_id === this.testId
           })
         }
         // console.log(this.questions)
@@ -261,14 +273,12 @@ export default defineComponent({
       })
     },
     getTest () {
-      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
+      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
         searchQuery: null,
-        tag1: null,
-        tag2: null,
+        tagId: null,
         take: null,
         skip: null,
         isExportFile: true,
-        exportColumns: {}
       }).then(response => {
         this.tests = response.data.items
         // console.log(this.tests)
@@ -291,7 +301,7 @@ export default defineComponent({
       // console.log(this.questionData)
       this.isLoading = true
       if (this.questionData.text !== '' && this.questionData.psychologyTestId !== null) {
-        axios.post(vars.api_base2 + '/Question/CreateQuestion', this.questionData).then(response => {
+        axios.post(vars.api_base2 + '/FargoTest/Question/CreateQuestion', this.questionData).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -330,19 +340,18 @@ export default defineComponent({
     },
     changeQuestions () {
       // console.log(this.selectedTest)
-      axios.post(vars.api_base2 + '/Question/GetQuestion', {
+      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
         searchQuery: null,
         psychologyTestId: null,
         take: null,
         skip: null,
-        isExportFile: false,
-        exportColumns: {}
+        isExportFile: true,
       }).then(response => {
         if (this.selectedTest.id === 0) {
           this.questions = response.data.items
         } else {
           this.questions = response.data.items.filter(question => {
-            return question.psychologytestid === this.selectedTest.id
+            return question.psychology_test_id === this.selectedTest.id
           })
         }
         // console.log(this.questions)
@@ -363,7 +372,11 @@ export default defineComponent({
     updateQuestion () {
       this.updateLoading = true
       if (this.selectedQuestionToEdit.text !== '') {
-        axios.put(vars.api_base2 + '/Question/UpdateQuestion', this.selectedQuestionToEdit).then(response => {
+        axios.put(vars.api_base2 + '/FargoTest/Question/UpdateQuestion', {
+          text: this.selectedQuestionToEdit.text,
+          psychologyTestId: this.selectedQuestionToEdit.psychology_test_id,
+          id: this.selectedQuestionToEdit.id
+        }).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -374,18 +387,22 @@ export default defineComponent({
             this.editDialog = !this.editDialog
             this.updateLoading = false
           } else {
-            this.$q.notify({
-              type: 'negative',
-              message: response.data.exceptions[0].persianDescription
-            })
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
             this.updateLoading = false
           }
         }).catch(error => {
           console.log(error)
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
           this.updateLoading = false
         })
       } else {
@@ -397,8 +414,7 @@ export default defineComponent({
       }
     },
     deleteQuestion (questionId) {
-      const payload = { id: questionId }
-      axios.delete(vars.api_base2 + '/Question/DeleteQuestion', { data: payload }).then(response => {
+      axios.delete(vars.api_base2 + `/FargoTest/Question/DeleteQuestion?id_=${questionId}`).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -406,27 +422,30 @@ export default defineComponent({
           })
           this.getQuestions()
         } else {
-          this.$q.notify({
-            type: 'negative',
-            message: response.data.exceptions[0].persianDescription
-          })
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
-        this.$q.notify({
-          type: 'negative',
-          message: 'مشکلی پیش آمد.'
-        })
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     getSearchItems () {
-      axios.post(vars.api_base2 + '/Question/GetQuestion', {
+      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
         searchQuery: this.search,
         take: null,
         skip: null,
         psychologyTestId: null,
         isExportFile: false,
-        exportColumns: {}
       }).then(response => {
         this.questions = response.data.items
       }).catch(error => {

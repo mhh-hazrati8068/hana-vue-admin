@@ -121,6 +121,19 @@
               min="0"
             />
           </div>
+          <div class="col-12 q-mt-md">
+            <span class="label">انتخاب سوال</span>
+            <q-select
+              dense
+              outlined
+              v-model="selectedAnswerToEdit.question_id"
+              :options="questionsForEditAnswer"
+              :option-value="'id'"
+              :option-label="'text'"
+              emit-value
+              map-options
+            />
+          </div>
           <div class="col-12 q-mt-md flex justify-end">
             <q-btn
               dense
@@ -285,8 +298,8 @@ export default defineComponent({
       answers: [],
       columns: [
         { name: 'counter', align: 'left', label: 'ردیف', field: 'counter' },
-        { name: 'text', align: 'left', label: 'عنوان سوال', field: 'text' },
-        { name: 'score', align: 'left', label: 'امتیاز سوال', field: 'score' },
+        { name: 'text', align: 'left', label: 'عنوان پاسخ', field: 'text' },
+        { name: 'score', align: 'left', label: 'امتیاز پاسخ', field: 'score' },
         { name: 'edit', align: 'center', label: '', field: 'edit' },
         { name: 'delete', align: 'center', label: '', field: 'delete' }
       ],
@@ -311,7 +324,8 @@ export default defineComponent({
       search: '',
       answersOfSelectedQuestion: [],
       selectedAnswers: [],
-      allAnswers: []
+      allAnswers: [],
+      questionsForEditAnswer: []
     }
   },
   created () {
@@ -327,7 +341,7 @@ export default defineComponent({
   },
   methods: {
     getCurrentQuestion () {
-      axios.post(vars.api_base2 + '/Question/GetQuestion', {
+      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
         searchQuery: null,
         psychologyTestId: null,
         take: null,
@@ -343,7 +357,7 @@ export default defineComponent({
       })
     },
     getTest () {
-      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
+      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
         searchQuery: null,
         tag1: null,
         tag2: null,
@@ -359,16 +373,15 @@ export default defineComponent({
       })
     },
     getQuestions () {
-      axios.post(vars.api_base2 + '/Question/GetQuestion', {
+      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
         searchQuery: null,
         psychologyTestId: null,
         take: null,
         skip: null,
         isExportFile: true,
-        exportColumns: {}
       }).then(response => {
         this.questions = response.data.items.filter(question => {
-          return question.psychologytestid === this.selectedTest.id
+          return question.psychology_test_id === this.selectedTest.id
         })
         // console.log(this.questions)
       }).catch(error => {
@@ -376,7 +389,7 @@ export default defineComponent({
       })
 
       if (this.selectedTest.id) {
-        axios.post(vars.api_base2 + '/Answer/GetAnswersByPsychologyTestId', {
+        axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
           psychologyTestId: this.selectedTest.id
         }).then(response => {
           this.allAnswers = response.data.items
@@ -438,7 +451,7 @@ export default defineComponent({
           })
           // console.log(this.selectedAnswers)
           // console.log(answer)
-          axios.post(vars.api_base2 + '/Answer/CreateAnswer', {
+          axios.post(vars.api_base2 + '/FargoTest/Answer/CreateAnswer', {
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
             text: answer[0].text,
             score: answer[0].score
@@ -475,7 +488,7 @@ export default defineComponent({
         return true
       }
       if (this.answerTemplate === 2) {
-        axios.post(vars.api_base2 + '/Answer/CreateAnswer', {
+        axios.post(vars.api_base2 + '/FargoTest/Answer/CreateAnswer', {
           questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
           text: this.answerText,
           score: Number(this.score)
@@ -510,7 +523,7 @@ export default defineComponent({
         })
       } else if (this.answerTemplate === 1) {
         for (let i = 0; i < this.selectedPattern.value.value; i++) {
-          axios.post(vars.api_base2 + '/Answer/CreateAnswer', {
+          axios.post(vars.api_base2 + '/FargoTest/Answer/CreateAnswer', {
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
             text: this.selectedPattern.value.options[i].label,
             score: this.selectedPattern.value.options[i].score
@@ -550,7 +563,7 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/Answer/GetAnswer', {
+      axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
         searchQuery: null,
         questionId: null,
         take: this.qBody.take,
@@ -565,7 +578,7 @@ export default defineComponent({
           this.answers = response.data.items
         } else {
           this.answers = response.data.items.filter(answer => {
-            return answer.questionid === Number(this.$route.query.questionId)
+            return answer.question_id === Number(this.$route.query.questionId)
           })
         }
       }).catch(error => {
@@ -575,7 +588,7 @@ export default defineComponent({
       })
     },
     getQuestionOptions () {
-      axios.post(vars.api_base2 + '/Question/GetQuestion', {
+      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
         searchQuery: null,
         psychologyTestId: null,
         take: null,
@@ -603,7 +616,7 @@ export default defineComponent({
     },
     changeQuestion () {
       // console.log(this.selectQuestionToShow)
-      axios.post(vars.api_base2 + '/Answer/GetAnswer', {
+      axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
         searchQuery: null,
         questionId: null,
         take: null,
@@ -616,7 +629,7 @@ export default defineComponent({
           this.answers = response.data.items
         } else {
           this.answers = response.data.items.filter(answer => {
-            return answer.questionid === this.selectQuestionToShow.id
+            return answer.question_id === this.selectQuestionToShow.id
           })
         }
       })
@@ -638,11 +651,7 @@ export default defineComponent({
       }
     },
     deleteAnswer (answer) {
-      const payload = {
-        id: answer.id,
-        questionId: null
-      }
-      axios.delete(vars.api_base2 + '/Answer/DeleteAnswer', { data: payload }).then(response => {
+      axios.delete(vars.api_base2 + `/FargoTest/Answer/DeleteAnswer?id_=${answer.id}`).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -650,22 +659,28 @@ export default defineComponent({
           })
           this.getAnswers()
         } else {
-          this.$q.notify({
-            type: 'negative',
-            message: response.data.exceptions[0].persianDescription
-          })
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
-        this.$q.notify({
-          type: 'negative',
-          message: 'مشکلی پیش آمد.'
-        })
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     openEditDialog (answer) {
       this.editDialog = !this.editDialog
       this.selectedAnswerToEdit = answer
+      console.log(this.selectedAnswerToEdit)
+      this.getQuestionsForEdit()
     },
     editAnswer () {
       this.updateLoading = true
@@ -675,10 +690,11 @@ export default defineComponent({
           message: 'لطفا موارد ضروری را وارد نمایید.'
         })
       } else {
-        axios.put(vars.api_base2 + '/Answer/UpdateAnswer', {
+        axios.put(vars.api_base2 + '/FargoTest/Answer/UpdateAnswer', {
           id: this.selectedAnswerToEdit.id,
           text: this.selectedAnswerToEdit.text,
-          score: Number(this.selectedAnswerToEdit.score)
+          score: Number(this.selectedAnswerToEdit.score),
+          questionId: this.selectedAnswerToEdit.question_id
         }).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -689,24 +705,28 @@ export default defineComponent({
             this.editDialog = !this.editDialog
             this.updateLoading = false
           } else {
-            this.$q.notify({
-              type: 'negative',
-              message: response.data.exceptions[0].persianDescription
-            })
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
             this.updateLoading = false
           }
         }).catch(error => {
           console.log(error)
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
           this.updateLoading = false
         })
       }
     },
     getSearchItems () {
-      axios.post(vars.api_base2 + '/Answer/GetAnswer', {
+      axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
         searchQuery: this.search,
         questionId: null,
         take: null,
@@ -716,6 +736,16 @@ export default defineComponent({
         score: null
       }).then(response => {
         this.answers = response.data.items
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    getQuestionsForEdit() {
+      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
+        questionId: this.selectedAnswerToEdit.question_id
+      }).then(response => {
+        this.questionsForEditAnswer = response.data.items
+        console.log(this.questionsForEditAnswer)
       }).catch(error => {
         console.log(error)
       })

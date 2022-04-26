@@ -56,6 +56,18 @@ const linksList = [
     name: 'psychologyTests',
     children: [
       {
+        title: 'دسته\u200Cبندی\u200Cها',
+        icon: '',
+        link: '/category',
+        name: 'category'
+      },
+      {
+        title: 'تگ\u200Cها',
+        icon: '',
+        link: '/tags',
+        name: 'tags'
+      },
+      {
         title: 'تست\u200Cها',
         icon: 'quiz',
         link: '/tests',
