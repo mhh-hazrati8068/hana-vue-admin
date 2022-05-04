@@ -296,17 +296,32 @@ export default defineComponent({
         skip: this.qBody.skip,
         isExportFile: false,
       }).then(response => {
-        this.pagination.rowsNumber = response.data.count
-        this.pagination.page = reqProps?.pagination.page ?? 1
-        this.questions = response.data.items
-        if (this.testId !== null) {
-          this.questions = this.questions.filter(question => {
-            return question.psychology_test_id === this.testId
-          })
+        if (response.data.isSuccess) {
+          this.pagination.rowsNumber = response.data.count
+          this.pagination.page = reqProps?.pagination.page ?? 1
+          this.questions = response.data.items
+          if (this.testId !== null) {
+            this.questions = this.questions.filter(question => {
+              return question.psychology_test_id === this.testId
+            })
+          }
+          // console.log(this.questions)
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
-        // console.log(this.questions)
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       }).then(() => {
         this.loading = false
       })
@@ -319,21 +334,36 @@ export default defineComponent({
         skip: null,
         isExportFile: true,
       }).then(response => {
-        this.tests = response.data.items
-        // console.log(this.tests)
-        this.selectOptions = [{
-          id: 0,
-          text: 'همه'
-        }, ...response.data.items
-        ]
-        if (this.testId !== null) {
-          this.selectedTest.id = this.tests.find(test => test.id === this.testId).id
+        if (response.data.isSuccess) {
+          this.tests = response.data.items
+          // console.log(this.tests)
+          this.selectOptions = [{
+            id: 0,
+            text: 'همه'
+          }, ...response.data.items
+          ]
+          if (this.testId !== null) {
+            this.selectedTest.id = this.tests.find(test => test.id === this.testId).id
+          } else {
+            this.selectedTest.id = this.selectOptions.find(test => test.id === 0).id
+          }
+          // console.log(this.selectedTest)
         } else {
-          this.selectedTest.id = this.selectOptions.find(test => test.id === 0).id
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
-        // console.log(this.selectedTest)
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     setQuestion () {
@@ -356,18 +386,22 @@ export default defineComponent({
             this.isLoading = false
           } else {
             this.isLoading = false
-            this.$q.notify({
-              type: 'negative',
-              message: response.data.exceptions[0].persianDescription
-            })
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
           }
         }).catch(error => {
           console.log(error)
           this.isLoading = false
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
         })
       } else {
         this.$q.notify({
@@ -386,16 +420,31 @@ export default defineComponent({
         skip: null,
         isExportFile: true,
       }).then(response => {
-        if (this.selectedTest.id === 0) {
-          this.questions = response.data.items
+        if (response.data.isSuccess) {
+          if (this.selectedTest.id === 0) {
+            this.questions = response.data.items
+          } else {
+            this.questions = response.data.items.filter(question => {
+              return question.psychology_test_id === this.selectedTest.id
+            })
+          }
+          // console.log(this.questions)
         } else {
-          this.questions = response.data.items.filter(question => {
-            return question.psychology_test_id === this.selectedTest.id
-          })
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
-        // console.log(this.questions)
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     goToAnswers (questionId) {
@@ -486,9 +535,24 @@ export default defineComponent({
         psychologyTestId: null,
         isExportFile: false,
       }).then(response => {
-        this.questions = response.data.items
+        if (response.data.isSuccess) {
+          this.questions = response.data.items
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     openDetailDialog(question) {

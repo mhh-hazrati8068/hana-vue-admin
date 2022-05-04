@@ -485,16 +485,31 @@ export default defineComponent({
         skip: this.qBody.skip,
         isExportFile: false,
       }).then(response => {
-        this.pagination.rowsNumber = response.data.count
-        this.pagination.page = reqProps?.pagination.page ?? 1
-        this.tests = response.data.items
-        if (this.tagId !== null) {
-          this.tests = this.tests.filter(test => {
-            return test.tag_id === this.tagId
-          })
+        if (response.data.isSuccess) {
+          this.pagination.rowsNumber = response.data.count
+          this.pagination.page = reqProps?.pagination.page ?? 1
+          this.tests = response.data.items
+          if (this.tagId !== null) {
+            this.tests = this.tests.filter(test => {
+              return test.tag_id === this.tagId
+            })
+          }
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       }).then(() => {
         this.loading = false
       })
@@ -599,8 +614,23 @@ export default defineComponent({
         isExportFile: false,
         exportColumns: {}
       }).then(response => {
-        this.tests = response.data.items
+        if (response.data.isSuccess) {
+          this.tests = response.data.items
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
         console.log(error)
       })
     },
@@ -616,27 +646,42 @@ export default defineComponent({
         isExportFile: true,
         categoryId: null
       }).then(res => {
-        this.tags = res.data.items
-        for (let i = 0; i < this.tests.length; i++) {
-          for (let j = 0; j < this.tags.length; j++) {
-            if (this.tests[i].tag_id === this.tags[j].id) {
-              this.tests[i].tag = this.tags[j].text
+        if (res.data.isSuccess) {
+          this.tags = res.data.items
+          for (let i = 0; i < this.tests.length; i++) {
+            for (let j = 0; j < this.tags.length; j++) {
+              if (this.tests[i].tag_id === this.tags[j].id) {
+                this.tests[i].tag = this.tags[j].text
+              }
             }
           }
-        }
-        // console.log(this.tags)
-        this.selectOptions = [{
-          id: 0,
-          text: 'همه'
-        }, ...res.data.items
-        ]
-        if (this.tagId !== null) {
-          this.selectedTag.id = this.tags.find(tag => tag.id === this.tagId).id
+          // console.log(this.tags)
+          this.selectOptions = [{
+            id: 0,
+            text: 'همه'
+          }, ...res.data.items
+          ]
+          if (this.tagId !== null) {
+            this.selectedTag.id = this.tags.find(tag => tag.id === this.tagId).id
+          } else {
+            this.selectedTag.id = this.selectOptions.find(tag => tag.id === 0).id
+          }
         } else {
-          this.selectedTag.id = this.selectOptions.find(tag => tag.id === 0).id
+          for (let i = 0; i < res.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: res.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(err => {
         console.log(err)
+        for (let i = 0; i < err.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: err.response.data.exceptions[i].persianDescription
+          })
+        }
       }).then(() => {
         this.loading = false
       })
@@ -650,15 +695,30 @@ export default defineComponent({
         skip: null,
         isExportFile: true,
       }).then(response => {
-        if (this.selectedTag.id === 0) {
-          this.tests = response.data.items
+        if (response.data.isSuccess) {
+          if (this.selectedTag.id === 0) {
+            this.tests = response.data.items
+          } else {
+            this.tests = response.data.items.filter(tag => {
+              return tag.tag_id === this.selectedTag.id
+            })
+          }
         } else {
-          this.tests = response.data.items.filter(tag => {
-            return tag.tag_id === this.selectedTag.id
-          })
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     }
   }

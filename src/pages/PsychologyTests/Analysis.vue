@@ -448,15 +448,30 @@ export default defineComponent({
         skip: null,
         isExportFile: true,
       }).then(response => {
-        this.testOptions = [{
-          id: 0,
-          text: 'همه'
-        }, ...response.data.items]
-        this.tests = response.data.items
-        // console.log(this.tests)
-        this.selectedTest.id = this.testOptions.find(test => test.id === 0).id
+        if (response.data.isSuccess) {
+          this.testOptions = [{
+            id: 0,
+            text: 'همه'
+          }, ...response.data.items]
+          this.tests = response.data.items
+          // console.log(this.tests)
+          this.selectedTest.id = this.testOptions.find(test => test.id === 0).id
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     getAnalyses (reqProps) {
@@ -471,11 +486,26 @@ export default defineComponent({
         skip: this.qBody.skip,
         isExportFile: false
       }).then(response => {
-        this.pagination.rowsNumber = response.data.count
-        this.pagination.page = reqProps?.pagination.page ?? 1
-        this.analyses = response.data.items
+        if (response.data.isSuccess) {
+          this.pagination.rowsNumber = response.data.count
+          this.pagination.page = reqProps?.pagination.page ?? 1
+          this.analyses = response.data.items
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       }).then(() => {
         this.loading = false
       })
@@ -488,15 +518,30 @@ export default defineComponent({
         skip: this.qBody.skip,
         isExportFile: true
       }).then(response => {
-        if (this.selectedTest.id === 0) {
-          this.analyses = response.data.items
+        if (response.data.isSuccess) {
+          if (this.selectedTest.id === 0) {
+            this.analyses = response.data.items
+          } else {
+            this.analyses = response.data.items.filter(analysis => {
+              return analysis.psychology_test_id === this.selectedTest.id
+            })
+          }
         } else {
-          this.analyses = response.data.items.filter(analysis => {
-            return analysis.psychology_test_id === this.selectedTest.id
-          })
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     setAnalysis ()  {
@@ -542,18 +587,22 @@ export default defineComponent({
             this.isLoading = false
           } else {
             this.isLoading = false
-            this.$q.notify({
-              type: 'negative',
-              message: response.data.exceptions[0].persianDescription
-            })
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
           }
         }).catch(error => {
           console.log(error)
           this.isLoading = false
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
         })
       }
     },
@@ -605,18 +654,22 @@ export default defineComponent({
             this.updateLoading = false
           } else {
             this.updateLoading = false
-            this.$q.notify({
-              type: 'negative',
-              message: response.data.exceptions[0].persianDescription
-            })
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
           }
         }).catch(error => {
           console.log(error)
           this.updateLoading = false
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
         })
       }
     },
@@ -629,17 +682,21 @@ export default defineComponent({
           })
           this.getAnalyses()
         } else {
-          this.$q.notify({
-            type: 'negative',
-            message: response.data.exceptions[0].persianDescription
-          })
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
-        this.$q.notify({
-          type: 'negative',
-          message: 'مشکلی پیش آمد.'
-        })
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     getSearchItems () {
@@ -650,9 +707,24 @@ export default defineComponent({
         skip: null,
         isExportFile: true
       }).then(response => {
-        this.analyses = response.data.items
+        if (response.data.isSuccess) {
+          this.analyses = response.data.items
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     openDetailDialog(analysis) {
@@ -668,15 +740,30 @@ export default defineComponent({
     },
     getSpecialties() {
       axios.get(vars.api_base2 + '/FargoTest/GetSpecialty').then(res => {
-        for (const key in res.data.items) {
-          this.specialties.push({
-            value: Number(key),
-            label: res.data.items[key]
-          })
+        if (res.data.isSuccess) {
+          for (const key in res.data.items) {
+            this.specialties.push({
+              value: Number(key),
+              label: res.data.items[key]
+            })
+          }
+          // console.log(this.specialties)
+        } else {
+          for (let i = 0; i < res.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: res.data.exceptions[i].persianDescription
+            })
+          }
         }
-        // console.log(this.specialties)
       }).catch(err => {
         console.log(err)
+        for (let i = 0; i < err.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: err.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     }
   }

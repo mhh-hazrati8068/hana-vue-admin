@@ -279,11 +279,27 @@ export default defineComponent({
         skip: this.qBody.skip,
         isExportFile: false
       }).then(res => {
-        this.pagination.rowsNumber = res.data.count
-        this.pagination.page = reqProps?.pagination.page ?? 1
-        this.categories = res.data.items
+        if (res.data.isSuccess) {
+          this.pagination.rowsNumber = res.data.count
+          this.pagination.page = reqProps?.pagination.page ?? 1
+          this.categories = res.data.items
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+          this.loading = false
+        }
       }).catch(err => {
         console.log(err)
+        for (let i = 0; i < err.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: err.response.data.exceptions[i].persianDescription
+          })
+        }
       }).then(() => {
         this.loading = false
       })
@@ -326,10 +342,12 @@ export default defineComponent({
         }).catch(err => {
           console.log(err)
           this.isLoading = false
-          this.$q.notify({
-            type: 'positive',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < err.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: err.response.data.exceptions[i].persianDescription
+            })
+          }
         })
       }
     },
@@ -400,10 +418,12 @@ export default defineComponent({
           }
         }).catch(err => {
           console.log(err)
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < err.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: err.response.data.exceptions[i].persianDescription
+            })
+          }
           this.isUpdating = false
         })
       }

@@ -399,10 +399,25 @@ export default defineComponent({
         isExportFile: true,
         exportColumns: {}
       }).then(response => {
-        this.tests = response.data.items
-        // console.log(this.tests)
+        if (response.data.isSuccess) {
+          this.tests = response.data.items
+          // console.log(this.tests)
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     getQuestions () {
@@ -413,27 +428,57 @@ export default defineComponent({
         skip: null,
         isExportFile: true,
       }).then(response => {
-        this.questions = response.data.items.filter(question => {
-          return question.psychology_test_id === this.selectedTest.id
-        })
-        // console.log(this.questions)
+        if (response.data.isSuccess) {
+          this.questions = response.data.items.filter(question => {
+            return question.psychology_test_id === this.selectedTest.id
+          })
+          // console.log(this.questions)
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
 
       if (this.selectedTest.id) {
         axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
           psychologyTestId: this.selectedTest.id
         }).then(response => {
-          this.allAnswers = response.data.items
-          this.answersOfSelectedQuestion = response.data.items
-          // console.log(this.answersOfSelectedQuestion)
-          for (let i = 0; i < this.answersOfSelectedQuestion.length; i++) {
-            this.answersOfSelectedQuestion[i].label = this.answersOfSelectedQuestion[i].text
-            this.answersOfSelectedQuestion[i].value = this.answersOfSelectedQuestion[i].id
+          if (response.data.isSuccess) {
+            this.allAnswers = response.data.items
+            this.answersOfSelectedQuestion = response.data.items
+            // console.log(this.answersOfSelectedQuestion)
+            for (let i = 0; i < this.answersOfSelectedQuestion.length; i++) {
+              this.answersOfSelectedQuestion[i].label = this.answersOfSelectedQuestion[i].text
+              this.answersOfSelectedQuestion[i].value = this.answersOfSelectedQuestion[i].id
+            }
+          } else {
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
           }
         }).catch(error => {
           console.log(error)
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
         })
       }
     },
@@ -504,18 +549,22 @@ export default defineComponent({
               this.isLoading = false
             } else {
               this.isLoading = false
-              this.$q.notify({
-                type: 'negative',
-                message: response.data.exceptions[0].persianDescription
-              })
+              for (let i = 0; i < response.data.exceptions.length; i++) {
+                this.$q.notify({
+                  type: 'negative',
+                  message: response.data.exceptions[i].persianDescription
+                })
+              }
             }
           }).catch(error => {
             console.log(error)
             this.isLoading = false
-            this.$q.notify({
-              type: 'negative',
-              message: 'مشکلی پیش آمد.'
-            })
+            for (let i = 0; i < error.response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: error.response.data.exceptions[i].persianDescription
+              })
+            }
           })
         }
         return true
@@ -541,18 +590,22 @@ export default defineComponent({
             this.isLoading = false
           } else {
             this.isLoading = false
-            this.$q.notify({
-              type: 'negative',
-              message: response.data.exceptions[0].persianDescription
-            })
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
           }
         }).catch(error => {
           console.log(error)
           this.isLoading = false
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
         })
       } else if (this.answerTemplate === 1) {
         for (let i = 0; i < this.selectedPattern.value.value; i++) {
@@ -575,18 +628,22 @@ export default defineComponent({
               this.isLoading = false
             } else {
               this.isLoading = false
-              this.$q.notify({
-                type: 'negative',
-                message: response.data.exceptions[0].persianDescription
-              })
+              for (let i = 0; i < response.data.exceptions.length; i++) {
+                this.$q.notify({
+                  type: 'negative',
+                  message: response.data.exceptions[i].persianDescription
+                })
+              }
             }
           }).catch(error => {
             console.log(error)
             this.isLoading = false
-            this.$q.notify({
-              type: 'negative',
-              message: 'مشکلی پیش آمد.'
-            })
+            for (let i = 0; i < error.response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: error.response.data.exceptions[i].persianDescription
+              })
+            }
           })
         }
       }
@@ -605,21 +662,36 @@ export default defineComponent({
         exportColumns: {},
         score: null
       }).then(response => {
-        this.pagination.rowsNumber = response.data.count
-        this.pagination.page = reqProps?.pagination.page ?? 1
-        if (!this.questionId || this.selectQuestionToShow.id === 0) {
-          this.answers = response.data.items
-        } else if (this.questionId) {
-          this.answers = response.data.items.filter(answer => {
-            return answer.question_id === Number(this.$route.query.questionId)
-          })
-        } else if (this.selectQuestionToShow.id !== 0) {
-          this.answers = response.data.items.filter(answer => {
-            return answer.question_id === this.selectQuestionToShow.id
-          })
+        if (response.data.isSuccess) {
+          this.pagination.rowsNumber = response.data.count
+          this.pagination.page = reqProps?.pagination.page ?? 1
+          if (!this.questionId || this.selectQuestionToShow.id === 0) {
+            this.answers = response.data.items
+          } else if (this.questionId) {
+            this.answers = response.data.items.filter(answer => {
+              return answer.question_id === Number(this.$route.query.questionId)
+            })
+          } else if (this.selectQuestionToShow.id !== 0) {
+            this.answers = response.data.items.filter(answer => {
+              return answer.question_id === this.selectQuestionToShow.id
+            })
+          }
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       }).then(() => {
         this.loading = false
       })
@@ -633,22 +705,37 @@ export default defineComponent({
         isExportFile: true,
         exportColumns: {}
       }).then(response => {
-        this.questionOptions = [{
-          id: 0,
-          text: 'همه'
-        }, ...response.data.items
-        ]
-        if (this.$route.query.questionId) {
-          this.selectQuestionToShow.id = this.questionOptions.find(question => {
-            return question.id === Number(this.$route.query.questionId)
-          })
+        if (response.data.isSuccess) {
+          this.questionOptions = [{
+            id: 0,
+            text: 'همه'
+          }, ...response.data.items
+          ]
+          if (this.$route.query.questionId) {
+            this.selectQuestionToShow.id = this.questionOptions.find(question => {
+              return question.id === Number(this.$route.query.questionId)
+            })
+          } else {
+            this.selectQuestionToShow.id = this.questionOptions.find(question => {
+              return question.id === 0
+            })
+          }
         } else {
-          this.selectQuestionToShow.id = this.questionOptions.find(question => {
-            return question.id === 0
-          })
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
         }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     changeAnswers () {
@@ -661,11 +748,28 @@ export default defineComponent({
         isExportFile: true,
         score: null
       }).then(response => {
-        if (this.selectQuestionToShow.id === 0) {
-          this.answers = response.data.items
+        if (response.data.isSuccess) {
+          if (this.selectQuestionToShow.id === 0) {
+            this.answers = response.data.items
+          } else {
+            this.answers = response.data.items.filter(answer => {
+              return answer.question_id === this.selectQuestionToShow.id
+            })
+          }
         } else {
-          this.answers = response.data.items.filter(answer => {
-            return answer.question_id === this.selectQuestionToShow.id
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
+      }).catch(err => {
+        console.log(err)
+        for (let i = 0; i < err.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: err.response.data.exceptions[i].persianDescription
           })
         }
       })
@@ -771,9 +875,24 @@ export default defineComponent({
         exportColumns: {},
         score: null
       }).then(response => {
-        this.answers = response.data.items
+        if (response.data.isSuccess) {
+          this.answers = response.data.items
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     getQuestionsForEdit() {
@@ -784,10 +903,25 @@ export default defineComponent({
         skip: null,
         isExportFile: true
       }).then(response => {
-        this.questionsForEditAnswer = response.data.items
-        // console.log(this.questionsForEditAnswer)
+        if (response.data.isSuccess) {
+          this.questionsForEditAnswer = response.data.items
+          // console.log(this.questionsForEditAnswer)
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     openDetailDialog(answer) {
@@ -801,11 +935,26 @@ export default defineComponent({
         skip: null,
         isExportFile: true
       }).then(response => {
-        this.selectedAnswerToShow.question = response.data.items.filter(question => {
-          return question.id === this.selectedAnswerToShow.question_id
-        })[0].text
+        if (response.data.isSuccess) {
+          this.selectedAnswerToShow.question = response.data.items.filter(question => {
+            return question.id === this.selectedAnswerToShow.question_id
+          })[0].text
+        } else {
+          for (let i = 0; i < response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: response.data.exceptions[i].persianDescription
+            })
+          }
+        }
       }).catch(error => {
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     }
   }
