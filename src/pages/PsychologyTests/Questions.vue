@@ -14,7 +14,7 @@
     </q-input>
     <div class="row">
       <div class="col-12">
-        <div class="flex justify-between" style="align-items: center">
+        <div class="flex justify-between" style="align-items: center; margin-top: 2rem">
           <span class="title">سوال&zwnj;های موجود</span>
           <q-select
             dense
@@ -54,10 +54,28 @@
                 >
                   <span
                     :class="{ 'row-numbers': col.field === 'counter' }"
-                    @click="goToAnswers(props.row.id)"
                   >
                     {{ col.value }}
                   </span>
+                  <q-btn
+                    v-if="col.field === 'answersBtn'"
+                    unelevated
+                    dense
+                    label="مشاهده پاسخ&zwnj;ها"
+                    class="text-primary"
+                    style="font-size: .75rem"
+                    @click="goToAnswers(props.row.id)"
+                  />
+                  <q-btn
+                    v-if="col.field === 'detail'"
+                    unelevated
+                    dense
+                    round
+                    icon="visibility"
+                    class="detail-btn"
+                    title="جزئیات"
+                    @click="openDetailDialog(props.row)"
+                  />
                   <q-btn
                     v-if="col.field === 'edit'"
                     unelevated
@@ -193,6 +211,23 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="detailDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">جزئیات سوال</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="q-my-lg">
+          متن: {{ selectedQuestionToShow.text }}
+        </div>
+        <div class="q-my-lg">
+          تست: {{ selectedQuestionToShow.test }}
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -218,7 +253,9 @@ export default defineComponent({
       },
       columns: [
         { name: 'counter', align: 'left', label: 'ردیف', field: 'counter' },
-        { name: 'text', align: 'left', label: 'عنوان سوال', field: 'text' },
+        { name: 'text', align: 'left', label: 'متن سوال', field: 'text' },
+        { name: 'answersBtn', align: 'center', label: '', field: 'answersBtn' },
+        { name: 'detail', align: 'center', label: '', field: 'detail'},
         { name: 'edit', align: 'center', label: '', field: 'edit' },
         { name: 'delete', align: 'center', label: '', field: 'delete' }
       ],
@@ -234,7 +271,9 @@ export default defineComponent({
       },
       isLoading: false,
       updateLoading: false,
-      search: ''
+      search: '',
+      detailDialog: false,
+      selectedQuestionToShow: {}
     }
   },
   created () {
@@ -451,6 +490,14 @@ export default defineComponent({
       }).catch(error => {
         console.log(error)
       })
+    },
+    openDetailDialog(question) {
+      this.detailDialog = !this.detailDialog
+      this.selectedQuestionToShow = question
+      this.selectedQuestionToShow.test = this.tests.filter(test => {
+        return test.id === this.selectedQuestionToShow.psychology_test_id
+      })[0].text
+      // console.log(this.selectedQuestionToShow)
     }
   }
 })

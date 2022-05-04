@@ -14,7 +14,7 @@
     </q-input>
     <div class="row">
       <div class="col-12">
-        <div class="flex justify-between" style="align-items: center">
+        <div class="flex justify-between" style="align-items: center; margin-top: 2rem">
           <span class="title">پاسخ&zwnj;های موجود</span>
           <q-select
             dense
@@ -28,7 +28,7 @@
             map-options
             class="q-ml-md"
             style="min-width: 150px"
-            @update:model-value="changeQuestion"
+            @update:model-value="changeAnswers"
           />
         </div>
       </div>
@@ -57,6 +57,16 @@
                   >
                     {{ col.value }}
                   </span>
+                  <q-btn
+                    v-if="col.field === 'detail'"
+                    unelevated
+                    dense
+                    round
+                    icon="visibility"
+                    class="detail-btn"
+                    title="جزئیات"
+                    @click="openDetailDialog(props.row)"
+                  />
                   <q-btn
                     v-if="col.field === 'edit'"
                     unelevated
@@ -264,6 +274,26 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="detailDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">جزئیات پاسخ</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="q-my-lg">
+          متن: {{ selectedAnswerToShow.text }}
+        </div>
+        <div class="q-my-lg">
+          امتیاز: {{ selectedAnswerToShow.score }}
+        </div>
+        <div class="q-my-lg">
+          سوال: {{ selectedAnswerToShow.question }}
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -298,8 +328,9 @@ export default defineComponent({
       answers: [],
       columns: [
         { name: 'counter', align: 'left', label: 'ردیف', field: 'counter' },
-        { name: 'text', align: 'left', label: 'عنوان پاسخ', field: 'text' },
-        { name: 'score', align: 'left', label: 'امتیاز پاسخ', field: 'score' },
+        { name: 'text', align: 'left', label: 'متن پاسخ', field: 'text' },
+        { name: 'score', align: 'left', label: 'امتیاز', field: 'score' },
+        { name: 'detail', align: 'center', label: '', field: 'detail'},
         { name: 'edit', align: 'center', label: '', field: 'edit' },
         { name: 'delete', align: 'center', label: '', field: 'delete' }
       ],
@@ -325,7 +356,9 @@ export default defineComponent({
       answersOfSelectedQuestion: [],
       selectedAnswers: [],
       allAnswers: [],
-      questionsForEditAnswer: []
+      questionsForEditAnswer: [],
+      detailDialog: false,
+      selectedAnswerToShow: {}
     }
   },
   created () {
@@ -394,7 +427,7 @@ export default defineComponent({
         }).then(response => {
           this.allAnswers = response.data.items
           this.answersOfSelectedQuestion = response.data.items
-          console.log(this.answersOfSelectedQuestion)
+          // console.log(this.answersOfSelectedQuestion)
           for (let i = 0; i < this.answersOfSelectedQuestion.length; i++) {
             this.answersOfSelectedQuestion[i].label = this.answersOfSelectedQuestion[i].text
             this.answersOfSelectedQuestion[i].value = this.answersOfSelectedQuestion[i].id
@@ -416,8 +449,8 @@ export default defineComponent({
           return false
         }
       }
-      if (this.answerTemplate === 0 || (this.answerTemplate === 1 &&
-        Object.keys(this.selectedPattern).length === 0)) {
+      if ((this.answerTemplate === 0 || (this.answerTemplate === 1 &&
+        Object.keys(this.selectedPattern).length === 0)) && this.selectedAnswers.length === 0) {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا الگوی پاسخ را انتخاب کنید.'
@@ -425,7 +458,7 @@ export default defineComponent({
         this.isLoading = false
         return false
       }
-      if (this.answerTemplate === 2 && this.answerText === '') {
+      if ((this.answerTemplate === 2 && this.answerText === '') && this.selectedAnswers.length === 0) {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا متن پاسخ را وارد کنید.'
@@ -433,7 +466,7 @@ export default defineComponent({
         this.isLoading = false
         return false
       }
-      if (this.answerTemplate === 2 && this.score === null) {
+      if ((this.answerTemplate === 2 && this.score === null) && this.selectedAnswers.length === 0) {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا امتیاز پاسخ را وارد کنید.'
@@ -574,11 +607,15 @@ export default defineComponent({
       }).then(response => {
         this.pagination.rowsNumber = response.data.count
         this.pagination.page = reqProps?.pagination.page ?? 1
-        if (!this.questionId) {
+        if (!this.questionId || this.selectQuestionToShow.id === 0) {
           this.answers = response.data.items
-        } else {
+        } else if (this.questionId) {
           this.answers = response.data.items.filter(answer => {
             return answer.question_id === Number(this.$route.query.questionId)
+          })
+        } else if (this.selectQuestionToShow.id !== 0) {
+          this.answers = response.data.items.filter(answer => {
+            return answer.question_id === this.selectQuestionToShow.id
           })
         }
       }).catch(error => {
@@ -614,15 +651,14 @@ export default defineComponent({
         console.log(error)
       })
     },
-    changeQuestion () {
+    changeAnswers () {
       // console.log(this.selectQuestionToShow)
       axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
         searchQuery: null,
         questionId: null,
         take: null,
         skip: null,
-        isExportFile: false,
-        exportColumns: {},
+        isExportFile: true,
         score: null
       }).then(response => {
         if (this.selectQuestionToShow.id === 0) {
@@ -679,7 +715,7 @@ export default defineComponent({
     openEditDialog (answer) {
       this.editDialog = !this.editDialog
       this.selectedAnswerToEdit = answer
-      console.log(this.selectedAnswerToEdit)
+      // console.log(this.selectedAnswerToEdit)
       this.getQuestionsForEdit()
     },
     editAnswer () {
@@ -742,10 +778,32 @@ export default defineComponent({
     },
     getQuestionsForEdit() {
       axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        questionId: this.selectedAnswerToEdit.question_id
+        psychologyTestId: null,
+        searchQuery: null,
+        take: null,
+        skip: null,
+        isExportFile: true
       }).then(response => {
         this.questionsForEditAnswer = response.data.items
-        console.log(this.questionsForEditAnswer)
+        // console.log(this.questionsForEditAnswer)
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    openDetailDialog(answer) {
+      this.detailDialog = !this.detailDialog
+      this.selectedAnswerToShow = answer
+      // console.log(this.selectedAnswerToShow)
+      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
+        psychologyTestId: null,
+        searchQuery: null,
+        take: null,
+        skip: null,
+        isExportFile: true
+      }).then(response => {
+        this.selectedAnswerToShow.question = response.data.items.filter(question => {
+          return question.id === this.selectedAnswerToShow.question_id
+        })[0].text
       }).catch(error => {
         console.log(error)
       })

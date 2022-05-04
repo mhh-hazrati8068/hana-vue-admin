@@ -45,6 +45,15 @@
                     {{ col.value }}
               </span>
               <q-btn
+                v-if="col.field === 'tagsBtn'"
+                unelevated
+                dense
+                label="مشاهده تگ&zwnj;ها"
+                class="text-primary"
+                style="font-size: .75rem"
+                @click="goToTags(props.row.id)"
+              />
+              <q-btn
                 v-if="col.field === 'edit'"
                 unelevated
                 dense
@@ -231,8 +240,9 @@ export default defineComponent({
         { name: 'title', align: 'center', label: 'عنوان', field: 'text' },
         { name: 'color', align: 'center', label: 'رنگ', field: 'main_color' },
         { name: 'image', align: 'center', label: 'تصویر', field: 'img' },
+        { name: 'tagsBtn', align: 'center', label: '', field: 'tagsBtn' },
         { name: 'edit', align: 'center', label: '', field: 'edit' },
-        { name: 'delete', align: 'center', label: '', field: 'delete' }
+        { name: 'delete', align: 'center', label: '', field: 'delete' },
       ],
       pagination: {
         page: 1,
@@ -401,6 +411,12 @@ export default defineComponent({
     rgbToHex(a){
       a = a.replace(/[^\d,]/g,"").split(",");
       return"#"+((1<<24)+(+a[0]<<16)+(+a[1]<<8)+ +a[2]).toString(16).slice(1)
+    },
+    goToTags(categoryId) {
+      this.$router.push({
+        name: 'tags',
+        query: { categoryId }
+      })
     }
   },
   created() {

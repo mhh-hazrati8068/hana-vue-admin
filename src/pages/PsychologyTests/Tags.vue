@@ -11,8 +11,22 @@
         <q-icon name="search" />
       </template>
     </q-input>
-    <div class="title">
+    <div class="title flex justify-between" style="align-items: center">
       <span>تگ&zwnj;های موجود</span>
+      <q-select
+        dense
+        outlined
+        v-model="selectedCategory.id"
+        :options="selectOptions"
+        :option-value="'id'"
+        :option-label="'text'"
+        label="انتخاب دسته&zwnj;بندی"
+        emit-value
+        map-options
+        class="q-ml-md"
+        style="min-width: 150px"
+        @update:model-value="changeTag"
+      />
     </div>
     <div class="tags-wrapper">
       <q-table
@@ -44,6 +58,15 @@
               >
                     {{ col.value }}
               </span>
+              <q-btn
+                v-if="col.field === 'testsBtn'"
+                unelevated
+                dense
+                label="مشاهده تست&zwnj;ها"
+                class="text-primary"
+                style="font-size: .75rem"
+                @click="goToTests(props.row.id)"
+              />
               <q-btn
                 v-if="col.field === 'edit'"
                 unelevated
@@ -223,6 +246,7 @@ export default defineComponent({
         { name: 'text', align: 'center', label: 'عنوان', field: 'text' },
         { name: 'categoryLabel', align: 'center', label: 'دسته\u200Cبندی', field: 'categoryLabel' },
         { name: 'img', align: 'center', label: 'تصویر', field: 'img' },
+        { name: 'testsBtn', align: 'center', label: '', field: 'testsBtn' },
         { name: 'edit', align: 'center', label: '', field: 'edit' },
         { name: 'delete', align: 'center', label: '', field: 'delete' }
       ],
@@ -246,7 +270,10 @@ export default defineComponent({
       isLoading: false,
       editDialog: false,
       selectedTagToEdit: {},
-      isUpdating: false
+      isUpdating: false,
+      selectedCategory: {},
+      selectOptions: [],
+      categoryId: null
     }
   },
   methods: {
@@ -258,6 +285,16 @@ export default defineComponent({
         isExportFile: true
       }).then(res => {
         this.categories = res.data.items
+        this.selectOptions = [{
+          id: 0,
+          text: 'همه'
+        }, ...res.data.items
+        ]
+        if (this.categoryId !== null) {
+          this.selectedCategory.id = this.categories.find(category => category.id === this.categoryId).id
+        } else {
+          this.selectedCategory.id = this.selectOptions.find(category => category.id === 0).id
+        }
       }).catch(err => {
         console.log(err)
       })
@@ -283,6 +320,11 @@ export default defineComponent({
               this.tags[i].categoryLabel = this.categories[j].text
             }
           }
+        }
+        if (this.categoryId !== null) {
+          this.tags = this.tags.filter(tag => {
+            return tag.category_id === this.categoryId
+          })
         }
       }).catch(err => {
         console.log(err)
@@ -403,9 +445,38 @@ export default defineComponent({
           this.isUpdating = false
         })
       }
+    },
+    changeTag() {
+      axios.post(vars.api_base2 + '/FargoTest/Tag/GetTag', {
+        searchQuery: null,
+        // categoryId: this.selectedCategory.id !== 0 ? this.selectedCategory.id : null,
+        categoryId: null,
+        take: null,
+        skip: null,
+        isExportFile: true,
+      }).then(response => {
+        if (this.selectedCategory.id === 0) {
+          this.tags = response.data.items
+        } else {
+          this.tags = response.data.items.filter(tag => {
+            return tag.category_id === this.selectedCategory.id
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+      })
+    },
+    goToTests(tagId) {
+      this.$router.push({
+        name: 'tests',
+        query: { tagId }
+      })
     }
   },
   created() {
+    if (this.$route.query.categoryId) {
+      this.categoryId = Number(this.$route.query.categoryId)
+    }
     this.getCategories()
     this.getTags()
   }

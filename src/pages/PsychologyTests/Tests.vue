@@ -14,7 +14,23 @@
     </q-input>
     <div class="row">
       <div class="col-12">
-        <span class="title">تست&zwnj;های موجود</span>
+        <div class="title flex justify-between" style="align-items: center">
+          <span>تست&zwnj;های موجود</span>
+          <q-select
+            dense
+            outlined
+            v-model="selectedTag.id"
+            :options="selectOptions"
+            :option-value="'id'"
+            :option-label="'text'"
+            label="انتخاب تگ"
+            emit-value
+            map-options
+            class="q-ml-md"
+            style="min-width: 150px"
+            @update:model-value="changeTests"
+          />
+        </div>
       </div>
       <div class="col-12">
         <div class="tests-wrapper">
@@ -45,10 +61,18 @@
                   <span
                     v-else
                     :class="{ 'row-numbers': col.field === 'counter' }"
-                    @click="goToQuestions(props.row.id)"
                   >
                     {{ col.value }}
                   </span>
+                  <q-btn
+                    v-if="col.field === 'questionsBtn'"
+                    unelevated
+                    dense
+                    label="مشاهده سوال&zwnj;ها"
+                    class="text-primary"
+                    style="font-size: .75rem"
+                    @click="goToQuestions(props.row.id)"
+                  />
                   <q-btn
                     v-if="col.field === 'detail'"
                     unelevated
@@ -96,14 +120,38 @@
       </div>
     </div>
   </div>
-  <q-dialog v-model="showDescription">
+  <q-dialog v-model="detailDialog">
     <q-card>
       <q-card-section class="row items-center">
-        <div style="font-size: 1.1rem; margin-left: 2rem">توضیحات تست</div>
+        <div style="font-size: 1.1rem; margin-left: 2rem">جزئیات تست</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
-      <q-card-section>{{ descriptionText }}</q-card-section>
+      <q-card-section>
+        <div class="q-my-lg">
+          عنوان: {{ selectedTestToShow.text }}
+        </div>
+        <div class="q-my-lg">
+          تگ: {{ selectedTestToShow.tag }}
+        </div>
+        <div class="q-my-lg">
+          توضیحات: {{ selectedTestToShow.description }}
+        </div>
+        <div class="q-my-lg flex" style="align-items: center">
+          <div>
+            <span>پولی</span>
+            <q-icon name="check_circle" color="green" style="font-size: 1.25rem; margin-right: .5rem;" v-if="selectedTestToShow.being_monetary"/>
+            <q-icon name="cancel" color="red" style="font-size: 1.25rem; margin-right: .5rem;" v-else/>
+          </div>
+          <div class="q-ml-lg" v-if="selectedTestToShow.being_monetary">
+            قیمت: {{ toCurrency(selectedTestToShow.cost) }} تومان
+          </div>
+        </div>
+        <div class="q-my-lg flex column">
+          <span>تصویر:</span>
+          <img :src="selectedTestToShow.img" class="q-mt-md">
+        </div>
+      </q-card-section>
     </q-card>
   </q-dialog>
   <q-dialog v-model="editDialog">
@@ -314,9 +362,11 @@
 import { defineComponent } from 'vue'
 import vars from '../../vars'
 import * as axios from 'axios'
+import {moneyMixin} from "boot/money";
 
 export default defineComponent({
   name: 'Tests',
+  mixins: [moneyMixin],
   data () {
     return {
       tests: [],
@@ -334,6 +384,7 @@ export default defineComponent({
         // { name: 'description', align: 'center', label: 'توضیحات', field: 'description' },
         { name: 'tag', align: 'center', label: 'تگ تست', field: 'tag' },
         // { name: 'img', align: 'center', label: 'تصویر تست', field: 'img' },
+        { name: 'questionsBtn', align: 'center', label: '', field: 'questionsBtn' },
         { name: 'detail', align: 'center', label: '', field: 'detail'},
         { name: 'edit', align: 'center', label: '', field: 'edit' },
         { name: 'delete', align: 'center', label: '', field: 'delete' }
@@ -343,7 +394,7 @@ export default defineComponent({
         rowsPerPage: 20,
         rowsNumber: 0
       },
-      showDescription: false,
+      detailDialog: false,
       descriptionText: '',
       editDialog: false,
       selectedTestToEdit: {},
@@ -359,12 +410,19 @@ export default defineComponent({
       isLoading: false,
       updateLoading: false,
       search: '',
-      tags: []
+      tags: [],
+      selectedTag: {},
+      selectOptions: [],
+      tagId: null,
+      selectedTestToShow: {}
     }
   },
   created () {
-    this.getTest()
+    if (this.$route.query.tagId) {
+      this.tagId = Number(this.$route.query.tagId)
+    }
     this.getTags()
+    this.getTest()
   },
   methods: {
     setTest () {
@@ -430,6 +488,11 @@ export default defineComponent({
         this.pagination.rowsNumber = response.data.count
         this.pagination.page = reqProps?.pagination.page ?? 1
         this.tests = response.data.items
+        if (this.tagId !== null) {
+          this.tests = this.tests.filter(test => {
+            return test.tag_id === this.tagId
+          })
+        }
       }).catch(error => {
         console.log(error)
       }).then(() => {
@@ -541,7 +604,10 @@ export default defineComponent({
         console.log(error)
       })
     },
-    openDetailDialog(test) {},
+    openDetailDialog(test) {
+      this.detailDialog = !this.detailDialog
+      this.selectedTestToShow = test
+    },
     getTags() {
       axios.post(vars.api_base2 + '/FargoTest/Tag/GetTag', {
         searchQuery: null,
@@ -558,13 +624,43 @@ export default defineComponent({
             }
           }
         }
-        // console.log(this.tests)
+        // console.log(this.tags)
+        this.selectOptions = [{
+          id: 0,
+          text: 'همه'
+        }, ...res.data.items
+        ]
+        if (this.tagId !== null) {
+          this.selectedTag.id = this.tags.find(tag => tag.id === this.tagId).id
+        } else {
+          this.selectedTag.id = this.selectOptions.find(tag => tag.id === 0).id
+        }
       }).catch(err => {
         console.log(err)
       }).then(() => {
         this.loading = false
       })
     },
+    changeTests() {
+      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
+        searchQuery: null,
+        // categoryId: this.selectedCategory.id !== 0 ? this.selectedCategory.id : null,
+        categoryId: null,
+        take: null,
+        skip: null,
+        isExportFile: true,
+      }).then(response => {
+        if (this.selectedTag.id === 0) {
+          this.tests = response.data.items
+        } else {
+          this.tests = response.data.items.filter(tag => {
+            return tag.tag_id === this.selectedTag.id
+          })
+        }
+      }).catch(error => {
+        console.log(error)
+      })
+    }
   }
 })
 </script>
@@ -578,7 +674,7 @@ export default defineComponent({
   overflow: hidden;
   .title {
     font-size: 1.1rem;
-    display: inline-block;
+    margin-top: 2rem;
   }
   .create-test-container {
     margin-top: 2rem;

@@ -14,7 +14,7 @@
     </q-input>
     <div class="row">
       <div class="col-12">
-        <div class="flex justify-between">
+        <div class="flex justify-between" style="align-items: center; margin-top: 2rem">
           <span class="title">تحلیل&zwnj;های موجود</span>
           <q-select
             dense
@@ -55,6 +55,16 @@
                   >
                     {{ col.value }}
                   </span>
+                  <q-btn
+                    v-if="col.field === 'detail'"
+                    unelevated
+                    dense
+                    round
+                    icon="visibility"
+                    class="detail-btn"
+                    title="جزئیات"
+                    @click="openDetailDialog(props.row)"
+                  />
                   <q-btn
                     v-if="col.field === 'edit'"
                     unelevated
@@ -101,7 +111,46 @@
       </q-card-section>
       <q-card-section>
         <div class="row">
-          <div class="col-12 col-md-6 q-mt-md">
+          <div class="col-12 q-mb-md">
+            <span class="label">انتخاب تست</span>
+            <q-select
+              dense
+              outlined
+              v-model="selectedAnalysisToEdit.psychology_test_id"
+              :options="tests"
+              :option-label="'text'"
+              :option-value="'id'"
+              emit-value
+              map-options
+              style="min-width: 150px"
+              required
+            />
+          </div>
+          <div class="col-12 col-md-6 q-mb-md">
+            <span class="label">عنوان</span>
+            <q-input
+              dense
+              outlined
+              v-model="selectedAnalysisToEdit.tittle"
+            />
+          </div>
+          <div class="col-12 col-md-6 q-mb-md">
+            <div class="second-input">
+              <span class="label">انتخاب تخصص</span>
+              <q-select
+                dense
+                outlined
+                v-model="selectedAnalysisToEdit.specialty_id"
+                :options="specialties"
+                :option-value="'value'"
+                :option-label="'label'"
+                emit-value
+                map-options
+                required
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mb-md">
             <span class="label">حداقل امتیاز</span>
             <q-input
               dense
@@ -113,20 +162,37 @@
               required
             />
           </div>
-          <div class="col-12 col-md-6 q-mt-md">
-            <span class="label">حداکثر امتیاز</span>
-            <q-input
-              dense
-              outlined
-              v-model="selectedAnalysisToEdit.maxScore"
-              stack-label
-              type="number"
-              class="second-input"
-              min="0"
-            />
+          <div class="col-12 col-md-6 q-mb-md">
+            <div class="second-input">
+              <span class="label">حداکثر امتیاز</span>
+              <q-input
+                dense
+                outlined
+                v-model="selectedAnalysisToEdit.maxScore"
+                stack-label
+                type="number"
+                min="0"
+              />
+            </div>
           </div>
-          <div class="col-12 q-mt-lg">
-            <span class="label">متن آنالیز</span>
+          <div class="col-12 q-mb-md">
+            <span class="label">رنگ امتیاز</span>
+            <q-input
+              filled
+              v-model="selectedAnalysisToEdit.color_score"
+              class="color"
+            >
+              <template v-slot:append>
+                <q-icon name="colorize" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-color v-model="selectedAnalysisToEdit.color_score" />
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </div>
+          <div class="col-12 q-mb-md">
+            <span class="label">متن آنالیز:</span>
             <q-input
               dense
               outlined
@@ -167,7 +233,7 @@
             <q-select
               dense
               outlined
-              v-model="selectTestForAnalysis.id"
+              v-model="analysisData.psychologyTestId"
               :options="tests"
               :option-label="'text'"
               :option-value="'id'"
@@ -178,11 +244,35 @@
             />
           </div>
           <div class="col-12 col-md-6 q-mb-md">
+            <span class="label">عنوان</span>
+            <q-input
+              dense
+              outlined
+              v-model="analysisData.tittle"
+            />
+          </div>
+          <div class="col-12 col-md-6 q-mb-md">
+            <div class="second-input">
+              <span class="label">انتخاب تخصص</span>
+              <q-select
+                dense
+                outlined
+                v-model="analysisData.specialty_id"
+                :options="specialties"
+                :option-value="'value'"
+                :option-label="'label'"
+                emit-value
+                map-options
+                required
+              />
+            </div>
+          </div>
+          <div class="col-12 col-md-6 q-mb-md">
             <span class="label">حداقل امتیاز</span>
             <q-input
               dense
               outlined
-              v-model="minScore"
+              v-model="analysisData.minScore"
               stack-label
               type="number"
               min="0"
@@ -195,7 +285,7 @@
               <q-input
                 dense
                 outlined
-                v-model="maxScore"
+                v-model="analysisData.maxScore"
                 stack-label
                 type="number"
                 min="0"
@@ -203,11 +293,27 @@
             </div>
           </div>
           <div class="col-12 q-mb-md">
+            <span class="label">رنگ امتیاز</span>
+            <q-input
+              filled
+              v-model="analysisData.colorScore"
+              class="color"
+            >
+              <template v-slot:append>
+                <q-icon name="colorize" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-color v-model="analysisData.colorScore" />
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </div>
+          <div class="col-12 q-mb-md">
             <span class="label">متن آنالیز:</span>
             <q-input
               dense
               outlined
-              v-model="analysisText"
+              v-model="analysisData.text"
               type="textarea"
               required
             />
@@ -230,6 +336,50 @@
       </q-card-section>
     </q-card>
   </q-dialog>
+  <q-dialog v-model="detailDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">جزئیات تحلیل</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+      <q-card-section>
+        <div class="q-my-lg">
+          عنوان: {{ selectedAnalysisToShow.tittle }}
+        </div>
+        <div class="q-my-lg">
+          متن: {{ selectedAnalysisToShow.text }}
+        </div>
+        <div class="q-my-lg">
+          تست: {{ selectedAnalysisToShow.test }}
+        </div>
+        <div class="q-my-lg flex" v-if="selectedAnalysisToShow.score.length > 1">
+          <div>
+            حداقل امتیاز: {{ selectedAnalysisToShow.score[0] }}
+          </div>
+          <div class="q-ml-lg">
+            حداکثر امتیاز: {{ selectedAnalysisToShow.score[1] }}
+          </div>
+        </div>
+        <div class="q-my-lg" v-if="selectedAnalysisToShow.score.length === 1">
+          <div>
+            امتیاز: {{ selectedAnalysisToShow.score[0] }}
+          </div>
+        </div>
+        <div class="q-my-lg">
+          تخصص: {{ selectedAnalysisToShow.specialty }}
+        </div>
+        <div class="q-my-lg flex">
+          <div>
+            رنگ: {{ selectedAnalysisToShow.color_score }}
+          </div>
+          <div
+            style="width: 20px; height: 20px; margin-right: 1rem"
+            :style="{ 'background': selectedAnalysisToShow.color_score }"></div>
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -246,8 +396,9 @@ export default defineComponent({
       selectedTest: {},
       columns: [
         { name: 'counter', align: 'left', label: 'ردیف', field: 'counter' },
-        { name: 'text', align: 'left', label: 'متن', field: 'text' },
+        { name: 'tittle', align: 'left', label: 'متن', field: 'tittle' },
         { name: 'score', align: 'left', label: 'امتیاز', field: 'score' },
+        { name: 'detail', align: 'center', label: '', field: 'detail'},
         { name: 'edit', align: 'center', label: '', field: 'edit' },
         { name: 'delete', align: 'center', label: '', field: 'delete' }
       ],
@@ -258,9 +409,15 @@ export default defineComponent({
       },
       analyses: [],
       selectTestForAnalysis: {},
-      minScore: null,
-      maxScore: null,
-      analysisText: '',
+      analysisData: {
+        minScore: null,
+        maxScore: null,
+        text: '',
+        tittle: '',
+        colorScore: '',
+        psychologyTestId: null,
+        specialty_id: null
+      },
       editDialog: false,
       selectedAnalysisToEdit: {},
       createDialog: false,
@@ -271,23 +428,25 @@ export default defineComponent({
       },
       isLoading: false,
       updateLoading: false,
-      search: ''
+      search: '',
+      detailDialog: false,
+      selectedAnalysisToShow: {},
+      specialties: []
     }
   },
   created () {
     this.getTests()
     this.getAnalyses()
+    this.getSpecialties()
   },
   methods: {
     getTests () {
-      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
+      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
         searchQuery: null,
-        tag1: null,
-        tag2: null,
+        tagId: null,
         take: null,
         skip: null,
         isExportFile: true,
-        exportColumns: {}
       }).then(response => {
         this.testOptions = [{
           id: 0,
@@ -305,13 +464,12 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/TypeQuestion/GetTypeQuestion', {
-        searchQuery: null,
+      axios.post(vars.api_base2 + '/FargoTest/ReplyPsychology/GetReplyPsychology', {
         psychologyTestId: null,
+        searchQuery: null,
         take: this.qBody.take,
         skip: this.qBody.skip,
-        isExportFile: false,
-        exportColumns: {}
+        isExportFile: false
       }).then(response => {
         this.pagination.rowsNumber = response.data.count
         this.pagination.page = reqProps?.pagination.page ?? 1
@@ -323,52 +481,62 @@ export default defineComponent({
       })
     },
     changeAnalyses () {
-      axios.post(vars.api_base2 + '/TypeQuestion/GetTypeQuestion', {
-        searchQuery: null,
+      axios.post(vars.api_base2 + '/FargoTest/ReplyPsychology/GetReplyPsychology', {
         psychologyTestId: null,
-        take: null,
-        skip: null,
-        isExportFile: false,
-        exportColumns: {}
+        searchQuery: null,
+        take: this.qBody.take,
+        skip: this.qBody.skip,
+        isExportFile: true
       }).then(response => {
         if (this.selectedTest.id === 0) {
           this.analyses = response.data.items
         } else {
           this.analyses = response.data.items.filter(analysis => {
-            return analysis.psychologytestid === this.selectedTest.id
+            return analysis.psychology_test_id === this.selectedTest.id
           })
         }
       }).catch(error => {
         console.log(error)
       })
     },
-    setAnalysis () {
+    setAnalysis ()  {
       this.isLoading = true
-      if (!this.selectTestForAnalysis || !this.minScore || !this.analysisText) {
+      if (!this.analysisData.psychologyTestId || !this.analysisData.minScore || !this.analysisData.text ||
+          !this.analysisData.tittle || !this.analysisData.colorScore || !this.analysisData.specialty_id) {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا موارد ضروری را وارد کنید.'
         })
+        this.isLoading = false
       } else {
+        console.log(this.analysisData.specialty_id)
         const score = []
-        score.push(Number(this.minScore))
-        if (this.maxScore) {
-          score.push(Number(this.maxScore))
+        score.push(Number(this.analysisData.minScore))
+        if (this.analysisData.maxScore) {
+          score.push(Number(this.analysisData.maxScore))
         }
-        axios.post(vars.api_base2 + '/TypeQuestion/CreateTypeQuestion', {
-          psychologyTestId: this.selectTestForAnalysis.id,
-          text: this.analysisText,
-          score: score
+        axios.post(vars.api_base2 + '/FargoTest/ReplyPsychology/CreateReplyPsychology', {
+          text: this.analysisData.text,
+          tittle: this.analysisData.tittle,
+          colorScore: this.analysisData.colorScore,
+          psychologyTestId: this.analysisData.psychologyTestId,
+          specialty_id: Number(this.analysisData.specialty_id),
+          score
         }).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
               type: 'positive',
               message: 'تحلیل تست اضافه شد.'
             })
-            this.selectTestForAnalysis = {}
-            this.minScore = null
-            this.maxScore = null
-            this.analysisText = ''
+            this.analysisData = {
+              minScore: null,
+              maxScore: null,
+              text: '',
+              tittle: '',
+              colorScore: '',
+              psychologyTestId: null,
+              specialty_id: null
+            }
             this.createDialog = false
             this.getAnalyses()
             this.isLoading = false
@@ -392,31 +560,40 @@ export default defineComponent({
     openEditDialog (analysis) {
       this.editDialog = !this.editDialog
       this.selectedAnalysisToEdit = analysis
-      if (this.selectedAnalysisToEdit.score.includes('[')) {
-        this.selectedAnalysisToEdit.minScore = Number(this.selectedAnalysisToEdit.score[1])
-        this.selectedAnalysisToEdit.maxScore = Number(this.selectedAnalysisToEdit.score[4])
+      /*if (this.selectedAnalysisToEdit.score.includes('[')) {
+        this.selectedAnalysisToEdit.minScore = Number(this.selectedAnalysisToEdit.score[0])
+        this.selectedAnalysisToEdit.maxScore = Number(this.selectedAnalysisToEdit.score[1])
       } else {
         this.selectedAnalysisToEdit.minScore = Number(this.selectedAnalysisToEdit.score)
         this.selectedAnalysisToEdit.maxScore = null
-      }
+      }*/
+      this.selectedAnalysisToEdit.minScore = Number(this.selectedAnalysisToEdit.score[0])
+      this.selectedAnalysisToEdit.maxScore = Number(this.selectedAnalysisToEdit.score[1])
+      // console.log(this.selectedAnalysisToEdit)
     },
     editAnalysis () {
       this.updateLoading = true
-      if (!this.selectedAnalysisToEdit.text || !this.selectedAnalysisToEdit.minScore) {
+      if (!this.selectedAnalysisToEdit.text || !this.selectedAnalysisToEdit.minScore || !this.selectedAnalysisToEdit.tittle ||
+          !this.selectedAnalysisToEdit.psychology_test_id || !this.selectedAnalysisToEdit.specialty_id || !this.selectedAnalysisToEdit.color_score) {
         this.$q.notify({
           type: 'negative',
           message: 'لطفا موارد ضروری را وارد کنید.'
         })
+        this.updateLoading = false
       } else {
         const score = []
         score.push(Number(this.selectedAnalysisToEdit.minScore))
         if (this.selectedAnalysisToEdit.maxScore) {
           score.push(Number(this.selectedAnalysisToEdit.maxScore))
         }
-        axios.put(vars.api_base2 + '/TypeQuestion/UpdateTypeQuestion', {
+        axios.put(vars.api_base2 + '/FargoTest/ReplyPsychology/UpdateReplyPsychology', {
           id: this.selectedAnalysisToEdit.id,
           text: this.selectedAnalysisToEdit.text,
-          score: score
+          score,
+          psychologyTestId: this.selectedAnalysisToEdit.psychology_test_id,
+          specialty_id: this.selectedAnalysisToEdit.specialty_id,
+          tittle: this.selectedAnalysisToEdit.tittle,
+          colorScore: this.selectedAnalysisToEdit.color_score
         }).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -444,8 +621,7 @@ export default defineComponent({
       }
     },
     deleteAnalysis (id) {
-      const payload = { id: id }
-      axios.delete(vars.api_base2 + '/TypeQuestion/DeleteTypeQuestion', { data: payload }).then(response => {
+      axios.delete(vars.api_base2 + `/FargoTest/ReplyPsychology/DeleteReplyPsychology?id_=${id}`).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -467,17 +643,40 @@ export default defineComponent({
       })
     },
     getSearchItems () {
-      axios.post(vars.api_base2 + '/TypeQuestion/GetTypeQuestion', {
-        searchQuery: this.search,
+      axios.post(vars.api_base2 + '/FargoTest/ReplyPsychology/GetReplyPsychology', {
         psychologyTestId: null,
+        searchQuery: null,
         take: null,
         skip: null,
-        isExportFile: false,
-        exportColumns: {}
+        isExportFile: true
       }).then(response => {
         this.analyses = response.data.items
       }).catch(error => {
         console.log(error)
+      })
+    },
+    openDetailDialog(analysis) {
+      this.detailDialog = !this.detailDialog
+      this.selectedAnalysisToShow = analysis
+      this.selectedAnalysisToShow.test = this.tests.filter(test => {
+        return test.id === this.selectedAnalysisToShow.psychology_test_id
+      })[0].text
+      this.selectedAnalysisToShow.specialty = this.specialties.filter(specialty => {
+        return specialty.value === this.selectedAnalysisToShow.specialty_id
+      })[0].label
+      // console.log(this.selectedAnalysisToShow)
+    },
+    getSpecialties() {
+      axios.get(vars.api_base2 + '/FargoTest/GetSpecialty').then(res => {
+        for (const key in res.data.items) {
+          this.specialties.push({
+            value: Number(key),
+            label: res.data.items[key]
+          })
+        }
+        // console.log(this.specialties)
+      }).catch(err => {
+        console.log(err)
       })
     }
   }
