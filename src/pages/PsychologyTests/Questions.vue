@@ -234,9 +234,17 @@
 import { defineComponent } from 'vue'
 import vars from '../../vars'
 import * as axios from 'axios'
+import { useMeta } from 'quasar'
+
+const metaData = {
+  title: 'تست\u200Cهای روانشناسی - سوال\u200Cها'
+}
 
 export default defineComponent({
   name: 'Questions',
+  setup() {
+    useMeta(metaData)
+  },
   data () {
     return {
       questions: [],
@@ -289,12 +297,12 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        searchQuery: this.search ? this.search : null,
-        psychologyTestId: null,
-        take: this.qBody.take,
-        skip: this.qBody.skip,
-        isExportFile: false,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
+        SearchQuery: this.search ? this.search : null,
+        PsychologyTestId: null,
+        Take: this.qBody.take,
+        Skip: this.qBody.skip,
+        IsExportFile: false,
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -327,12 +335,12 @@ export default defineComponent({
       })
     },
     getTest () {
-      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
-        searchQuery: null,
-        tagId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
+        SearchQuery: null,
+        TagId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           this.tests = response.data.items
@@ -370,7 +378,7 @@ export default defineComponent({
       // console.log(this.questionData)
       this.isLoading = true
       if (this.questionData.text !== '' && this.questionData.psychologyTestId !== null) {
-        axios.post(vars.api_base2 + '/FargoTest/Question/CreateQuestion', this.questionData).then(response => {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateFargoQuestion', this.questionData).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -413,12 +421,12 @@ export default defineComponent({
     },
     changeQuestions () {
       // console.log(this.selectedTest)
-      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        searchQuery: null,
-        psychologyTestId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
+        SearchQuery: null,
+        PsychologyTestId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTest.id === 0) {
@@ -460,7 +468,7 @@ export default defineComponent({
     updateQuestion () {
       this.updateLoading = true
       if (this.selectedQuestionToEdit.text !== '') {
-        axios.put(vars.api_base2 + '/FargoTest/Question/UpdateQuestion', {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/UpdateFargoQuestion', {
           text: this.selectedQuestionToEdit.text,
           psychologyTestId: this.selectedQuestionToEdit.psychology_test_id,
           id: this.selectedQuestionToEdit.id
@@ -502,7 +510,9 @@ export default defineComponent({
       }
     },
     deleteQuestion (questionId) {
-      axios.delete(vars.api_base2 + `/FargoTest/Question/DeleteQuestion?id_=${questionId}`).then(response => {
+      axios.post(vars.api_base2 + '/FargoTest/Question/DeleteQuestion', {
+        Id_: questionId
+      }).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -528,12 +538,12 @@ export default defineComponent({
       })
     },
     getSearchItems () {
-      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        searchQuery: this.search,
-        take: null,
-        skip: null,
-        psychologyTestId: null,
-        isExportFile: false,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
+        SearchQuery: this.search,
+        Take: null,
+        Skip: null,
+        PsychologyTestId: null,
+        IsExportFile: false,
       }).then(response => {
         if (response.data.isSuccess) {
           this.questions = response.data.items

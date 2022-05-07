@@ -234,9 +234,17 @@
 import { defineComponent } from "vue";
 import * as axios from "axios";
 import vars from "src/vars";
+import { useMeta } from 'quasar'
+
+const metaData = {
+  title: 'تست\u200Cهای روانشناسی - تگ\u200Cها'
+}
 
 export default defineComponent({
   name: 'Tags',
+  setup() {
+    useMeta(metaData)
+  },
   data() {
     return {
       search: '',
@@ -278,11 +286,11 @@ export default defineComponent({
   },
   methods: {
     getCategories() {
-      axios.post(vars.api_base2 + '/FargoTest/Category/GetCategory', {
-        searchQuery: null,
-        take: null,
-        skip: null,
-        isExportFile: true
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetCategory', {
+        SearchQuery: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true
       }).then(res => {
         if (res.data.isSuccess) {
           this.categories = res.data.items
@@ -319,12 +327,12 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/FargoTest/Tag/GetTag', {
-        searchQuery: null,
-        take: this.qBody.take,
-        skip: this.qBody.skip,
-        isExportFile: false,
-        categoryId: null
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTag', {
+        SearchQuery: null,
+        Take: this.qBody.take,
+        Skip: this.qBody.skip,
+        IsExportFile: false,
+        CategoryId: null
       }).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count
@@ -371,7 +379,7 @@ export default defineComponent({
         })
         this.isLoading = false
       } else {
-        axios.post(vars.api_base2 + '/FargoTest/Tag/CreateTag', this.tagData).then(res => {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateTag', this.tagData).then(res => {
           if (res.data.isSuccess) {
             this.createDialog = false
             this.tagData = {
@@ -411,7 +419,9 @@ export default defineComponent({
       this.selectedTagToEdit = tag
     },
     deleteTag(tagId) {
-      axios.delete(vars.api_base2 + `/FargoTest/Tag/DeleteTag?id_=${tagId}`).then(res => {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteTag', {
+        Id_: tagId
+      }).then(res => {
         if (res.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -445,7 +455,7 @@ export default defineComponent({
           message: 'لطفا همه مقادیر را وارد کنید.'
         })
       } else {
-        axios.put(vars.api_base2 + '/FargoTest/Tag/UpdateTag', {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/UpdateTag', {
           text: this.selectedTagToEdit.text,
           img: this.selectedTagToEdit.img,
           categoryId: this.selectedTagToEdit.category_id,
@@ -481,13 +491,13 @@ export default defineComponent({
       }
     },
     changeTag() {
-      axios.post(vars.api_base2 + '/FargoTest/Tag/GetTag', {
-        searchQuery: null,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTag', {
+        SearchQuery: null,
         // categoryId: this.selectedCategory.id !== 0 ? this.selectedCategory.id : null,
-        categoryId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
+        CategoryId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedCategory.id === 0) {

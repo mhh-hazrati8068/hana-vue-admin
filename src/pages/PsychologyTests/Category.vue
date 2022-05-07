@@ -21,6 +21,7 @@
         :rows="categories"
         v-model:pagination="pagination"
         :loading="loading"
+        :filter="search"
         @request="getCategories"
         :rows-per-page-options="[10,20,30,40,50]"
       >
@@ -32,18 +33,29 @@
               :props="props"
             >
               <span
-                v-if="col.field !== 'counter'"
+                v-if="col.field !== 'counter' && col.field !== 'img'"
                 style="cursor: default"
+                class="flex flex-center"
               >
                 {{ col.value }}
+                <div
+                  v-if="col.field === 'main_color'"
+                  style="width: 12px; height: 12px; margin-right: .5rem; border-radius: 100%"
+                  :style="{ 'background': col.value }"
+                ></div>
               </span>
               <span
-                v-else
+                v-if="col.field === 'counter'"
                 :class="{ 'row-numbers': col.field === 'counter' }"
                 style="cursor: default"
               >
                     {{ col.value }}
               </span>
+              <div class="flex flex-center">
+                <svg v-if="col.field === 'img'" style="max-width: 50px; max-height: 70px">
+                  <path :d="col.value" :fill="props.row.main_color"></path>
+                </svg>
+              </div>
               <q-btn
                 v-if="col.field === 'tagsBtn'"
                 unelevated
@@ -196,7 +208,9 @@
           <div class="col-12 q-mt-lg">
             <span class="label">تصویر</span>
             <div>
-              <img :src="selectedCategoryToEdit.img">
+              <svg style="max-width: 100px; max-height: 100px">
+                <path :d="selectedCategoryToEdit.img" :fill="selectedCategoryToEdit.main_color"></path>
+              </svg>
             </div>
             <q-input
               outlined
@@ -228,9 +242,17 @@
 import { defineComponent } from "vue";
 import vars from '../../vars'
 import * as axios from 'axios'
+import { useMeta } from 'quasar'
+
+const metaData = {
+  title: 'تست\u200Cهای روانشناسی - دسته\u200Cبندی'
+}
 
 export default defineComponent({
   name: 'Category',
+  setup() {
+    useMeta(metaData)
+  },
   data() {
     return {
       search: '',
@@ -273,11 +295,11 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/FargoTest/Category/GetCategory', {
-        searchQuery: null,
-        take: this.qBody.take,
-        skip: this.qBody.skip,
-        isExportFile: false
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetCategory', {
+        SearchQuery: null,
+        Take: this.qBody.take,
+        Skip: this.qBody.skip,
+        IsExportFile: false
       }).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count
@@ -316,7 +338,7 @@ export default defineComponent({
         if (!this.categoryData.mainColor.includes('#')) {
           this.categoryData.mainColor = this.rgbToHex(this.categoryData.mainColor)
         }
-        axios.post(vars.api_base2 + '/FargoTest/Category/CreateCategory', this.categoryData).then(res => {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateCategory', this.categoryData).then(res => {
           if (res.data.isSuccess) {
             this.createDialog = false
             this.categoryData = {
@@ -352,7 +374,9 @@ export default defineComponent({
       }
     },
     deleteCategory(categoryId) {
-      axios.delete(vars.api_base2 + `/FargoTest/Category/DeleteCategory?id_=${categoryId}`).then(res => {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteCategory', {
+        id_: categoryId
+      }).then(res => {
         if (res.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -393,7 +417,7 @@ export default defineComponent({
         if (!this.selectedCategoryToEdit.main_color.includes('#')) {
           this.selectedCategoryToEdit.main_color = this.rgbToHex(this.selectedCategoryToEdit.main_color)
         }
-        axios.put(vars.api_base2 + '/FargoTest/Category/UpdateCategory', {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/UpdateCategory', {
           text: this.selectedCategoryToEdit.text,
           img: this.selectedCategoryToEdit.img,
           mainColor: this.selectedCategoryToEdit.main_color,

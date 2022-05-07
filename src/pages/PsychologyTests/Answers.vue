@@ -300,9 +300,17 @@
 import { defineComponent } from 'vue'
 import * as axios from 'axios'
 import vars from '../../vars'
+import { useMeta } from 'quasar'
+
+const metaData = {
+  title: 'تست\u200Cهای روانشناسی - پاسخ\u200Cها'
+}
 
 export default defineComponent({
-  name: 'Tests',
+  name: 'Answers',
+  setup() {
+    useMeta(metaData)
+  },
   data () {
     return {
       questionId: null,
@@ -374,13 +382,12 @@ export default defineComponent({
   },
   methods: {
     getCurrentQuestion () {
-      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        searchQuery: null,
-        psychologyTestId: null,
-        take: null,
-        skip: null,
-        isExportFile: false,
-        exportColumns: {}
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
+        SearchQuery: null,
+        PsychologyTestId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: false,
       }).then(response => {
         this.currentQuestion = response.data.items.filter(question => {
           return question.id === this.questionId
@@ -390,14 +397,12 @@ export default defineComponent({
       })
     },
     getTest () {
-      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
-        searchQuery: null,
-        tag1: null,
-        tag2: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
-        exportColumns: {}
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
+        SearchQuery: null,
+        TagId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: false,
       }).then(response => {
         if (response.data.isSuccess) {
           this.tests = response.data.items
@@ -421,12 +426,12 @@ export default defineComponent({
       })
     },
     getQuestions () {
-      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        searchQuery: null,
-        psychologyTestId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
+        SearchQuery: null,
+        PsychologyTestId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           this.questions = response.data.items.filter(question => {
@@ -452,8 +457,8 @@ export default defineComponent({
       })
 
       if (this.selectedTest.id) {
-        axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
-          psychologyTestId: this.selectedTest.id
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
+          PsychologyTestId: this.selectedTest.id
         }).then(response => {
           if (response.data.isSuccess) {
             this.allAnswers = response.data.items
@@ -529,7 +534,7 @@ export default defineComponent({
           })
           // console.log(this.selectedAnswers)
           // console.log(answer)
-          axios.post(vars.api_base2 + '/FargoTest/Answer/CreateAnswer', {
+          axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateFargoAnswer', {
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
             text: answer[0].text,
             score: answer[0].score
@@ -570,7 +575,7 @@ export default defineComponent({
         return true
       }
       if (this.answerTemplate === 2) {
-        axios.post(vars.api_base2 + '/FargoTest/Answer/CreateAnswer', {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateFargoAnswer', {
           questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
           text: this.answerText,
           score: Number(this.score)
@@ -609,7 +614,7 @@ export default defineComponent({
         })
       } else if (this.answerTemplate === 1) {
         for (let i = 0; i < this.selectedPattern.value.value; i++) {
-          axios.post(vars.api_base2 + '/FargoTest/Answer/CreateAnswer', {
+          axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateFargoAnswer', {
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
             text: this.selectedPattern.value.options[i].label,
             score: this.selectedPattern.value.options[i].score
@@ -653,14 +658,13 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
-        searchQuery: null,
-        questionId: null,
-        take: this.qBody.take,
-        skip: this.qBody.skip,
-        isExportFile: false,
-        exportColumns: {},
-        score: null
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
+        SearchQuery: null,
+        QuestionId: null,
+        Take: this.qBody.take,
+        Skip: this.qBody.skip,
+        IsExportFile: false,
+        PsychologyTestId: null
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -697,13 +701,12 @@ export default defineComponent({
       })
     },
     getQuestionOptions () {
-      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        searchQuery: null,
-        psychologyTestId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
-        exportColumns: {}
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
+        SearchQuery: null,
+        PsychologyTestId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           this.questionOptions = [{
@@ -740,13 +743,13 @@ export default defineComponent({
     },
     changeAnswers () {
       // console.log(this.selectQuestionToShow)
-      axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
         searchQuery: null,
-        questionId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
-        score: null
+        QuestionId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
+        PsychologyTestId: null
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectQuestionToShow.id === 0) {
@@ -791,7 +794,9 @@ export default defineComponent({
       }
     },
     deleteAnswer (answer) {
-      axios.delete(vars.api_base2 + `/FargoTest/Answer/DeleteAnswer?id_=${answer.id}`).then(response => {
+      axios.post(vars.api_base2 + '/FargoTest/Answer/DeleteFargoAnswer', {
+        Id_: answer.id
+      }).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -830,7 +835,7 @@ export default defineComponent({
           message: 'لطفا موارد ضروری را وارد نمایید.'
         })
       } else {
-        axios.put(vars.api_base2 + '/FargoTest/Answer/UpdateAnswer', {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/UpdateFargoAnswer', {
           id: this.selectedAnswerToEdit.id,
           text: this.selectedAnswerToEdit.text,
           score: Number(this.selectedAnswerToEdit.score),
@@ -866,14 +871,13 @@ export default defineComponent({
       }
     },
     getSearchItems () {
-      axios.post(vars.api_base2 + '/FargoTest/Answer/GetAnswer', {
-        searchQuery: this.search,
-        questionId: null,
-        take: null,
-        skip: null,
-        isExportFile: false,
-        exportColumns: {},
-        score: null
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
+        SearchQuery: this.search,
+        QuestionId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: false,
+        PsychologyTestId: null
       }).then(response => {
         if (response.data.isSuccess) {
           this.answers = response.data.items
@@ -896,12 +900,12 @@ export default defineComponent({
       })
     },
     getQuestionsForEdit() {
-      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        psychologyTestId: null,
-        searchQuery: null,
-        take: null,
-        skip: null,
-        isExportFile: true
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
+        PsychologyTestId: null,
+        SearchQuery: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           this.questionsForEditAnswer = response.data.items
@@ -928,12 +932,12 @@ export default defineComponent({
       this.detailDialog = !this.detailDialog
       this.selectedAnswerToShow = answer
       // console.log(this.selectedAnswerToShow)
-      axios.post(vars.api_base2 + '/FargoTest/Question/GetQuestion', {
-        psychologyTestId: null,
-        searchQuery: null,
-        take: null,
-        skip: null,
-        isExportFile: true
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
+        PsychologyTestId: null,
+        SearchQuery: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           this.selectedAnswerToShow.question = response.data.items.filter(question => {

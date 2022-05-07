@@ -363,10 +363,18 @@ import { defineComponent } from 'vue'
 import vars from '../../vars'
 import * as axios from 'axios'
 import {moneyMixin} from "boot/money";
+import { useMeta } from 'quasar'
+
+const metaData = {
+  title: 'تست\u200Cهای روانشناسی - تست\u200Cها'
+}
 
 export default defineComponent({
   name: 'Tests',
   mixins: [moneyMixin],
+  setup() {
+    useMeta(metaData)
+  },
   data () {
     return {
       tests: [],
@@ -435,7 +443,7 @@ export default defineComponent({
         })
         this.isLoading = false
       } else {
-        axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/CreateTest', this.testData).then(response => {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateTest', this.testData).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -478,12 +486,12 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
-        searchQuery: null,
-        tagId: null,
-        take: this.qBody.take,
-        skip: this.qBody.skip,
-        isExportFile: false,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
+        SearchQuery: null,
+        TagId: null,
+        Take: this.qBody.take,
+        Skip: this.qBody.skip,
+        IsExportFile: false,
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -539,7 +547,7 @@ export default defineComponent({
         })
         this.updateLoading = false
       } else {
-        axios.put(vars.api_base2 + '/FargoTest/PsychologyTest/UpdateTest', {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/UpdateTest', {
           text: this.selectedTestToEdit.text,
           img: this.selectedTestToEdit.img,
           description: this.selectedTestToEdit.description,
@@ -579,7 +587,9 @@ export default defineComponent({
       }
     },
     deleteTest (testId) {
-      axios.delete(vars.api_base2 + `/FargoTest/PsychologyTest/DeleteTest?id_=${testId}`).then(response => {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteTest', {
+        Id_: testId
+      }).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -605,14 +615,12 @@ export default defineComponent({
       })
     },
     getSearchItems () {
-      axios.post(vars.api_base2 + '/PsychologyTest/GetTest', {
-        searchQuery: this.search,
-        tag1: null,
-        tag2: null,
-        take: null,
-        skip: null,
-        isExportFile: false,
-        exportColumns: {}
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
+        SearchQuery: this.search,
+        TagId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: false,
       }).then(response => {
         if (response.data.isSuccess) {
           this.tests = response.data.items
@@ -639,12 +647,12 @@ export default defineComponent({
       this.selectedTestToShow = test
     },
     getTags() {
-      axios.post(vars.api_base2 + '/FargoTest/Tag/GetTag', {
-        searchQuery: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
-        categoryId: null
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTag', {
+        SearchQuery: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
+        CategoryId: null
       }).then(res => {
         if (res.data.isSuccess) {
           this.tags = res.data.items
@@ -687,13 +695,13 @@ export default defineComponent({
       })
     },
     changeTests() {
-      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
-        searchQuery: null,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
+        SearchQuery: null,
         // categoryId: this.selectedCategory.id !== 0 ? this.selectedCategory.id : null,
-        categoryId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
+        CategoryId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTag.id === 0) {

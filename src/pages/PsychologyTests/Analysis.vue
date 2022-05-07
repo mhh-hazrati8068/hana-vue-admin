@@ -26,6 +26,7 @@
             emit-value
             map-options
             style="min-width: 150px"
+            label="انتخاب تست"
             @update:model-value="changeAnalyses"
           />
         </div>
@@ -386,9 +387,17 @@
 import { defineComponent } from 'vue'
 import * as axios from 'axios'
 import vars from 'src/vars'
+import { useMeta } from 'quasar'
+
+const metaData = {
+  title: 'تست\u200Cهای روانشناسی - تحلیل\u200Cها'
+}
 
 export default defineComponent({
   name: 'Analysis',
+  setup() {
+    useMeta(metaData)
+  },
   data () {
     return {
       tests: [],
@@ -441,12 +450,12 @@ export default defineComponent({
   },
   methods: {
     getTests () {
-      axios.post(vars.api_base2 + '/FargoTest/PsychologyTest/GetTest', {
-        searchQuery: null,
-        tagId: null,
-        take: null,
-        skip: null,
-        isExportFile: true,
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
+        SearchQuery: null,
+        TagId: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           this.testOptions = [{
@@ -479,12 +488,12 @@ export default defineComponent({
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
-      axios.post(vars.api_base2 + '/FargoTest/ReplyPsychology/GetReplyPsychology', {
-        psychologyTestId: null,
-        searchQuery: null,
-        take: this.qBody.take,
-        skip: this.qBody.skip,
-        isExportFile: false
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetReplyPsychology', {
+        PsychologyTestId: null,
+        SearchQuery: null,
+        Take: this.qBody.take,
+        Skip: this.qBody.skip,
+        IsExportFile: false
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -511,12 +520,12 @@ export default defineComponent({
       })
     },
     changeAnalyses () {
-      axios.post(vars.api_base2 + '/FargoTest/ReplyPsychology/GetReplyPsychology', {
-        psychologyTestId: null,
-        searchQuery: null,
-        take: this.qBody.take,
-        skip: this.qBody.skip,
-        isExportFile: true
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetReplyPsychology', {
+        PsychologyTestId: null,
+        SearchQuery: null,
+        Take: this.qBody.take,
+        Skip: this.qBody.skip,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTest.id === 0) {
@@ -560,7 +569,7 @@ export default defineComponent({
         if (this.analysisData.maxScore) {
           score.push(Number(this.analysisData.maxScore))
         }
-        axios.post(vars.api_base2 + '/FargoTest/ReplyPsychology/CreateReplyPsychology', {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateReplyPsychology', {
           text: this.analysisData.text,
           tittle: this.analysisData.tittle,
           colorScore: this.analysisData.colorScore,
@@ -635,7 +644,7 @@ export default defineComponent({
         if (this.selectedAnalysisToEdit.maxScore) {
           score.push(Number(this.selectedAnalysisToEdit.maxScore))
         }
-        axios.put(vars.api_base2 + '/FargoTest/ReplyPsychology/UpdateReplyPsychology', {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/UpdateReplyPsychology', {
           id: this.selectedAnalysisToEdit.id,
           text: this.selectedAnalysisToEdit.text,
           score,
@@ -674,7 +683,9 @@ export default defineComponent({
       }
     },
     deleteAnalysis (id) {
-      axios.delete(vars.api_base2 + `/FargoTest/ReplyPsychology/DeleteReplyPsychology?id_=${id}`).then(response => {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteReplyPsychology', {
+        Id_: id
+      }).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
             type: 'info',
@@ -700,12 +711,12 @@ export default defineComponent({
       })
     },
     getSearchItems () {
-      axios.post(vars.api_base2 + '/FargoTest/ReplyPsychology/GetReplyPsychology', {
-        psychologyTestId: null,
-        searchQuery: null,
-        take: null,
-        skip: null,
-        isExportFile: true
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetReplyPsychology', {
+        PsychologyTestId: null,
+        SearchQuery: null,
+        Take: null,
+        Skip: null,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           this.analyses = response.data.items
@@ -739,7 +750,7 @@ export default defineComponent({
       // console.log(this.selectedAnalysisToShow)
     },
     getSpecialties() {
-      axios.get(vars.api_base2 + '/FargoTest/GetSpecialty').then(res => {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetSpecialty').then(res => {
         if (res.data.isSuccess) {
           for (const key in res.data.items) {
             this.specialties.push({
