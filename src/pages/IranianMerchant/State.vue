@@ -113,6 +113,7 @@
                 outlined
                 dense
                 v-model="stateData.dialect"
+                :disable="noCountry"
               />
             </div>
           </div>
@@ -209,8 +210,8 @@
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input second-input">
-              <span class="label">فایل تصویری</span>
-              <q-file
+              <span class="label">فایل تصویری (لینک فایل را وارد کنید)</span>
+              <q-input
                 outlined
                 dense
                 v-model="stateData.picture"
@@ -219,8 +220,8 @@
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input">
-              <span class="label">فایل صوتی</span>
-              <q-file
+              <span class="label">فایل صوتی (لینک فایل را وارد کنید)</span>
+              <q-input
                 outlined
                 dense
                 v-model="stateData.nativeSong"
@@ -630,6 +631,7 @@ export default defineComponent({
       newNativeSong: '',
       updateLoading: false,
       selectedStateCode: null,
+      noCountry: false
     }
   },
   methods: {
@@ -754,11 +756,12 @@ export default defineComponent({
         countryCode: null,
         take: 0,
         skip: 0,
-        isExportFile: true,
-        fromDateTime: null,
-        toDateTime: null
+        isExportFile: true
       }).then(response => {
         this.countries = response.data.items
+        if (response.data.count === 0) {
+          this.noCountry = true
+        }
       }).catch(error =>{
         console.log(error)
       })

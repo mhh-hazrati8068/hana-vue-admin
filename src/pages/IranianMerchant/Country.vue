@@ -165,8 +165,8 @@
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input second-input">
-              <span class="label">فایل تصویری</span>
-              <q-file
+              <span class="label">پرچم (لینک فایل را وارد کنید)</span>
+              <q-input
                 outlined
                 dense
                 v-model="countryData.picture"
@@ -175,8 +175,8 @@
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input">
-              <span class="label">فایل سرود ملی</span>
-              <q-file
+              <span class="label">سرود ملی (لینک فایل را وارد کنید)</span>
+              <q-input
                 outlined
                 dense
                 v-model="countryData.nationalAnthem"
@@ -268,8 +268,8 @@
           <div class="col-12 q-mt-md">
             <div>
               صادرات:
-              <span v-for="(item, index) of selectedCountryToShow.export" :key="index">
-                {{ item }} <span v-if="index !== selectedCountryToShow.export.length - 1 && selectedCountryToShow.export.length !== 1"> ,</span>
+              <span v-for="(item, index) of selectedCountryToShow.exportation" :key="index">
+                {{ item }} <span v-if="index !== selectedCountryToShow.exportation.length - 1 && selectedCountryToShow.exportation.length !== 1"> ,</span>
               </span>
             </div>
           </div>
@@ -384,22 +384,21 @@
               <div class="q-mt-sm">
                 <img :src="selectedCountryToEdit.picture"/>
               </div>
-              <q-btn
+<!--              <q-btn
                 unelevated
                 dense
                 label="تغییر فایل تصویری"
                 class="full-width"
                 color="primary"
                 @click="changePictureFile"
-              />
-              <q-file
+              />-->
+              <q-input
                 outlined
                 dense
-                v-show="false"
-                v-model="newCountryPicture"
+                v-model="selectedCountryToEdit.picture"
                 ref="flag"
               />
-              <span v-if="Object.keys(newCountryPicture).length !== 0">{{ newCountryPicture.name }}</span>
+<!--              <span v-if="Object.keys(newCountryPicture).length !== 0">{{ newCountryPicture.name }}</span>-->
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
@@ -408,22 +407,21 @@
               <div class="q-mt-sm">
                 <audio :src="selectedCountryToEdit.nationalAnthem"/>
               </div>
-              <q-btn
+<!--              <q-btn
                 unelevated
                 dense
                 label="تغییر فایل سرود ملی"
                 class="full-width"
                 color="primary"
                 @click="changeAudioFile"
-              />
-              <q-file
+              />-->
+              <q-input
                 outlined
                 dense
-                v-show="false"
-                v-model="newNationalAnthem"
+                v-model="selectedCountryToEdit.nationalAnthem"
                 ref="audio"
               />
-              <span v-if="Object.keys(newNationalAnthem).length !== 0">{{ newNationalAnthem.name }}</span>
+<!--              <span v-if="Object.keys(newNationalAnthem).length !== 0">{{ newNationalAnthem.name }}</span>-->
             </div>
           </div>
           <div class="col-12 q-mt-md">
@@ -432,7 +430,7 @@
               <q-input
                 outlined
                 dense
-                v-model="selectedCountryToEdit.export"
+                v-model="selectedCountryToEdit.exportation"
               />
             </div>
           </div>
@@ -470,9 +468,17 @@
 import { defineComponent } from "vue";
 import * as axios from "axios";
 import vars from '../../vars';
+import { useMeta } from 'quasar'
+
+const metaData = {
+  title: 'تاجر ایرانی - کشورها'
+}
 
 export default defineComponent({
   name: 'Countries',
+  setup() {
+    useMeta(metaData)
+  },
   data() {
     return {
       search: '',
@@ -501,8 +507,8 @@ export default defineComponent({
         capital: '',
         language: '',
         population: '',
-        exportation: [],
-        importation: [],
+        exportation: '',
+        importation: '',
         picture: '',
         nationalAnthem: ''
       },
@@ -529,7 +535,7 @@ export default defineComponent({
       let isIso3Reiterative = false;
       let importation = []
       let exportation = []
-      let fd = new FormData()
+      // let fd = new FormData()
       if (!this.countryData.capital || !this.countryData.countryCode || !this.countryData.currency || !this.countryData.iso3 || !this.countryData.name ||
           !this.countryData.language || !this.countryData.population || !this.countryData.importation || !this.countryData.exportation ||
           !this.countryData.picture || !this.countryData.nationalAnthem) {
@@ -541,7 +547,7 @@ export default defineComponent({
       } else {
         // importation = this.countryData.importation.split('\\')
         // exportation = this.countryData.exportation.split('\\')
-        fd.append("capital", this.countryData.capital)
+        /*fd.append("capital", this.countryData.capital)
         fd.append("countryCode", this.countryData.countryCode)
         fd.append("currency", this.countryData.currency)
         fd.append("iso3", this.countryData.iso3)
@@ -551,7 +557,7 @@ export default defineComponent({
         fd.append("importation", this.countryData.importation)
         fd.append("export", this.countryData.exportation)
         fd.append("picture", this.countryData.picture)
-        fd.append("nationalAnthem", this.countryData.nationalAnthem)
+        fd.append("nationalAnthem", this.countryData.nationalAnthem)*/
 
         for (let i = 0; i < this.countries.length; i++) {
           if (this.countries[i].countryCode === Number(this.countryData.countryCode)) {
@@ -562,13 +568,14 @@ export default defineComponent({
             isIso3Reiterative = true;
           }
         }
+        this.countryData.countryCode = Number(this.countryData.countryCode)
         if (isCountryCodeReiterative || isIso3Reiterative) {
           this.$q.notify({
             type: 'negative',
             message: 'کد کشور و یا کد سه حرفی تکراری میباشد.'
           })
           this.isLoading = false
-        } else if (this.countryData.picture.type !== 'image/png') {
+        } /*else if (this.countryData.picture.type !== 'image/png') {
           this.$q.notify({
             type: 'negative',
             message: 'نوع فایل تصویری باید بصورت png باشد.'
@@ -580,8 +587,8 @@ export default defineComponent({
             message: 'نوع فایل صوتی باید بصورت mp3 باشد.'
           })
           this.isLoading = false
-        } else {
-          axios.post(vars.api_base3 + '/Country/CreateCountry', fd).then(response => {
+        }*/ else {
+          axios.post(vars.api_base3 + '/Country/CreateCountry', this.countryData).then(response => {
             if (response.data.isSuccess) {
               this.$q.notify({
                 type: 'positive',
@@ -595,8 +602,8 @@ export default defineComponent({
                 capital: '',
                 language: '',
                 population: '',
-                exportation: [],
-                importation: [],
+                exportation: '',
+                importation: '',
                 picture: '',
                 nationalAnthem: ''
               }
@@ -624,35 +631,39 @@ export default defineComponent({
         countryCode: null,
         take: this.qBody.take,
         skip: this.qBody.skip,
-        isExportFile: false,
-        fromDateTime: null,
-        toDateTime: null
+        isExportFile: false
       }).then(response => {
         this.pagination.rowsNumber = response.data.count
         this.pagination.page = reqProps?.pagination.page ?? 1
         this.countries = response.data.items
       }).catch(error =>{
         console.log(error)
+        for (let i = 0; i < error.response.data.exceptions.length; i++) {
+          this.$q.notify({
+            type: 'negative',
+            message: error.response.data.exceptions[i].persianDescription
+          })
+        }
       })
     },
     openDetailDialog(country) {
       this.detailDialog = !this.editDialog
       this.selectedCountryToShow = country
-      console.log(this.selectedCountryToShow)
+      // console.log(this.selectedCountryToShow)
     },
     openEditDialog(country) {
       this.editDialog = !this.editDialog
       this.selectedCountryToEdit = country
       this.selectedCountryCountryCode = this.selectedCountryToEdit.countryCode
       this.selectedCountryIso3 = this.selectedCountryToEdit.iso3
-      this.selectedCountryToEdit.export = this.selectedCountryToEdit.export.toString().replaceAll(',', '\\')
+      this.selectedCountryToEdit.exportation = this.selectedCountryToEdit.exportation.toString().replaceAll(',', '\\')
       this.selectedCountryToEdit.importation = this.selectedCountryToEdit.importation.toString().replaceAll(',', '\\')
     },
     updateCountry() {
       this.updateLoading = true
       let isCountryCodeReiterative = false;
       let isIso3Reiterative = false;
-      let fd = new FormData()
+      // let fd = new FormData()
       const countries = this.countries.filter(country => {
         return country.id !== this.selectedCountryToEdit.id
       })
@@ -666,7 +677,7 @@ export default defineComponent({
         }
       }
 
-      fd.append("capital", this.selectedCountryToEdit.capital)
+      /*fd.append("capital", this.selectedCountryToEdit.capital)
       fd.append("countryCode", this.selectedCountryToEdit.countryCode)
       fd.append("currency", this.selectedCountryToEdit.currency)
       fd.append("iso3", this.selectedCountryToEdit.iso3)
@@ -677,7 +688,7 @@ export default defineComponent({
       fd.append("export", this.selectedCountryToEdit.export)
       fd.append("id", this.selectedCountryToEdit.id)
       fd.append("picture", this.newCountryPicture)
-      fd.append("nationalAnthem", this.newNationalAnthem)
+      fd.append("nationalAnthem", this.newNationalAnthem)*/
 
       if (isCountryCodeReiterative || isIso3Reiterative) {
         this.$q.notify({
@@ -686,7 +697,7 @@ export default defineComponent({
         })
         this.updateLoading = false
       } else {
-        if (this.newCountryPicture) {
+        /*if (this.newCountryPicture) {
           if (this.newCountryPicture.type !== 'image/png') {
             this.$q.notify({
               type: 'negative',
@@ -703,9 +714,10 @@ export default defineComponent({
             })
             this.updateLoading = false
           }
-        }
+        }*/
+        console.log(this.selectedCountryToEdit)
 
-        axios.put(vars.api_base3 + '/Country/UpdateCountry', fd).then(response => {
+        axios.put(vars.api_base3 + '/Country/UpdateCountry', this.selectedCountryToEdit).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
               type: 'positive',
@@ -714,15 +726,17 @@ export default defineComponent({
             this.getCountries()
             this.editDialog = false
             this.updateLoading = false
-            this.newNationalAnthem = ''
-            this.newCountryPicture = ''
+            /*this.newNationalAnthem = ''
+            this.newCountryPicture = ''*/
           }
         }).catch(error => {
           console.log(error)
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }
           this.updateLoading = false
         })
       }
