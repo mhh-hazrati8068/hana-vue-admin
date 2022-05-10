@@ -180,7 +180,7 @@
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input">
-              <span class="label">capacityAndLimitations</span>
+              <span class="label">capacityAndLimitations (هریک از موارد را با \ جدا کنید)</span>
               <q-input
                 outlined
                 dense
@@ -190,7 +190,7 @@
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input">
-              <span class="label">products</span>
+              <span class="label">products (هریک از موارد را با \ جدا کنید)</span>
               <q-input
                 outlined
                 dense
@@ -210,21 +210,27 @@
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input second-input">
-              <span class="label">فایل تصویری (لینک فایل را وارد کنید)</span>
+              <span class="label">فایل تصویری (لینک فایل را وارد کنید، بعد از هر لینک دکمه enter را بزنید)</span>
               <q-input
                 outlined
                 dense
-                v-model="stateData.picture"
+                type="textarea"
+                rows="1"
+                v-model="pictureUrls"
+                autogrow
               />
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input">
-              <span class="label">فایل صوتی (لینک فایل را وارد کنید)</span>
+              <span class="label">فایل صوتی (لینک فایل را وارد کنید، بعد از هر لینک دکمه enter را بزنید)</span>
               <q-input
                 outlined
                 dense
-                v-model="stateData.nativeSong"
+                type="textarea"
+                rows="1"
+                v-model="songsUrls"
+                autogrow
               />
             </div>
           </div>
@@ -269,7 +275,7 @@
   <q-dialog v-model="detailDialog">
     <q-card>
       <q-card-section class="row items-center">
-        <div class="text-h6">جزئیات کشور</div>
+        <div class="text-h6">جزئیات استان</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
@@ -317,12 +323,18 @@
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div>
-              capacityAndLimitations: {{ selectedStateToShow.capacityAndLimitations }}
+              capacityAndLimitations:
+              <span v-for="(item, index) of selectedStateToShow.capacityAndLimitations" :key="index">
+                {{ item }}<span v-if="index !== selectedStateToShow.capacityAndLimitations.length - 1 && selectedStateToShow.capacityAndLimitations.length !== 1">, </span>
+              </span>
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div>
-              products: {{ selectedStateToShow.products }}
+              products:
+              <span v-for="(item, index) of selectedStateToShow.products" :key="index">
+                {{ item }}<span v-if="index !== selectedStateToShow.products.length - 1 && selectedStateToShow.products.length !== 1">, </span>
+              </span>
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
@@ -333,8 +345,8 @@
           <div class="col-12 q-mt-md">
             <div>
               صادرات:
-              <span v-for="(item, index) of selectedStateToShow.export" :key="index">
-                {{ item }} <span v-if="index !== selectedStateToShow.export.length - 1 && selectedStateToShow.export.length !== 1"> ,</span>
+              <span v-for="(item, index) of selectedStateToShow.exportation" :key="index">
+                {{ item }}<span v-if="index !== selectedStateToShow.exportation.length - 1 && selectedStateToShow.exportation.length !== 1">, </span>
               </span>
             </div>
           </div>
@@ -342,20 +354,36 @@
             <div>
               واردات:
               <span v-for="(item, index) of selectedStateToShow.importation" :key="index">
-                {{ item }} <span v-if="index !== selectedStateToShow.importation.length - 1 && selectedStateToShow.importation.length !== 1"> ,</span>
+                {{ item }}<span v-if="index !== selectedStateToShow.importation.length - 1 && selectedStateToShow.importation.length !== 1">, </span>
               </span>
             </div>
           </div>
           <div class="col-12 q-mt-md">
             <div>
-              <p>تصویر</p>
-              <img :src="selectedStateToShow.picture"/>
+              <p v-if="selectedStateToShow.picture.length === 1">تصویر</p>
+              <p v-else>تصاویر</p>
+              <div class="flex justify-between">
+                <img
+                  v-for="(img, index) of selectedStateToShow.picture"
+                  :src="img"
+                  :key="index"
+                  style="margin: 0 .5rem"
+                />
+              </div>
             </div>
           </div>
           <div class="col-12 q-mt-md">
             <div>
-              <p>سرود</p>
-              <audio :src="selectedStateToShow.nativeSong"/>
+              <p v-if="selectedStateToShow.nativeSong.length === 1">سرود محلی</p>
+              <p v-else>سرودهای محلی</p>
+              <div class="flex justify-between">
+                <audio
+                  v-for="(audio, index) of selectedStateToShow.nativeSong"
+                  :key="index"
+                  :src="audio"
+                  style="margin: 0 .5rem"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -490,49 +518,63 @@
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input second-input">
               <span class="label">فایل تصویری</span>
-              <div class="q-mt-sm">
-                <img :src="selectedStateToEdit.picture"/>
+              <div class="flex justify-between q-mt-sm">
+                <img
+                  v-for="(img, index) of selectedStateToEdit.picture"
+                  :key="index"
+                  :src="img"
+                  style="margin: .5rem"
+                />
               </div>
-              <q-btn
+<!--              <q-btn
                 unelevated
                 dense
                 label="تغییر فایل تصویری"
                 class="full-width"
                 color="primary"
                 @click="changePictureFile"
-              />
-              <q-file
+              />-->
+              <q-input
+                v-for="(img, index) of selectedStateToEdit.picture"
+                :key="index"
                 outlined
                 dense
-                v-show="false"
-                v-model="newStatePicture"
+                v-model="selectedStateToEdit.picture[index]"
                 ref="flag"
+                class="q-mt-md"
               />
-              <span v-if="Object.keys(newStatePicture).length !== 0">{{ newStatePicture.name }}</span>
+<!--              <span v-if="Object.keys(newStatePicture).length !== 0">{{ newStatePicture.name }}</span>-->
             </div>
           </div>
           <div class="col-12 col-md-6 q-mt-md">
             <div class="input">
               <span class="label">فایل صوتی</span>
-              <div class="q-mt-sm">
-                <audio :src="selectedStateToEdit.nationalAnthem"/>
+              <div class="flex justify-between q-mt-sm">
+                <audio
+                  v-for="(audio, index) of selectedStateToEdit.nativeSong"
+                  :key="index"
+                  :src="audio"
+                  style="margin: .5rem"
+                />
               </div>
-              <q-btn
+<!--              <q-btn
                 unelevated
                 dense
                 label="تغییر فایل صوتی"
                 class="full-width"
                 color="primary"
                 @click="changeAudioFile"
-              />
-              <q-file
+              />-->
+              <q-input
+                v-for="(audio, index) of selectedStateToEdit.nativeSong"
+                :key="index"
                 outlined
                 dense
-                v-show="false"
-                v-model="newNativeSong"
-                ref="audio"
+                v-model="selectedStateToEdit.nativeSong[index]"
+                ref="flag"
+                class="q-mt-md"
               />
-              <span v-if="Object.keys(newNativeSong).length !== 0">{{ newNativeSong.name }}</span>
+<!--              <span v-if="Object.keys(newNativeSong).length !== 0">{{ newNativeSong.name }}</span>-->
             </div>
           </div>
           <div class="col-12 q-mt-md">
@@ -541,7 +583,7 @@
               <q-input
                 outlined
                 dense
-                v-model="selectedStateToEdit.export"
+                v-model="selectedStateToEdit.exportation"
               />
             </div>
           </div>
@@ -587,7 +629,7 @@ export default defineComponent({
       search: '',
       columns: [
         { name: 'stateCode', align: 'center', label: 'کد', field: 'stateCode'},
-        { name: 'center', align: 'center', label: 'مرکز', field: 'center'},
+        { name: 'center', align: 'center', label: 'مرکز استان', field: 'center'},
         { name: 'detail', align: 'center', label: '', field: 'detail'},
         { name: 'edit', align: 'center', label: '', field: 'edit'},
         { name: 'delete', align: 'center', label: '', field: 'delete'},
@@ -602,8 +644,8 @@ export default defineComponent({
       loading: false,
       createDialog: false,
       stateData: {
-        picture: '',
-        nativeSong: '',
+        picture: [],
+        nativeSong: [],
         countryId: null,
         stateCode: null,
         dialect: '',
@@ -618,6 +660,8 @@ export default defineComponent({
         products: '',
         water: ''
       },
+      pictureUrls: '',
+      songsUrls: '',
       isLoading: false,
       qBody: {
         take: 20,
@@ -639,9 +683,9 @@ export default defineComponent({
       console.log(this.stateData)
       this.isLoading = true
       let isStateCodeReiterative = false;
-      let importation = []
-      let exportation = []
-      let fd = new FormData()
+      /*let importation = []
+      let exportation = []*/
+      // let fd = new FormData()
       if (!this.stateData.picture || !this.stateData.nativeSong || !this.stateData.countryId || !this.stateData.stateCode || !this.stateData.dialect ||
         !this.stateData.state || !this.stateData.weather || !this.stateData.soilAndEarth || !this.stateData.population || !this.stateData.capacityAndLimitations ||
         !this.stateData.center || !this.stateData.importation || !this.stateData.exportation || !this.stateData.products || !this.stateData.water) {
@@ -653,7 +697,7 @@ export default defineComponent({
       } else {
         // importation = this.countryData.importation.split('\\')
         // exportation = this.countryData.exportation.split('\\')
-        fd.append("picture_state", this.stateData.picture)
+        /*fd.append("picture_state", this.stateData.picture)
         fd.append("native_song", this.stateData.nativeSong)
         fd.append("countryId", this.stateData.countryId)
         fd.append("stateCode", this.stateData.stateCode)
@@ -667,7 +711,10 @@ export default defineComponent({
         fd.append("capacityAndLimitations", this.stateData.capacityAndLimitations)
         fd.append("center", this.stateData.center)
         fd.append("products", this.stateData.products)
-        fd.append("water", this.stateData.water)
+        fd.append("water", this.stateData.water)*/
+
+        this.stateData.picture = this.pictureUrls.split('\n')
+        this.stateData.nativeSong = this.songsUrls.split('\n')
 
         for (let i = 0; i < this.states.length; i++) {
           if (this.states[i].stateCode === Number(this.stateData.stateCode)) {
@@ -681,7 +728,7 @@ export default defineComponent({
             message: 'کد استان تکراری میباشد.'
           })
           this.isLoading = false
-        } else if (this.stateData.picture.type !== 'image/png') {
+        } /*else if (this.stateData.picture.type !== 'image/png') {
           this.$q.notify({
             type: 'negative',
             message: 'نوع فایل تصویری باید بصورت png باشد.'
@@ -693,16 +740,16 @@ export default defineComponent({
             message: 'نوع فایل صوتی باید بصورت mp3 باشد.'
           })
           this.isLoading = false
-        } else {
-          axios.post(vars.api_base3 + '/State/CreateState', fd).then(response => {
+        }*/ else {
+          axios.post(vars.api_base3 + '/State/CreateState', this.stateData).then(response => {
             if (response.data.isSuccess) {
               this.$q.notify({
                 type: 'positive',
                 message: 'اطلاعات استان با موفقیت ثبت شد.'
               })
               this.stateData = {
-                picture: '',
-                nativeSong: '',
+                picture: [],
+                nativeSong: [],
                 countryId: null,
                 stateCode: null,
                 dialect: '',
@@ -720,13 +767,22 @@ export default defineComponent({
               this.getStates()
               this.createDialog = false
               this.isLoading = false
+            } else {
+              for (let i = 0; i < response.data.exceptions.length; i++) {
+                this.$q.notify({
+                  type: 'negative',
+                  message: response.data.exceptions[i].persianDescription
+                })
+              }
             }
           }).catch(error => {
             console.log(error)
-            this.$q.notify({
-              type: 'negative',
-              message: 'مشکلی پیش آمد.'
-            })
+            for (let i = 0; i < error.response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: error.response.data.exceptions[i].persianDescription
+              })
+            }
             this.isLoading = false
           })
         }
@@ -775,7 +831,7 @@ export default defineComponent({
       this.editDialog = !this.editDialog
       this.selectedStateToEdit = country
       this.selectedStateCode = this.selectedStateToEdit.stateCode
-      this.selectedStateToEdit.export = this.selectedStateToEdit.export.toString().replaceAll(',', '\\')
+      this.selectedStateToEdit.exportation = this.selectedStateToEdit.exportation.toString().replaceAll(',', '\\')
       this.selectedStateToEdit.importation = this.selectedStateToEdit.importation.toString().replaceAll(',', '\\')
       this.selectedStateToEdit.capacityAndLimitations = this.selectedStateToEdit.capacityAndLimitations.toString().replaceAll(',', '\\')
       this.selectedStateToEdit.products = this.selectedStateToEdit.products.toString().replaceAll(',', '\\')
@@ -784,7 +840,7 @@ export default defineComponent({
     updateState() {
       this.updateLoading = true
       let isStateCodeReiterative = false;
-      let fd = new FormData()
+      // let fd = new FormData()
       const states = this.states.filter(state => {
         return state.id !== this.selectedStateToEdit.id
       })
@@ -795,7 +851,7 @@ export default defineComponent({
         }
       }
 
-      fd.append("countryId", this.selectedStateToEdit.countryId)
+      /*fd.append("countryId", this.selectedStateToEdit.countryId)
       fd.append("stateCode", this.selectedStateToEdit.stateCode)
       fd.append("dialect", this.selectedStateToEdit.dialect)
       fd.append("state", this.selectedStateToEdit.state)
@@ -808,7 +864,7 @@ export default defineComponent({
       fd.append("center", this.selectedStateToEdit.center)
       fd.append("products", this.selectedStateToEdit.products)
       fd.append("water", this.selectedStateToEdit.water)
-      fd.append("id", this.selectedStateToEdit.id)
+      fd.append("id", this.selectedStateToEdit.id)*/
 
       if (isStateCodeReiterative) {
         this.$q.notify({
@@ -817,7 +873,7 @@ export default defineComponent({
         })
         this.updateLoading = false
       } else {
-        if (this.newStatePicture) {
+        /*if (this.newStatePicture) {
           if (this.newStatePicture.type !== 'image/png') {
             this.$q.notify({
               type: 'negative',
@@ -838,9 +894,9 @@ export default defineComponent({
           } else {
             fd.append("native_song", this.newNativeSong)
           }
-        }
+        }*/
 
-        axios.put(vars.api_base3 + '/State/UpdateState', fd).then(response => {
+        axios.put(vars.api_base3 + '/State/UpdateState', this.selectedStateToEdit).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
               type: 'positive',
@@ -851,13 +907,22 @@ export default defineComponent({
             this.updateLoading = false
             this.newNativeSong = ''
             this.newStatePicture = ''
+          } else {
+            for (let i = 0; i < response.data.exceptions.length; i++) {
+              this.$q.notify({
+                type: 'negative',
+                message: response.data.exceptions[i].persianDescription
+              })
+            }
           }
         }).catch(error => {
           console.log(error)
-          this.$q.notify({
-            type: 'negative',
-            message: 'مشکلی پیش آمد.'
-          })
+          /*for (let i = 0; i < error.response.data.exceptions.length; i++) {
+            this.$q.notify({
+              type: 'negative',
+              message: error.response.data.exceptions[i].persianDescription
+            })
+          }*/
           this.updateLoading = false
         })
       }
