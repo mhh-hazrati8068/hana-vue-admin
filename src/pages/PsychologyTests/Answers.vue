@@ -228,7 +228,7 @@
             <q-select
               dense
               outlined
-              v-model="selectedPattern.value"
+              v-model="selectedPattern"
               :options="answerPatterns"
               class="q-mb-md"
               @update:model-value="savePattern"
@@ -323,12 +323,7 @@ export default defineComponent({
       answerText: '',
       tests: [],
       selectedTest: {},
-      answerPatterns: [
-        { label: 'دو گزینه\u200Cای', value: 2, options: [{ label: 'بله', score: 1 }, { label: 'خیر', score: 0 }] },
-        { label: 'سه گزینه\u200Cای', value: 3, options: [{ label: 'زیاد', score: 2 }, { label: 'متوسط', score: 1 }, { label: 'کم', score: 0 }] },
-        { label: 'چهار گزینه\u200Cای', value: 4, options: [{ label: 'زیاد', score: 3 }, { label: 'متوسط', score: 2 }, { label: 'کم', score: 1 }, { label: 'نظری ندارم', score: 0 }] },
-        { label: 'پنج گزینه\u200Cای', value: 5, options: [{ label: 'کاملا موافقم', score: 4 }, { label: 'موافقم', score: 3 }, { label: 'خنثی', score: 2 }, { label: 'مخالفم', score: 1 }, { label: 'کاملا مخالفم', score: 0 }] }
-      ],
+      answerPatterns: [],
       selectedPattern: {},
       questions: [],
       selectedQuestion: {},
@@ -366,7 +361,13 @@ export default defineComponent({
       allAnswers: [],
       questionsForEditAnswer: [],
       detailDialog: false,
-      selectedAnswerToShow: {}
+      selectedAnswerToShow: {},
+      test: [
+        { label: 'دو گزینه\u200Cای', value: 2, options: [{ label: 'بله', score: 1 }, { label: 'خیر', score: 0 }] },
+        { label: 'سه گزینه\u200Cای', value: 3, options: [{ label: 'زیاد', score: 2 }, { label: 'متوسط', score: 1 }, { label: 'کم', score: 0 }] },
+        { label: 'چهار گزینه\u200Cای', value: 4, options: [{ label: 'زیاد', score: 3 }, { label: 'متوسط', score: 2 }, { label: 'کم', score: 1 }, { label: 'نظری ندارم', score: 0 }] },
+        { label: 'پنج گزینه\u200Cای', value: 5, options: [{ label: 'کاملا موافقم', score: 4 }, { label: 'موافقم', score: 3 }, { label: 'خنثی', score: 2 }, { label: 'مخالفم', score: 1 }, { label: 'کاملا مخالفم', score: 0 }] }
+      ]
     }
   },
   created () {
@@ -781,14 +782,16 @@ export default defineComponent({
       localStorage.setItem('answer-template', this.answerTemplate)
     },
     savePattern () {
-      localStorage.setItem('answer-pattern', this.selectedPattern.value.value)
+      localStorage.setItem('answer-pattern', this.selectedPattern.value)
     },
     getLocalStorage () {
+      this.answerPatterns = this.$store.state.answerPattern.patterns
       if (localStorage.getItem('answer-pattern')) {
-        this.selectedPattern.value = Object.assign({}, this.answerPatterns.filter(pattern => {
-          return pattern.value === Number(localStorage.getItem('answer-pattern'))
-        }))[0]
+        this.selectedPattern = this.answerPatterns.find(pattern => {
+            return pattern.value === Number(localStorage.getItem('answer-pattern'))
+        })
       }
+      console.log(this.selectedPattern)
       if (localStorage.getItem('answer-template')) {
         this.answerTemplate = Number(localStorage.getItem('answer-template'))
       }
