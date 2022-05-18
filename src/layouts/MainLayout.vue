@@ -90,6 +90,12 @@ const linksList = [
         icon: 'auto_graph',
         link: '/analysis',
         name: 'analysis'
+      },
+      {
+        title: 'دیدگاه\u200Cها',
+        icon: '',
+        link: '/comments',
+        name: 'comments'
       }
     ]
   },
