@@ -288,8 +288,6 @@ export default defineComponent({
     getCategories() {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetCategory', {
         SearchQuery: null,
-        Take: null,
-        Skip: null,
         IsExportFile: true
       }).then(res => {
         if (res.data.isSuccess) {
@@ -332,7 +330,6 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
-        CategoryId: null
       }).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count
@@ -494,9 +491,6 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTag', {
         SearchQuery: null,
         // categoryId: this.selectedCategory.id !== 0 ? this.selectedCategory.id : null,
-        CategoryId: null,
-        Take: null,
-        Skip: null,
         IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {

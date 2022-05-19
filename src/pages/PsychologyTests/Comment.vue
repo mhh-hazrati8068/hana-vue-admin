@@ -48,7 +48,7 @@
                 class="detail-btn"
                 @click="openDetailDialog(props.row)"
               />
-              <q-btn
+<!--              <q-btn
                 v-if="col.field === 'edit'"
                 unelevated
                 dense
@@ -56,7 +56,7 @@
                 icon="edit"
                 class="edit-btn"
                 @click="openEditDialog(props.row)"
-              />
+              />-->
               <q-btn
                 v-if="col.field === 'delete'"
                 unelevated
@@ -71,6 +71,17 @@
         </template>
       </q-table>
     </div>
+<!--    <div class="flex justify-end">
+      <q-btn
+        unelevated
+        dense
+        label="افزودن دیدگاه"
+        icon-right="add"
+        color="primary"
+        class="btn q-py-sm q-mt-md"
+        @click="createDialog = !createDialog"
+      />
+    </div>-->
   </div>
   <q-dialog v-model="detailDialog">
     <q-card>
@@ -79,12 +90,66 @@
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
+      <q-card-section>
+        <div class="flex column q-my-lg">
+          <span>کاربر</span>
+          <div class="q-mt-sm flex" style="align-items: center">
+            <img
+              :src="selectedCommentToShow.img"
+              style="max-width: 40px; max-height: 40px; border-radius: 100%; margin-left: .5rem"
+            />
+            <span>{{ selectedCommentToShow.name }}</span>
+          </div>
+        </div>
+        <div class="q-my-lg">
+          نقش کاربر: {{ selectedCommentToShow.user_role }}
+        </div>
+        <div class="flex column q-my-lg">
+          <span>متن</span>
+          <span class="q-pt-sm">{{ selectedCommentToShow.text }}</span>
+        </div>
+        <div class="q-my-lg">
+          تاریخ: {{ selectedCommentToShow.date }}
+        </div>
+        <div class="q-my-lg">
+          زمان: {{ selectedCommentToShow.time }}
+        </div>
+        <div class="q-my-lg">
+          کامنت فعال
+          <q-checkbox
+            readonly
+            disable
+            dense
+            v-model="selectedCommentToShow.is_active"
+          />
+        </div>
+        <div class="q-my-lg">
+          تست: {{ selectedCommentToShow.psychology_test_id }}
+        </div>
+        <div class="q-my-lg">
+          <span v-if="selectedCommentToShow.id === selectedCommentToShow.reply_id">
+            این دیدگاه جدید است.
+          </span>
+          <span v-else>
+            این دیدگاه در جواب به دیدگاهی دیگر است.
+          </span>
+        </div>
+      </q-card-section>
     </q-card>
   </q-dialog>
   <q-dialog v-model="editDialog">
     <q-card>
       <q-card-section class="row items-center">
         <div class="text-h6">ویرایش دیدگاه</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+  <q-dialog v-model="createDialog">
+    <q-card>
+      <q-card-section class="row items-center">
+        <div class="text-h6">افزودن دیدگاه</div>
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
@@ -169,6 +234,12 @@ export default defineComponent({
     openDetailDialog(comment) {
       this.detailDialog = true
       this.selectedCommentToShow = comment
+      const dateTime = this.selectedCommentToShow.date.split('T')
+      // const date = dateTime[0].split('-')
+      // console.log(date[1])
+      const d = new Date(dateTime[0])
+      this.selectedCommentToShow.date = d.toLocaleDateString('fa-IR')
+      this.selectedCommentToShow.time = dateTime[1].slice(0, dateTime[1].lastIndexOf(':'))
     },
     openEditDialog(comment) {
       this.editDialog = true

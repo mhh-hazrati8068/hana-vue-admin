@@ -374,7 +374,6 @@ export default defineComponent({
     if (this.$route.query) {
       this.questionId = Number(this.$route.query.questionId)
     }
-    this.getCurrentQuestion()
     this.getTest()
     this.getAnswers()
     this.getQuestions()
@@ -382,31 +381,13 @@ export default defineComponent({
     this.getLocalStorage()
   },
   methods: {
-    getCurrentQuestion () {
-      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
-        SearchQuery: null,
-        PsychologyTestId: null,
-        Take: null,
-        Skip: null,
-        IsExportFile: false,
-      }).then(response => {
-        this.currentQuestion = response.data.items.filter(question => {
-          return question.id === this.questionId
-        })
-      }).catch(error => {
-        console.log(error)
-      })
-    },
     getTest () {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
-        TagId: null,
-        Take: null,
-        Skip: null,
-        IsExportFile: false,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
-          this.tests = response.data.items
+          this.tests = response.data.item.items
           // console.log(this.tests)
         } else {
           for (let i = 0; i < response.data.exceptions.length; i++) {
@@ -429,10 +410,7 @@ export default defineComponent({
     getQuestions () {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: null,
-        PsychologyTestId: null,
-        Take: null,
-        Skip: null,
-        IsExportFile: true,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           this.questions = response.data.items.filter(question => {
@@ -661,11 +639,9 @@ export default defineComponent({
       this.pagination.rowsPerPage = this.qBody.take
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
         SearchQuery: null,
-        QuestionId: null,
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
-        PsychologyTestId: null
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -704,9 +680,6 @@ export default defineComponent({
     getQuestionOptions () {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: null,
-        PsychologyTestId: null,
-        Take: null,
-        Skip: null,
         IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
@@ -746,11 +719,7 @@ export default defineComponent({
       // console.log(this.selectQuestionToShow)
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
         searchQuery: null,
-        QuestionId: null,
-        Take: null,
-        Skip: null,
-        IsExportFile: true,
-        PsychologyTestId: null
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectQuestionToShow.id === 0) {
@@ -791,7 +760,7 @@ export default defineComponent({
             return pattern.value === Number(localStorage.getItem('answer-pattern'))
         })
       }
-      console.log(this.selectedPattern)
+      // console.log(this.selectedPattern)
       if (localStorage.getItem('answer-template')) {
         this.answerTemplate = Number(localStorage.getItem('answer-template'))
       }
@@ -876,11 +845,7 @@ export default defineComponent({
     getSearchItems () {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
         SearchQuery: this.search,
-        QuestionId: null,
-        Take: null,
-        Skip: null,
         IsExportFile: false,
-        PsychologyTestId: null
       }).then(response => {
         if (response.data.isSuccess) {
           this.answers = response.data.items
@@ -904,10 +869,7 @@ export default defineComponent({
     },
     getQuestionsForEdit() {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
-        PsychologyTestId: null,
         SearchQuery: null,
-        Take: null,
-        Skip: null,
         IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
@@ -936,10 +898,7 @@ export default defineComponent({
       this.selectedAnswerToShow = answer
       // console.log(this.selectedAnswerToShow)
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
-        PsychologyTestId: null,
         SearchQuery: null,
-        Take: null,
-        Skip: null,
         IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {

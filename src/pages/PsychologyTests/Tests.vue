@@ -488,7 +488,6 @@ export default defineComponent({
       this.pagination.rowsPerPage = this.qBody.take
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
-        TagId: null,
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
@@ -649,10 +648,7 @@ export default defineComponent({
     getTags() {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTag', {
         SearchQuery: null,
-        Take: null,
-        Skip: null,
-        IsExportFile: true,
-        CategoryId: null
+        IsExportFile: true
       }).then(res => {
         if (res.data.isSuccess) {
           this.tags = res.data.items
@@ -698,16 +694,13 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
         // categoryId: this.selectedCategory.id !== 0 ? this.selectedCategory.id : null,
-        CategoryId: null,
-        Take: null,
-        Skip: null,
         IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTag.id === 0) {
-            this.tests = response.data.items
+            this.tests = response.data.item.items
           } else {
-            this.tests = response.data.items.filter(tag => {
+            this.tests = response.data.item.items.filter(tag => {
               return tag.tag_id === this.selectedTag.id
             })
           }

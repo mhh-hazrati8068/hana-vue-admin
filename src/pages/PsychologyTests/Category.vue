@@ -283,7 +283,8 @@ export default defineComponent({
       categoryData: {
         text: '',
         img: '',
-        mainColor: ''
+        mainColor: '',
+        isActive: true
       },
       isLoading: false,
       editDialog: false,

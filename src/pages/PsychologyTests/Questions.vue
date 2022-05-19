@@ -299,7 +299,6 @@ export default defineComponent({
       this.pagination.rowsPerPage = this.qBody.take
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: this.search ? this.search : null,
-        PsychologyTestId: null,
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
@@ -337,18 +336,15 @@ export default defineComponent({
     getTest () {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
-        TagId: null,
-        Take: null,
-        Skip: null,
-        IsExportFile: true,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
-          this.tests = response.data.items
+          this.tests = response.data.item.items
           // console.log(this.tests)
           this.selectOptions = [{
             id: 0,
             text: 'همه'
-          }, ...response.data.items
+          }, ...response.data.item.items
           ]
           if (this.testId !== null) {
             this.selectedTest.id = this.tests.find(test => test.id === this.testId).id
@@ -423,10 +419,7 @@ export default defineComponent({
       // console.log(this.selectedTest)
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: null,
-        PsychologyTestId: null,
-        Take: null,
-        Skip: null,
-        IsExportFile: true,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTest.id === 0) {

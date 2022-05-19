@@ -452,17 +452,14 @@ export default defineComponent({
     getTests () {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
-        TagId: null,
-        Take: null,
-        Skip: null,
         IsExportFile: true,
       }).then(response => {
         if (response.data.isSuccess) {
           this.testOptions = [{
             id: 0,
             text: 'همه'
-          }, ...response.data.items]
-          this.tests = response.data.items
+          }, ...response.data.item.items]
+          this.tests = response.data.item.items
           // console.log(this.tests)
           this.selectedTest.id = this.testOptions.find(test => test.id === 0).id
         } else {
@@ -489,7 +486,6 @@ export default defineComponent({
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
       this.pagination.rowsPerPage = this.qBody.take
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetReplyPsychology', {
-        PsychologyTestId: null,
         SearchQuery: null,
         Take: this.qBody.take,
         Skip: this.qBody.skip,
@@ -521,7 +517,6 @@ export default defineComponent({
     },
     changeAnalyses () {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetReplyPsychology', {
-        PsychologyTestId: null,
         SearchQuery: null,
         Take: this.qBody.take,
         Skip: this.qBody.skip,
