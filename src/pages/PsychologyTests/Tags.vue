@@ -46,18 +46,22 @@
               :props="props"
             >
               <span
-                v-if="col.field !== 'counter'"
+                v-if="col.field !== 'counter' && col.field !== 'img'"
                 style="cursor: default"
               >
                 {{ col.value }}
               </span>
               <span
-                v-else
+                v-if="col.field === 'counter'"
                 :class="{ 'row-numbers': col.field === 'counter' }"
                 style="cursor: default"
               >
                     {{ col.value }}
               </span>
+              <div
+                v-if="col.field === 'img'"
+                v-html="col.value"
+              ></div>
               <q-btn
                 v-if="col.field === 'testsBtn'"
                 unelevated
@@ -330,6 +334,7 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
+        CategoryId: this.categoryId ? this.categoryId : 0
       }).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count

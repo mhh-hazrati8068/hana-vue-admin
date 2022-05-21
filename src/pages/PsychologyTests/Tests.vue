@@ -384,7 +384,8 @@ export default defineComponent({
         description: '',
         cost: null,
         beingMonetary: false,
-        tagId: null
+        tagId: null,
+        isActive: true
       },
       columns: [
         { name: 'counter', align: 'center', label: 'ردیف', field: 'counter' },
@@ -491,11 +492,12 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
+        TagId: this.tagId ? this.tagId : 0
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
           this.pagination.page = reqProps?.pagination.page ?? 1
-          this.tests = response.data.items
+          this.tests = response.data.item.items
           if (this.tagId !== null) {
             this.tests = this.tests.filter(test => {
               return test.tag_id === this.tagId
@@ -691,10 +693,11 @@ export default defineComponent({
       })
     },
     changeTests() {
+      this.loading = true
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
-        // categoryId: this.selectedCategory.id !== 0 ? this.selectedCategory.id : null,
-        IsExportFile: true,
+        TagId: this.selectedTag.id !== 0 ? this.selectedTag.id : 0,
+        IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTag.id === 0) {
@@ -720,6 +723,8 @@ export default defineComponent({
             message: error.response.data.exceptions[i].persianDescription
           })
         }
+      }).then(() => {
+        this.loading = false
       })
     }
   }

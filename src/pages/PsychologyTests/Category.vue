@@ -51,14 +51,11 @@
               >
                     {{ col.value }}
               </span>
-              <div class="flex flex-center">
-<!--                <svg width="35" height="30" viewBox="0 0 29 30" fill="#000" xmlns="http://www.w3.org/2000/svg" v-if="paths.length > 0">
-                  <path v-for="path of paths" :d="path"/>
-                </svg>-->
-                <svg v-if="col.field === 'img'" style="max-width: 50px; max-height: 70px">
-                  <path :d="col.value" :fill="props.row.main_color"></path>
-                </svg>
-              </div>
+              <div
+                v-if="col.field === 'img'"
+                v-html="col.value"
+                :style="{ 'fill': props.row.main_color }"
+              ></div>
               <q-btn
                 v-if="col.field === 'tagsBtn'"
                 unelevated
