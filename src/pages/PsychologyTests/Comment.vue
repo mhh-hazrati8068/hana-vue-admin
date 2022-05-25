@@ -16,7 +16,7 @@
     </div>
     <div class="comments-wrapper">
       <q-table
-        :table-style="'counter-reset: cssRowCounter' + ((pagination.page - 1) * pagination.rowsPerPage) + ';'"
+        :table-style="'counter-reset: cssRowCounter ' + ((pagination.page - 1) * pagination.rowsPerPage) + ';'"
         :columns="columns"
         :rows="comments"
         v-model:pagination="pagination"
