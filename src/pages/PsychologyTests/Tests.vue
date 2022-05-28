@@ -53,7 +53,7 @@
                   :props="props"
                 >
                   <span
-                    v-if="col.field === 'description'"
+                    v-if="col.field === 'text'"
                     class="description"
                     @click="showDescriptionDialog(col.value)"
                   >
@@ -147,6 +147,14 @@
             قیمت: {{ toCurrency(selectedTestToShow.cost) }} تومان
           </div>
         </div>
+        <div class="q-my-lg">
+          <span class="label">وضعیت:</span>
+          <div>
+            <span>فعال</span>
+            <q-icon name="check_circle" color="green" style="font-size: 1.25rem; margin-right: .5rem;" v-if="selectedTestToShow.is_active"/>
+            <q-icon name="cancel" color="red" style="font-size: 1.25rem; margin-right: .5rem;" v-else/>
+          </div>
+        </div>
         <div class="q-my-lg flex column">
           <span>تصویر:</span>
           <img :src="selectedTestToShow.img" class="q-mt-md">
@@ -232,6 +240,18 @@
                     placeholder="توضیحات تست را وارد نمایید..."
                     type="textarea"
                   />
+                </div>
+                <div class="col-12 q-mt-lg">
+                  <span class="label">وضعیت</span>
+                  <div>
+                    <span v-if="selectedTestToEdit.is_active">فعال</span>
+                    <span v-else>غیرفعال</span>
+                    <q-checkbox
+                      dense
+                      v-model="selectedTestToEdit.is_active"
+                      class="q-ml-sm"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -492,12 +512,12 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
-        TagId: this.tagId ? this.tagId : 0
+        TagId: this.tagId ? this.tagId : null
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
           this.pagination.page = reqProps?.pagination.page ?? 1
-          this.tests = response.data.item.items
+          this.tests = response.data.items
           if (this.tagId !== null) {
             this.tests = this.tests.filter(test => {
               return test.tag_id === this.tagId
@@ -555,7 +575,8 @@ export default defineComponent({
           cost: this.selectedTestToEdit.being_monetary ? Number(this.selectedTestToEdit.cost) : null,
           beingMonetary: this.selectedTestToEdit.being_monetary,
           id: this.selectedTestToEdit.id,
-          tagId: this.selectedTestToEdit.tag_id
+          tagId: this.selectedTestToEdit.tag_id,
+          isActive: this.selectedTestToEdit.is_active
         }).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
@@ -696,14 +717,14 @@ export default defineComponent({
       this.loading = true
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
-        TagId: this.selectedTag.id !== 0 ? this.selectedTag.id : 0,
+        TagId: this.selectedTag.id !== 0 ? this.selectedTag.id : null,
         IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTag.id === 0) {
-            this.tests = response.data.item.items
+            this.tests = response.data.items
           } else {
-            this.tests = response.data.item.items.filter(tag => {
+            this.tests = response.data.items.filter(tag => {
               return tag.tag_id === this.selectedTag.id
             })
           }

@@ -204,7 +204,7 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
-        PsychologyTestId: 1
+        PsychologyTestId: null
       }).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count

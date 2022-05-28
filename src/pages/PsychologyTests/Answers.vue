@@ -53,7 +53,7 @@
                   :props="props"
                 >
                   <span
-                    :class="{ 'row-numbers': col.field === 'counter' }"
+                    :class="{ 'row-numbers': col.field === 'counter', 'description': col.field === 'text' }"
                   >
                     {{ col.value }}
                   </span>
@@ -387,7 +387,7 @@ export default defineComponent({
         IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
-          this.tests = response.data.item.items
+          this.tests = response.data.items
           // console.log(this.tests)
         } else {
           for (let i = 0; i < response.data.exceptions.length; i++) {
@@ -437,7 +437,8 @@ export default defineComponent({
 
       if (this.selectedTest.id) {
         axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
-          PsychologyTestId: this.selectedTest.id
+          PsychologyTestId: this.selectedTest.id,
+          IsExportFile: true
         }).then(response => {
           if (response.data.isSuccess) {
             this.allAnswers = response.data.items
@@ -531,6 +532,7 @@ export default defineComponent({
               this.selectedAnswers = []
               this.getAnswers()
               this.isLoading = false
+              this.answersOfSelectedQuestion = []
             } else {
               this.isLoading = false
               for (let i = 0; i < response.data.exceptions.length; i++) {
@@ -572,6 +574,7 @@ export default defineComponent({
             this.createDialog = false
             this.getAnswers()
             this.isLoading = false
+            this.answersOfSelectedQuestion = []
           } else {
             this.isLoading = false
             for (let i = 0; i < response.data.exceptions.length; i++) {
@@ -592,11 +595,12 @@ export default defineComponent({
           }
         })
       } else if (this.answerTemplate === 1) {
-        for (let i = 0; i < this.selectedPattern.value.value; i++) {
+        for (let i = 0; i < this.selectedPattern.value; i++) {
+          console.log(this.selectedPattern);
           axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateFargoAnswer', {
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
-            text: this.selectedPattern.value.options[i].label,
-            score: this.selectedPattern.value.options[i].score
+            text: this.selectedPattern.options[i].label,
+            score: this.selectedPattern.options[i].score
           }).then(response => {
             // console.log(response)
             if (response.data.isSuccess) {
@@ -610,6 +614,7 @@ export default defineComponent({
               this.createDialog = false
               this.getAnswers()
               this.isLoading = false
+              this.answersOfSelectedQuestion = []
             } else {
               this.isLoading = false
               for (let i = 0; i < response.data.exceptions.length; i++) {
@@ -766,7 +771,7 @@ export default defineComponent({
       }
     },
     deleteAnswer (answer) {
-      axios.post(vars.api_base2 + '/FargoTest/Answer/DeleteFargoAnswer', {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteFargoAnswer', {
         Id_: answer.id
       }).then(response => {
         if (response.data.isSuccess) {

@@ -52,7 +52,7 @@
                   :props="props"
                 >
                   <span
-                    :class="{ 'row-numbers': col.field === 'counter' }"
+                    :class="{ 'row-numbers': col.field === 'counter', 'description': col.field === 'tittle' }"
                   >
                     {{ col.value }}
                   </span>
@@ -458,8 +458,8 @@ export default defineComponent({
           this.testOptions = [{
             id: 0,
             text: 'همه'
-          }, ...response.data.item.items]
-          this.tests = response.data.item.items
+          }, ...response.data.items]
+          this.tests = response.data.items
           // console.log(this.tests)
           this.selectedTest.id = this.testOptions.find(test => test.id === 0).id
         } else {
@@ -489,7 +489,8 @@ export default defineComponent({
         SearchQuery: null,
         Take: this.qBody.take,
         Skip: this.qBody.skip,
-        IsExportFile: false
+        IsExportFile: false,
+        PsychologyTestId: this.selectedTest.id ? this.selectedTest.id : null
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -520,7 +521,8 @@ export default defineComponent({
         SearchQuery: null,
         Take: this.qBody.take,
         Skip: this.qBody.skip,
-        IsExportFile: true
+        IsExportFile: true,
+        PsychologyTestId: this.selectedTest.id ? this.selectedTest.id : null
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTest.id === 0) {
@@ -560,9 +562,9 @@ export default defineComponent({
       } else {
         console.log(this.analysisData.specialty_id)
         const score = []
-        score.push(Number(this.analysisData.minScore))
+        score.push(this.analysisData.minScore)
         if (this.analysisData.maxScore) {
-          score.push(Number(this.analysisData.maxScore))
+          score.push(this.analysisData.maxScore)
         }
         axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateReplyPsychology', {
           text: this.analysisData.text,

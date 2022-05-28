@@ -53,7 +53,7 @@
                   :props="props"
                 >
                   <span
-                    :class="{ 'row-numbers': col.field === 'counter' }"
+                    :class="{ 'row-numbers': col.field === 'counter', 'description': col.field === 'text' }"
                   >
                     {{ col.value }}
                   </span>
@@ -302,6 +302,7 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
+        PsychologyTestId: this.testId ? this.testId : null
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -339,12 +340,12 @@ export default defineComponent({
         IsExportFile: true
       }).then(response => {
         if (response.data.isSuccess) {
-          this.tests = response.data.item.items
+          this.tests = response.data.items
           // console.log(this.tests)
           this.selectOptions = [{
             id: 0,
             text: 'همه'
-          }, ...response.data.item.items
+          }, ...response.data.items
           ]
           if (this.testId !== null) {
             this.selectedTest.id = this.tests.find(test => test.id === this.testId).id
@@ -419,7 +420,8 @@ export default defineComponent({
       // console.log(this.selectedTest)
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: null,
-        IsExportFile: true
+        IsExportFile: true,
+        PsychologyTestId: this.selectedTest.id ? this.selectedTest.id : null
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTest.id === 0) {
@@ -503,7 +505,7 @@ export default defineComponent({
       }
     },
     deleteQuestion (questionId) {
-      axios.post(vars.api_base2 + '/FargoTest/Question/DeleteQuestion', {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteFargoQuestion', {
         Id_: questionId
       }).then(response => {
         if (response.data.isSuccess) {

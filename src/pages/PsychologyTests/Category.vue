@@ -207,16 +207,27 @@
           </div>
           <div class="col-12 q-mt-lg">
             <span class="label">تصویر</span>
-            <div>
-              <svg style="max-width: 100px; max-height: 100px">
-                <path :d="selectedCategoryToEdit.img" :fill="selectedCategoryToEdit.main_color"></path>
-              </svg>
-            </div>
+            <div
+              v-html="selectedCategoryToEdit.img"
+              :style="{ 'fill': selectedCategoryToEdit.main_color }"
+            ></div>
             <q-input
               outlined
               dense
               v-model="selectedCategoryToEdit.img"
             />
+          </div>
+          <div class="col-12 q-mt-lg">
+            <span class="label">وضعیت</span>
+            <div>
+              <span v-if="selectedCategoryToEdit.is_active">فعال</span>
+              <span v-else>غیرفعال</span>
+              <q-checkbox
+                dense
+                v-model="selectedCategoryToEdit.is_active"
+                class="q-ml-sm"
+              />
+            </div>
           </div>
           <div class="col-12">
             <q-btn
@@ -422,7 +433,8 @@ export default defineComponent({
           text: this.selectedCategoryToEdit.text,
           img: this.selectedCategoryToEdit.img,
           mainColor: this.selectedCategoryToEdit.main_color,
-          id: this.selectedCategoryToEdit.id
+          id: this.selectedCategoryToEdit.id,
+          isActive: this.selectedCategoryToEdit.is_active
         }).then(res => {
           if (res.data.isSuccess) {
             this.editDialog = false

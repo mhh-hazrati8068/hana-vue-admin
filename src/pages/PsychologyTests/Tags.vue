@@ -214,6 +214,18 @@
                           accept=".svg"
                         />-->
           </div>
+          <div class="col-12 q-mt-lg">
+            <span class="label">وضعیت</span>
+            <div>
+              <span v-if="selectedTagToEdit.is_active">فعال</span>
+              <span v-else>غیرفعال</span>
+              <q-checkbox
+                dense
+                v-model="selectedTagToEdit.is_active"
+                class="q-ml-sm"
+              />
+            </div>
+          </div>
           <div class="col-12">
             <q-btn
               unelevated
@@ -277,7 +289,8 @@ export default defineComponent({
       tagData: {
         text: '',
         img: '',
-        categoryId: null
+        categoryId: null,
+        isActive: true
       },
       isLoading: false,
       editDialog: false,
@@ -334,7 +347,7 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
-        CategoryId: this.categoryId ? this.categoryId : 0
+        CategoryId: this.categoryId ? this.categoryId : null
       }).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count
@@ -461,7 +474,8 @@ export default defineComponent({
           text: this.selectedTagToEdit.text,
           img: this.selectedTagToEdit.img,
           categoryId: this.selectedTagToEdit.category_id,
-          id: this.selectedTagToEdit.id
+          id: this.selectedTagToEdit.id,
+          isActive: this.selectedTagToEdit.is_active
         }).then(res => {
           if (res.data.isSuccess) {
             this.editDialog = false
