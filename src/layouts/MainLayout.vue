@@ -23,7 +23,7 @@
           header
           class="flex flex-center q-mb-md"
         >
-          <img src="~assets/images/fargo.svg">
+          <img src="~assets/images/fargo.svg" class="logo" />
         </q-item-label>
         <q-expansion-item
           :expand-icon="item.children !== undefined ? '' : '_'"

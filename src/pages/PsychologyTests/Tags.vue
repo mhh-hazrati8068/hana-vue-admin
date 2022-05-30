@@ -202,6 +202,9 @@
           </div>
           <div class="col-12 q-mt-lg">
             <span class="label">تصویر (محتوای تصویر svg را قرار دهید)</span>
+            <div
+              v-html="selectedTagToEdit.img"
+            ></div>
             <q-input
               outlined
               dense
@@ -400,7 +403,8 @@ export default defineComponent({
             this.tagData = {
               text: '',
               img: '',
-              categoryId: null
+              categoryId: null,
+              isActive: true
             }
             this.$q.notify({
               type: 'positive',

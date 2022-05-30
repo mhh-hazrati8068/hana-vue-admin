@@ -356,7 +356,8 @@ export default defineComponent({
             this.categoryData = {
               text: '',
               img: '',
-              mainColor: ''
+              mainColor: '',
+              isActive: true
             }
             this.$q.notify({
               type: 'positive',

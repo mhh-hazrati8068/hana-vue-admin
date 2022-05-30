@@ -450,7 +450,6 @@ export default defineComponent({
     if (this.$route.query.tagId) {
       this.tagId = Number(this.$route.query.tagId)
     }
-    this.getTags()
     this.getTest()
   },
   methods: {
@@ -476,7 +475,8 @@ export default defineComponent({
               tag1: '',
               tag2: null,
               text: '',
-              description: ''
+              description: '',
+              isActive: true
             }
             this.createDialog = false
             this.isLoading = false
@@ -503,6 +503,7 @@ export default defineComponent({
       }
     },
     getTest (reqProps) {
+      this.getTags()
       this.loading = true
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
@@ -529,6 +530,13 @@ export default defineComponent({
               type: 'negative',
               message: response.data.exceptions[i].persianDescription
             })
+          }
+        }
+        for (let i = 0; i < this.tests.length; i++) {
+          for (let j = 0; j < this.tags.length; j++) {
+            if (this.tests[i].tag_id === this.tags[j].id) {
+              this.tests[i].tag = this.tags[j].text
+            }
           }
         }
       }).catch(error => {
@@ -675,13 +683,6 @@ export default defineComponent({
       }).then(res => {
         if (res.data.isSuccess) {
           this.tags = res.data.items
-          for (let i = 0; i < this.tests.length; i++) {
-            for (let j = 0; j < this.tags.length; j++) {
-              if (this.tests[i].tag_id === this.tags[j].id) {
-                this.tests[i].tag = this.tags[j].text
-              }
-            }
-          }
           // console.log(this.tags)
           this.selectOptions = [{
             id: 0,
@@ -727,6 +728,13 @@ export default defineComponent({
             this.tests = response.data.items.filter(tag => {
               return tag.tag_id === this.selectedTag.id
             })
+          }
+          for (let i = 0; i < this.tests.length; i++) {
+            for (let j = 0; j < this.tags.length; j++) {
+              if (this.tests[i].tag_id === this.tags[j].id) {
+                this.tests[i].tag = this.tags[j].text
+              }
+            }
           }
         } else {
           for (let i = 0; i < response.data.exceptions.length; i++) {

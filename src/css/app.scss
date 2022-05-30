@@ -171,3 +171,7 @@ body {
   text-overflow: ellipsis;
   max-width: 50ch;
 }
+
+img:not(.logo) {
+  width: 100%;
+}
