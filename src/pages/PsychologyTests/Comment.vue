@@ -34,7 +34,7 @@
             >
               <span
                 v-if="col.field === 'counter'"
-                :class="{ 'row-numbers': col.field === 'counter' }"
+                :class="{ 'row-numbers': col.field === 'counter', 'description': col.field === 'text' }"
               >
                 {{ col.value }}
               </span>

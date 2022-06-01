@@ -405,7 +405,7 @@ export default defineComponent({
       selectedTest: {},
       columns: [
         { name: 'counter', align: 'left', label: 'ردیف', field: 'counter' },
-        { name: 'tittle', align: 'left', label: 'متن', field: 'tittle' },
+        { name: 'tittle', align: 'left', label: 'عنوان', field: 'tittle' },
         { name: 'score', align: 'left', label: 'امتیاز', field: 'score' },
         { name: 'detail', align: 'center', label: '', field: 'detail'},
         { name: 'edit', align: 'center', label: '', field: 'edit' },
