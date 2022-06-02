@@ -562,9 +562,9 @@ export default defineComponent({
       } else {
         console.log(this.analysisData.specialty_id)
         const score = []
-        score.push(this.analysisData.minScore)
+        score.push(Number(this.analysisData.minScore))
         if (this.analysisData.maxScore) {
-          score.push(this.analysisData.maxScore)
+          score.push(Number(this.analysisData.maxScore))
         }
         axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateReplyPsychology', {
           text: this.analysisData.text,
