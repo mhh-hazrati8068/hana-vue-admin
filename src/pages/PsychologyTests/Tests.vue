@@ -463,7 +463,11 @@ export default defineComponent({
         })
         this.isLoading = false
       } else {
-        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateTest', this.testData).then(response => {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateTest', this.testData,{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
+        }).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -514,6 +518,10 @@ export default defineComponent({
         Skip: this.qBody.skip,
         IsExportFile: false,
         TagId: this.tagId ? this.tagId : null
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -585,6 +593,10 @@ export default defineComponent({
           id: this.selectedTestToEdit.id,
           tagId: this.selectedTestToEdit.tag_id,
           isActive: this.selectedTestToEdit.is_active
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
@@ -619,6 +631,10 @@ export default defineComponent({
     deleteTest (testId) {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteTest', {
         Id_: testId
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
@@ -651,6 +667,10 @@ export default defineComponent({
         Take: null,
         Skip: null,
         IsExportFile: false,
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.tests = response.data.items
@@ -680,6 +700,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTag', {
         SearchQuery: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(res => {
         if (res.data.isSuccess) {
           this.tags = res.data.items
@@ -720,6 +744,10 @@ export default defineComponent({
         SearchQuery: null,
         TagId: this.selectedTag.id !== 0 ? this.selectedTag.id : null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTag.id === 0) {

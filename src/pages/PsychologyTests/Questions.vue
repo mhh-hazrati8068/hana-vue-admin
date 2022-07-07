@@ -303,6 +303,10 @@ export default defineComponent({
         Skip: this.qBody.skip,
         IsExportFile: false,
         PsychologyTestId: this.testId ? this.testId : null
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -338,6 +342,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.tests = response.data.items
@@ -375,7 +383,11 @@ export default defineComponent({
       // console.log(this.questionData)
       this.isLoading = true
       if (this.questionData.text !== '' && this.questionData.psychologyTestId !== null) {
-        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateFargoQuestion', this.questionData).then(response => {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateFargoQuestion', this.questionData,{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
+        }).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -422,6 +434,10 @@ export default defineComponent({
         SearchQuery: null,
         IsExportFile: true,
         PsychologyTestId: this.selectedTest.id ? this.selectedTest.id : null
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTest.id === 0) {
@@ -467,6 +483,10 @@ export default defineComponent({
           text: this.selectedQuestionToEdit.text,
           psychologyTestId: this.selectedQuestionToEdit.psychology_test_id,
           id: this.selectedQuestionToEdit.id
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(response => {
           // console.log(response)
           if (response.data.isSuccess) {
@@ -507,6 +527,10 @@ export default defineComponent({
     deleteQuestion (questionId) {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteFargoQuestion', {
         Id_: questionId
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
@@ -539,6 +563,10 @@ export default defineComponent({
         Skip: null,
         PsychologyTestId: null,
         IsExportFile: false,
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.questions = response.data.items

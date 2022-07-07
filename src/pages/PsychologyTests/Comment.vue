@@ -33,12 +33,16 @@
               :props="props"
             >
               <span
-                v-if="col.field === 'counter'"
-                :class="{ 'row-numbers': col.field === 'counter', 'description': col.field === 'text' }"
+                v-if="col.field === 'text'"
+                class="description"
               >
-                {{ col.value }}
-              </span>
-              {{ col.value }}
+                    {{ col.value }}</span>
+              <span
+                v-else
+                :class="{ 'row-numbers': col.field === 'counter' }"
+              >
+                    {{ col.value }}
+                  </span>
               <q-btn
                 v-if="col.field === 'detail'"
                 unelevated
@@ -57,7 +61,7 @@
                 class="edit-btn"
                 @click="openEditDialog(props.row)"
               />-->
-              <q-btn
+<!--              <q-btn
                 v-if="col.field === 'delete'"
                 unelevated
                 dense
@@ -65,7 +69,7 @@
                 icon="delete"
                 class="delete-btn"
                 @click="deleteComment(props.row.id)"
-              />
+              />-->
             </q-td>
           </q-tr>
         </template>
@@ -205,6 +209,10 @@ export default defineComponent({
         Skip: this.qBody.skip,
         IsExportFile: false,
         PsychologyTestId: null
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count
@@ -248,6 +256,10 @@ export default defineComponent({
     deleteComment(id) {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteComment', {
         Id_: id
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(res => {
         if (res.data.isSuccess) {
           this.$q.notify({

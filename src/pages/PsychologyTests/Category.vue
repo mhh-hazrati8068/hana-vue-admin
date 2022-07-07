@@ -312,7 +312,12 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false
-      }).then(res => {
+      },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
+        }
+      ).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count
           this.pagination.page = reqProps?.pagination.page ?? 1
@@ -350,7 +355,11 @@ export default defineComponent({
         if (!this.categoryData.mainColor.includes('#')) {
           this.categoryData.mainColor = this.rgbToHex(this.categoryData.mainColor)
         }
-        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateCategory', this.categoryData).then(res => {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateCategory', this.categoryData,{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
+        }).then(res => {
           if (res.data.isSuccess) {
             this.createDialog = false
             this.categoryData = {
@@ -389,6 +398,10 @@ export default defineComponent({
     deleteCategory(categoryId) {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteCategory', {
         id_: categoryId
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(res => {
         if (res.data.isSuccess) {
           this.$q.notify({
@@ -436,6 +449,10 @@ export default defineComponent({
           mainColor: this.selectedCategoryToEdit.main_color,
           id: this.selectedCategoryToEdit.id,
           isActive: this.selectedCategoryToEdit.is_active
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(res => {
           if (res.data.isSuccess) {
             this.editDialog = false

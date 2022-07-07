@@ -309,6 +309,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetCategory', {
         SearchQuery: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(res => {
         if (res.data.isSuccess) {
           this.categories = res.data.items
@@ -351,6 +355,10 @@ export default defineComponent({
         Skip: this.qBody.skip,
         IsExportFile: false,
         CategoryId: this.categoryId ? this.categoryId : null
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(res => {
         if (res.data.isSuccess) {
           this.pagination.rowsNumber = res.data.count
@@ -397,7 +405,11 @@ export default defineComponent({
         })
         this.isLoading = false
       } else {
-        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateTag', this.tagData).then(res => {
+        axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateTag', this.tagData,{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
+        }).then(res => {
           if (res.data.isSuccess) {
             this.createDialog = false
             this.tagData = {
@@ -440,6 +452,10 @@ export default defineComponent({
     deleteTag(tagId) {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteTag', {
         Id_: tagId
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(res => {
         if (res.data.isSuccess) {
           this.$q.notify({
@@ -480,6 +496,10 @@ export default defineComponent({
           categoryId: this.selectedTagToEdit.category_id,
           id: this.selectedTagToEdit.id,
           isActive: this.selectedTagToEdit.is_active
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(res => {
           if (res.data.isSuccess) {
             this.editDialog = false
@@ -515,6 +535,10 @@ export default defineComponent({
         SearchQuery: null,
         // categoryId: this.selectedCategory.id !== 0 ? this.selectedCategory.id : null,
         IsExportFile: true,
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedCategory.id === 0) {

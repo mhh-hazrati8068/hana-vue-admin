@@ -26,5 +26,15 @@ export default route(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.MODE === 'ssr' ? void 0 : process.env.VUE_ROUTER_BASE)
   })
 
+  /*Router.beforeEach((to, from, next) => {
+    if(localStorage.getItem('token') === undefined || localStorage.getItem('token') === null) {
+      console.log('jj');
+      this.$router.push('Error403')
+      // next({ name: 'Error403' });
+    } else {
+      next();
+    }
+  })*/
+
   return Router
 })

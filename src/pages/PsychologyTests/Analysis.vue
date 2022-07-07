@@ -453,6 +453,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
         IsExportFile: true,
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.testOptions = [{
@@ -491,6 +495,10 @@ export default defineComponent({
         Skip: this.qBody.skip,
         IsExportFile: false,
         PsychologyTestId: this.selectedTest.id ? this.selectedTest.id : null
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -523,6 +531,10 @@ export default defineComponent({
         Skip: this.qBody.skip,
         IsExportFile: true,
         PsychologyTestId: this.selectedTest.id ? this.selectedTest.id : null
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectedTest.id === 0) {
@@ -573,6 +585,10 @@ export default defineComponent({
           psychologyTestId: this.analysisData.psychologyTestId,
           specialty_id: Number(this.analysisData.specialty_id),
           score
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -649,6 +665,10 @@ export default defineComponent({
           specialty_id: this.selectedAnalysisToEdit.specialty_id,
           tittle: this.selectedAnalysisToEdit.tittle,
           colorScore: this.selectedAnalysisToEdit.color_score
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -682,6 +702,10 @@ export default defineComponent({
     deleteAnalysis (id) {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteReplyPsychology', {
         Id_: id
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
@@ -714,6 +738,10 @@ export default defineComponent({
         Take: null,
         Skip: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.analyses = response.data.items
@@ -747,7 +775,11 @@ export default defineComponent({
       // console.log(this.selectedAnalysisToShow)
     },
     getSpecialties() {
-      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetSpecialty').then(res => {
+      axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetSpecialty',{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
+      }).then(res => {
         if (res.data.isSuccess) {
           for (const key in res.data.items) {
             this.specialties.push({

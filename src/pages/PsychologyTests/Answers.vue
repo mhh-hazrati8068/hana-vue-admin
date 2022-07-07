@@ -385,6 +385,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetTest', {
         SearchQuery: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.tests = response.data.items
@@ -411,6 +415,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.questions = response.data.items.filter(question => {
@@ -439,6 +447,10 @@ export default defineComponent({
         axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
           PsychologyTestId: this.selectedTest.id,
           IsExportFile: true
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(response => {
           if (response.data.isSuccess) {
             this.allAnswers = response.data.items
@@ -518,6 +530,10 @@ export default defineComponent({
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
             text: answer[0].text,
             score: answer[0].score
+          },{
+            headers: {
+              'Authorization': localStorage.getItem('token')
+            }
           }).then(response => {
             // console.log(response)
             if (response.data.isSuccess) {
@@ -560,6 +576,10 @@ export default defineComponent({
           questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
           text: this.answerText,
           score: Number(this.score)
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -601,6 +621,10 @@ export default defineComponent({
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
             text: this.selectedPattern.options[i].label,
             score: this.selectedPattern.options[i].score
+          },{
+            headers: {
+              'Authorization': localStorage.getItem('token')
+            }
           }).then(response => {
             // console.log(response)
             if (response.data.isSuccess) {
@@ -647,6 +671,10 @@ export default defineComponent({
         Take: this.qBody.take,
         Skip: this.qBody.skip,
         IsExportFile: false,
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.pagination.rowsNumber = response.data.count
@@ -686,6 +714,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: null,
         IsExportFile: true,
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.questionOptions = [{
@@ -725,6 +757,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
         searchQuery: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           if (this.selectQuestionToShow.id === 0) {
@@ -773,6 +809,10 @@ export default defineComponent({
     deleteAnswer (answer) {
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/DeleteFargoAnswer', {
         Id_: answer.id
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.$q.notify({
@@ -817,6 +857,10 @@ export default defineComponent({
           text: this.selectedAnswerToEdit.text,
           score: Number(this.selectedAnswerToEdit.score),
           questionId: this.selectedAnswerToEdit.question_id
+        },{
+          headers: {
+            'Authorization': localStorage.getItem('token')
+          }
         }).then(response => {
           if (response.data.isSuccess) {
             this.$q.notify({
@@ -851,6 +895,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoAnswer', {
         SearchQuery: this.search,
         IsExportFile: false,
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.answers = response.data.items
@@ -876,6 +924,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.questionsForEditAnswer = response.data.items
@@ -905,6 +957,10 @@ export default defineComponent({
       axios.post(vars.api_base2 + '/api/PsychologicalAssay/GetFargoQuestion', {
         SearchQuery: null,
         IsExportFile: true
+      },{
+        headers: {
+          'Authorization': localStorage.getItem('token')
+        }
       }).then(response => {
         if (response.data.isSuccess) {
           this.selectedAnswerToShow.question = response.data.items.filter(question => {
