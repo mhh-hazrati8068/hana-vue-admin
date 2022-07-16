@@ -16,7 +16,7 @@ const routes = [
       { name: 'states', path: '/states', component: () => import('pages/IranianMerchant/State.vue') },
       { name: 'category', path: '/category', component: () => import('pages/PsychologyTests/Category.vue') },
       { name: 'tags', path: '/tags', component: () => import('pages/PsychologyTests/Tags.vue') },
-      { name: 'comments', path: '/comments', component: () => import('pages/PsychologyTests/Comment') },
+      // { name: 'comments', path: '/comments', component: () => import('pages/PsychologyTests/Comment') },
       { name: 'Error403', path: '/error', component: () => import('pages/Error403.vue') }
     ]
   },

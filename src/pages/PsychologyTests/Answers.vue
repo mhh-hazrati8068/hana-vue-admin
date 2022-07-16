@@ -351,7 +351,7 @@ export default defineComponent({
       loading: false,
       qBody: {
         take: 20,
-        skip: 20
+        skip: 0
       },
       isLoading: false,
       updateLoading: false,
