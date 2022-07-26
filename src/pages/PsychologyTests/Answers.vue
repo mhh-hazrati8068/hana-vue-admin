@@ -234,6 +234,18 @@
               @update:model-value="savePattern"
               :disable="selectedAnswers.length > 0"
             />
+            <div class="" v-for="(pattern, index) in selectedPattern.options" :key="index">
+              <div class="pattern flex q-my-md" style="align-items: center">
+                <span style="min-width: 100px">{{ pattern.label }}</span>
+                <q-input
+                  dense
+                  outlined
+                  type="number"
+                  class="q-ml-md"
+                  v-model="pattern.score"
+                />
+              </div>
+            </div>
           </div>
           <div class="col-12 q-mt-md" v-if="answerTemplate === 2">
             <span class="label">متن پاسخ</span>
@@ -323,7 +335,7 @@ export default defineComponent({
       answerText: '',
       tests: [],
       selectedTest: {},
-      answerPatterns: [],
+      answerPatterns: this.$store.state.answerPattern.patterns,
       selectedPattern: {},
       questions: [],
       selectedQuestion: {},
@@ -362,12 +374,6 @@ export default defineComponent({
       questionsForEditAnswer: [],
       detailDialog: false,
       selectedAnswerToShow: {},
-      test: [
-        { label: 'دو گزینه\u200Cای', value: 2, options: [{ label: 'بله', score: 1 }, { label: 'خیر', score: 0 }] },
-        { label: 'سه گزینه\u200Cای', value: 3, options: [{ label: 'زیاد', score: 2 }, { label: 'متوسط', score: 1 }, { label: 'کم', score: 0 }] },
-        { label: 'چهار گزینه\u200Cای', value: 4, options: [{ label: 'زیاد', score: 3 }, { label: 'متوسط', score: 2 }, { label: 'کم', score: 1 }, { label: 'نظری ندارم', score: 0 }] },
-        { label: 'پنج گزینه\u200Cای', value: 5, options: [{ label: 'کاملا موافقم', score: 4 }, { label: 'موافقم', score: 3 }, { label: 'خنثی', score: 2 }, { label: 'مخالفم', score: 1 }, { label: 'کاملا مخالفم', score: 0 }] }
-      ]
     }
   },
   created () {
@@ -620,7 +626,7 @@ export default defineComponent({
           axios.post(vars.api_base2 + '/api/PsychologicalAssay/CreateFargoAnswer', {
             questionId: this.questionId ? this.questionId : this.selectedQuestion.id,
             text: this.selectedPattern.options[i].label,
-            score: this.selectedPattern.options[i].score
+            score: Number(this.selectedPattern.options[i].score)
           },{
             headers: {
               'Authorization': localStorage.getItem('token')
@@ -800,8 +806,10 @@ export default defineComponent({
         this.selectedPattern = this.answerPatterns.find(pattern => {
             return pattern.value === Number(localStorage.getItem('answer-pattern'))
         })
+      } else {
+        this.selectedPattern = this.answerPatterns[0];
       }
-      // console.log(this.selectedPattern)
+      console.log(this.selectedPattern)
       if (localStorage.getItem('answer-template')) {
         this.answerTemplate = Number(localStorage.getItem('answer-template'))
       }
