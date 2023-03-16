@@ -55,6 +55,7 @@
                 v-if="col.field === 'img'"
                 v-html="col.value"
                 :style="{ 'fill': props.row.main_color }"
+                style="max-width: 50px; margin: auto"
               ></div>
               <q-btn
                 v-if="col.field === 'tagsBtn'"
@@ -208,8 +209,10 @@
           <div class="col-12 q-mt-lg">
             <span class="label">تصویر</span>
             <div
+              class="d-flex justify-center"
               v-html="selectedCategoryToEdit.img"
               :style="{ 'fill': selectedCategoryToEdit.main_color }"
+              style="max-width: 75px"
             ></div>
             <q-input
               outlined
@@ -439,6 +442,7 @@ export default defineComponent({
           type: 'negative',
           message: 'لطفا همه مقادیر را وارد کنید.'
         })
+        this.isUpdating = false
       } else {
         if (!this.selectedCategoryToEdit.main_color.includes('#')) {
           this.selectedCategoryToEdit.main_color = this.rgbToHex(this.selectedCategoryToEdit.main_color)

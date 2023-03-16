@@ -859,6 +859,7 @@ export default defineComponent({
           type: 'negative',
           message: 'لطفا موارد ضروری را وارد نمایید.'
         })
+        this.updateLoading = false
       } else {
         axios.post(vars.api_base2 + '/api/PsychologicalAssay/UpdateFargoAnswer', {
           id: this.selectedAnswerToEdit.id,

@@ -61,6 +61,7 @@
               <div
                 v-if="col.field === 'img'"
                 v-html="col.value"
+                style="max-width: 50px; margin: auto"
               ></div>
               <q-btn
                 v-if="col.field === 'testsBtn'"
@@ -204,6 +205,7 @@
             <span class="label">تصویر (محتوای تصویر svg را قرار دهید)</span>
             <div
               v-html="selectedTagToEdit.img"
+              style="max-width: 75px"
             ></div>
             <q-input
               outlined
@@ -489,6 +491,7 @@ export default defineComponent({
           type: 'negative',
           message: 'لطفا همه مقادیر را وارد کنید.'
         })
+        this.isUpdating = false
       } else {
         axios.post(vars.api_base2 + '/api/PsychologicalAssay/UpdateTag', {
           text: this.selectedTagToEdit.text,

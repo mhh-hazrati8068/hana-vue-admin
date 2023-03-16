@@ -450,7 +450,7 @@ export default defineComponent({
     if (this.$route.query.tagId) {
       this.tagId = Number(this.$route.query.tagId)
     }
-    this.getTest()
+    this.getTags()
   },
   methods: {
     setTest () {
@@ -726,6 +726,7 @@ export default defineComponent({
             })
           }
         }
+        this.getTest()
       }).catch(err => {
         console.log(err)
         for (let i = 0; i < err.response.data.exceptions.length; i++) {
