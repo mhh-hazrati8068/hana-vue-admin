@@ -689,7 +689,7 @@ export default defineComponent({
             this.answers = response.data.items
           } else if (this.questionId) {
             this.answers = response.data.items.filter(answer => {
-              return answer.question_id === Number(this.$route.query.questionId)
+              return answer.question_id === Number(this.questionId)
             })
           } else if (this.selectQuestionToShow.id !== 0) {
             this.answers = response.data.items.filter(answer => {
