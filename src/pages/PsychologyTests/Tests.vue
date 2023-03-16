@@ -507,7 +507,7 @@ export default defineComponent({
       }
     },
     getTest (reqProps) {
-      this.getTags()
+      // this.getTags()
       this.loading = true
       this.qBody.take = reqProps?.pagination.rowsPerPage ?? 20
       this.qBody.skip = reqProps ? (reqProps?.pagination.page - 1) * this.qBody.take : 0
