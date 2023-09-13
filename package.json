@@ -2,8 +2,8 @@
   "name": "hana-admin",
   "version": "0.0.1",
   "description": "A Quasar Framework app",
-  "productName": "Psychology Tests",
-  "author": "Zahra Hanifi <zahrahanifi98@gmail.com>",
+  "productName": "HanaGame admin panel",
+  "author": "mohammad hossain hazrati",
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
@@ -12,9 +12,11 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "axios": "^0.21.1",
+    "chart.js": "^4.4.0",
     "core-js": "^3.6.5",
     "quasar": "^2.0.0",
     "vue": "^3.0.0",
+    "vue-chartjs": "^5.2.0",
     "vue-router": "^4.0.0",
     "vuex": "^4.0.1"
   },

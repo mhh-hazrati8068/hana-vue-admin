@@ -22,19 +22,19 @@ body {
 }
 
 .q-header {
-  background: #FFFFFF !important;
+  background: $bold-red !important;
 
   .q-btn {
     color: $dark;
-
-    @media (min-width: 1007px) {
-      display: none;
-    }
+    // @media (min-width: 1007px) {
+    //   display: hidden;
+    // }
   }
 }
 
 .q-router-link--active {
-  background: $primary-light;
+  background: $primary-red;
+  border-radius: 5px;
 }
 
 .q-expansion-item__content {
@@ -46,21 +46,23 @@ body {
 }
 
 .q-drawer {
-  width: 250px !important;
+  width: 300px !important;
+  background-color: $primary-red;
 
   .q-list .q-item .q-item__section--side {
     //padding: 0 !important;
     min-width: auto !important;
 
     .q-icon {
-      color: $primary;
+      color: $dark;
     }
   }
 }
 
 @media (min-width: 1007px) {
   .q-page-container {
-    padding-left: 250px !important;
+    width: 100%;
+    padding-left: 300px !important;
   }
 }
 
