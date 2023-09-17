@@ -1,7 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
     <q-header class="header-container">
-      <q-toolbar>
+      <q-toolbar class="header-toolbar">
         <q-btn
           flat
           dense
@@ -11,24 +11,19 @@
           @click="toggleLeftDrawer"
         />
       </q-toolbar>
-      <div class="q-card-container">
+      <div class="q-card-container header-section">
         <p>سیستم مدیریت یکپارچه شرکت سروهانا پارسیان</p>
-        <p>بازی هانا</p>
       </div>
 
-      <q-item-label class="q-pa-md">
-        <img
-          src="~assets/images/headerLogo.svg"
-          alt="Logo"
-          class="logo header"
-        />
-      </q-item-label>
     </q-header>
+    <q-item-label>
+      <img src="~assets/images/label.svg" alt="label" class="label" />
+    </q-item-label>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header class="flex flex-center q-mb">
-          <img src="~assets/images/hana.svg" class="logo" />
+          <img src="~assets/images/headerLogo.svg" class="logo" />
         </q-item-label>
         <div class="list-container">
           <q-expansion-item
@@ -90,7 +85,7 @@ const linksList = [
         link: "/wisc-answers",
         name: "wiscAnswers",
         active: false,
-      },   
+      },
     ],
   },
   {
@@ -161,30 +156,35 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.header-container {
-  background: $white;
-  color: $dark;
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Add this line to distribute space evenly */
-}
 .q-card-container {
   width: 100%;
   max-height: 50px;
-  padding: 2px;
+}
+.header-toolbar {
+  flex: 1;
+}
+.q-card-container p {
+  width: 100%;
   margin: 0 auto;
   color: $white;
   text-align: center;
-  justify-content: center;
-  display: grid;
-  justify-content: center;
   font-size: 12px;
+  font-weight: bolder;
 }
+
 .header {
   margin-top: 10px;
 }
 .logo {
-  width: 120px;
+  width: 200px;
+  height: auto;
+}
+
+.label {
+  margin-top: 50px;
+  opacity: 0.7;
+  position: relative;
+  z-index: 2;
 }
 .list-container {
   margin: 0 auto;

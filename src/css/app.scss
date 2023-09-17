@@ -23,12 +23,11 @@ body {
 
 .q-header {
   background: $bold-red !important;
-
+  display: flex;
+  align-items: center;
+  flex-direction: row;
   .q-btn {
     color: $dark;
-    // @media (min-width: 1007px) {
-    //   display: hidden;
-    // }
   }
 }
 
