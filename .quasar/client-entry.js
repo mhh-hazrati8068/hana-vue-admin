@@ -136,7 +136,9 @@ createQuasarApp(createApp, quasarUserOptions)
       
       import(/* webpackMode: "eager" */ 'boot/axios'),
       
-      import(/* webpackMode: "eager" */ 'boot/money')
+      import(/* webpackMode: "eager" */ 'boot/money'),
+      
+      import(/* webpackMode: "eager" */ 'boot/apexcharts')
       
     ]).then(bootFiles => {
       const boot = bootFiles
