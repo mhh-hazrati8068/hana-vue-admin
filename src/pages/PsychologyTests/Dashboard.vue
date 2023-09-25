@@ -2,15 +2,15 @@
   <div class="test-categories-container">
     <div class="box-container">
       <div class="box">Box 1</div>
-      <div class="box">Box 2</div>
+      <div class="box box2">Box 2</div>
       <div class="box">Box 3</div>
     </div>
 
     <div class="charts-container">
-      <div class="monthly"><MonthlyChart></MonthlyChart></div>
       <div class="weekly"><WeeklyChart></WeeklyChart></div>
+      <div class="monthly"><MonthlyChart></MonthlyChart></div>
     </div>
-    <div class="total"></div>
+    <div class="total"><TotalChart></TotalChart></div>
   </div>
 </template>
 
@@ -26,33 +26,40 @@ const MonthlyChart = defineAsyncComponent(() =>
 const WeeklyChart = defineAsyncComponent(() =>
   import("components/charts/WeeklyChart.vue")
 );
+const TotalChart = defineAsyncComponent(() =>
+  import("components/charts/TotalChart.vue")
+);
 
 export default defineComponent({
   name: "Dashboard",
   components: {
     MonthlyChart,
     WeeklyChart,
+    TotalChart,
   },
 });
 </script>
 
 <style lang="scss" scoped>
 .test-categories-container {
-  padding:0 1rem;
+  padding: 0 1rem;
   .box-container {
-    display: flex; /* Use flexbox */
-    justify-content: space-between; /* Distribute space between items */
+    display: flex;
+    justify-content: space-between;
   }
 
   .box {
-    width: 50%; /* Set a fixed width for each box (adjust as needed) */
-    height: 100px; /* Set a fixed height for each box (adjust as needed) */
-    background-color: #e0e0e0;
+    width: 50%;
+    height: 100px;
+    background-color: #ffe7db;
     text-align: center;
     line-height: 100px;
     border-radius: 20px;
     padding: 0.5rem;
-    margin: 5px; /* Add some margin between boxes */
+    margin: 5px;
+  }
+  .box2 {
+    background-color: rgba(191, 213, 174, 0.42);
   }
 
   .title {
@@ -70,24 +77,24 @@ export default defineComponent({
       height: 260px;
       background-color: #ffe7db;
       border-radius: 20px;
-      margin-right: 5px;
+      margin-left: 5px;
     }
     .weekly {
       width: 50%;
       height: 260px;
       background-color: #bfd5ae;
-      margin-left: 5px;
       border-radius: 20px;
+      margin-right: 5px;
     }
   }
   .total {
-    margin:0 auto;
+    margin: 0 auto;
     position: relative;
     top: 0.5rem;
     border-radius: 20px;
     width: 99.5%;
-    height: 400px;
-    background-color: #dadada;
+    height: 380px;
+    background-color: #edebeb;
   }
   .categories-wrapper {
     margin-top: 2rem;

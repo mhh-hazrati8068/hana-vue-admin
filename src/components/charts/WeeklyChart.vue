@@ -2,7 +2,7 @@
   <div id="chart">
     <apexchart
       type="area"
-      height="350"
+      height="250"
       :options="chartOptions"
       :series="series"
     ></apexchart>
@@ -15,16 +15,16 @@ export default {
     return {
       series: [
         {
-          name: "STOCK ABC",
-          data: series.monthDataSeries1.prices,
+          name: "Desktops",
+          data: [10, 41, 35, 51, 49, 62, 69],
         },
       ],
       chartOptions: {
         chart: {
+          height: 250,
           type: "area",
-          height: 350,
           zoom: {
-            enabled: false,
+            enabled: true,
           },
         },
         dataLabels: {
@@ -33,24 +33,18 @@ export default {
         stroke: {
           curve: "straight",
         },
-
         title: {
-          text: "Fundamental Analysis of Stocks",
+          // text: "Product Trends by Month",
           align: "left",
         },
-        subtitle: {
-          text: "Price Movements",
-          align: "left",
+        grid: {
+          row: {
+            colors: ["#f3f3f3", "transparent"], // takes an array which will be repeated on columns
+            opacity: 0.5,
+          },
         },
-        labels: series.monthDataSeries1.dates,
         xaxis: {
-          type: "datetime",
-        },
-        yaxis: {
-          opposite: true,
-        },
-        legend: {
-          horizontalAlign: "left",
+          categories: ["Sat", "Sun", "Mon", "Tus", "Wed", "Thu", "Fri"],
         },
       },
     };

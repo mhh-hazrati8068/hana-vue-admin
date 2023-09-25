@@ -306,7 +306,7 @@ export default {
         chart: {
           id: "area-datetime",
           type: "area",
-          height: 350,
+          height: 250,
           zoom: {
             autoScaleYaxis: true,
           },
