@@ -1,9 +1,21 @@
 <template>
   <div class="test-categories-container">
     <div class="box-container">
-      <div class="box">Box 1</div>
-      <div class="box box2">Box 2</div>
-      <div class="box">Box 3</div>
+      <div class="box">
+        <q-btn flat dense round icon="cached" aria-label="cached" class="btn" />
+        <!-- <p>23 آنلاین</p> -->
+        <p>تعداد کاربران</p>
+      </div>
+      <div class="box box2">
+        <q-btn flat dense round icon="cached" aria-label="cached" class="btn" />
+        <!-- <p>23 کالا</p> -->
+        <p>کالاهای تعریف</p>
+      </div>
+      <div class="box">
+        <q-btn flat dense round icon="cached" aria-label="cached" class="btn" />
+        <!-- <p>آنلاین</p> static -->
+        <p>ادمین</p>
+      </div>
     </div>
 
     <div class="charts-container">
@@ -57,6 +69,14 @@ export default defineComponent({
     border-radius: 20px;
     padding: 0.5rem;
     margin: 5px;
+
+    .btn {
+      color: #c1c1c1;
+      position: relative;
+      top: 0;
+      width: 4%;
+      float: left;
+    }
   }
   .box2 {
     background-color: rgba(191, 213, 174, 0.42);

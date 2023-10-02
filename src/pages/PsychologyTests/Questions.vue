@@ -4,7 +4,7 @@
       v-model="search"
       outlined
       dense
-      placeholder="جستجو کنید..."
+      placeholder="جستجو در سوال ها ..."
       class="q-mb-md"
       @update:model-value="getQuestions"
     >

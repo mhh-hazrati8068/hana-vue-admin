@@ -14,7 +14,6 @@
       <div class="q-card-container header-section">
         <p>سیستم مدیریت یکپارچه شرکت سروهانا پارسیان</p>
       </div>
-
     </q-header>
     <q-item-label>
       <img src="~assets/images/label.svg" alt="label" class="label" />
@@ -67,23 +66,23 @@ const linksList = [
     link: "/Dashboard",
   },
   {
-    title: "تست ها ",
+    title: "ورود تست ها",
     icon: "",
     name: "wiscTest",
     active: true,
     children: [
       {
-        title: "ورود تست",
+        title: "تست ها",
         icon: "quiz",
-        link: "/wisc-questions",
-        name: "wiscQuestions",
+        link: "/testHomePage",
+        name: "tests",
         active: true,
       },
       {
-        title: "گزارش های درخواستی",
-        icon: "rule",
-        link: "/wisc-answers",
-        name: "wiscAnswers",
+        title: "گزارش کاربرها",
+        icon: "quiz",
+        link: "/report",
+        name: "report",
         active: true,
       },
     ],
@@ -99,13 +98,13 @@ const linksList = [
         icon: "flag",
         link: "/countries",
         name: "countries",
-        active: true,
+        active: false,
       },
       {
         title: "محصولات فروخته شده",
         link: "/states",
         name: "states",
-        active: true,
+        active: false,
       },
       {
         title: "آپلود گزارش کاربر",
