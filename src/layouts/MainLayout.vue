@@ -48,6 +48,9 @@
           </q-expansion-item>
         </div>
       </q-list>
+      <q-item-label header class="flex flex-center q-mb">
+        <img src="~assets/images/sarve.png" class="logo2" />
+      </q-item-label>
     </q-drawer>
 
     <q-page-container>
@@ -178,7 +181,10 @@ export default defineComponent({
   width: 200px;
   height: auto;
 }
-
+.logo2{
+  width: 50%;
+  margin-top: 5%;
+}
 .label {
   margin-top: 50px;
   opacity: 0.7;

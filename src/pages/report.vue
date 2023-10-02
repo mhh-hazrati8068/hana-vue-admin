@@ -41,7 +41,7 @@
               v-model:pagination="pagination"
               :loading="loading"
               @request="getTest"
-              :rows-per-page-options="[10,20,30,40,50]"
+              :rows-per-page-options="[5,10,20,30,40,50]"
             >
               <template v-slot:body="props">
                 <q-tr
@@ -68,7 +68,7 @@
                       v-if="col.field === 'questionsBtn'"
                       unelevated
                       dense
-                      label="مشاهده سوال&zwnj;ها"
+                      label="مشاهده گزارش&zwnj;ها"
                       class="text-primary"
                       style="font-size: .75rem"
                       @click="goToQuestions(props.row.id)"

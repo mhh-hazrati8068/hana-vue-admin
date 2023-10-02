@@ -52,9 +52,13 @@ body {
 .q-drawer {
   width: 300px !important;
   background-color: $primary-red;
+  // background-image: url(../assets/images/hana.svg);
+  // background-repeat: no-repeat;
+  // background-size: cover;
 
   .q-list .q-item .q-item__section--side {
     //padding: 0 !important;
+
     min-width: auto !important;
 
     .q-icon {
