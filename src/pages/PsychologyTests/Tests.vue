@@ -386,7 +386,7 @@ import {moneyMixin} from "boot/money";
 import { useMeta } from 'quasar'
 
 const metaData = {
-  title: 'تست\u200Cهای روانشناسی - تست\u200Cها'
+  title: 'تست ها'
 }
 
 export default defineComponent({

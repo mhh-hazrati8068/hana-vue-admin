@@ -237,7 +237,7 @@ import * as axios from 'axios'
 import { useMeta } from 'quasar'
 
 const metaData = {
-  title: 'تست\u200Cهای روانشناسی - سوال\u200Cها'
+  title: 'سوالات'
 }
 
 export default defineComponent({

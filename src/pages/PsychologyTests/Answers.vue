@@ -315,7 +315,7 @@ import vars from '../../vars'
 import { useMeta } from 'quasar'
 
 const metaData = {
-  title: 'تست\u200Cهای روانشناسی - پاسخ\u200Cها'
+  title: 'پاسخ ها'
 }
 
 export default defineComponent({

@@ -18,6 +18,7 @@
 
     <!-- Render Components based on visibility -->
     <div class="component-container">
+      <!-- for toggle thingd in vue you can use v-if v-else v-else-if -->
       <Tests v-if="showTests"></Tests>
       <Questions v-if="showQuestions"></Questions>
       <Answers v-if="showAnswers"></Answers>

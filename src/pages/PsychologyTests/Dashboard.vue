@@ -32,6 +32,10 @@ import vars from "../../vars";
 import * as axios from "axios";
 import { useMeta } from "quasar";
 
+const metaData = {
+  title: "داشبورد",
+};
+
 const MonthlyChart = defineAsyncComponent(() =>
   import("components/charts/MonthlyChart.vue")
 );
@@ -44,6 +48,9 @@ const TotalChart = defineAsyncComponent(() =>
 
 export default defineComponent({
   name: "Dashboard",
+  setup() {
+    useMeta(metaData);
+  },
   components: {
     MonthlyChart,
     WeeklyChart,
@@ -70,14 +77,17 @@ export default defineComponent({
     padding: 0.5rem;
     margin: 5px;
 
+    p {
+      height: 10%;
+    }
     .btn {
       color: #c1c1c1;
       position: relative;
       top: 0;
-      width: 4%;
       float: left;
     }
   }
+
   .box2 {
     background-color: rgba(191, 213, 174, 0.42);
   }
@@ -93,7 +103,6 @@ export default defineComponent({
     padding: 0.25rem;
     .monthly {
       width: 50%;
-      padding: 0.25rem;
       height: 260px;
       background-color: #ffe7db;
       border-radius: 20px;

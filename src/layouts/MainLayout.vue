@@ -99,22 +99,17 @@ const linksList = [
       {
         title: "معرفی محصولات",
         icon: "flag",
-        link: "/countries",
-        name: "countries",
-        active: false,
+        link: "/Products",
+        name: "Products",
+        active: true,
       },
       {
         title: "محصولات فروخته شده",
         link: "/states",
         name: "states",
-        active: false,
+        active: true,
       },
-      {
-        title: "آپلود گزارش کاربر",
-        link: "/states",
-        name: "states",
-        active: false,
-      },
+     
     ],
   },
   {
