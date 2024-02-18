@@ -13,14 +13,6 @@
                   alt="Main Image"
                 />
               </div>
-              <div class="related-images">
-                <img
-                  v-for="n in numRelatedImages"
-                  :key="n"
-                  src="~assets/images/sarve.png"
-                  alt="Related Image"
-                />
-              </div>
             </div>
             <div class="desc">
               <h4>نام محصول: {{ slide.title }}</h4>
@@ -39,7 +31,10 @@
               </p>
               <p>قیمت: {{ slide.price }} تومان</p>
             </div>
-            <q-btn @click="deleteProduct(index)" color="negative"
+            <q-btn
+              @click="deleteProduct(index)"
+              color="negative"
+              class="delete-product"
               >حذف محصول</q-btn
             >
           </div>
@@ -47,8 +42,9 @@
       </swiper>
     </div>
     <div class="related-products">
-      <h5>اضافه کردن محصولات جدید</h5>
-      <q-btn @click="openModal" color="primary">افزودن محصول</q-btn>
+      <q-btn @click="openModal" color="primary" class="s-btn"
+        >افزودن محصول</q-btn
+      >
     </div>
     <!-- add modal to add products -->
     <q-dialog v-model="isModalVisible">
@@ -117,7 +113,6 @@ export default defineComponent({
           price: "43000",
           section: "book",
           mainImgSrc: "~assets/images/sarve.png",
-          relatedImg: ["~assets/images/sarve.png", "~assets/images/sarve.png"],
         },
         {
           title: "محصول دوم",
@@ -127,7 +122,6 @@ export default defineComponent({
           price: "44000",
           section: "book",
           mainImgSrc: "~assets/images/sarve.png",
-          relatedImg: ["~assets/images/sarve.png", "~assets/images/sarve.png"],
         },
         {
           title: "محصول سوم",
@@ -137,7 +131,6 @@ export default defineComponent({
           price: "46000",
           section: "book",
           mainImgSrc: "~assets/images/sarve.png",
-          relatedImg: ["~assets/images/sarve.png", "~assets/images/sarve.png"],
         },
         {
           title: "محصول چهارم",
@@ -147,7 +140,6 @@ export default defineComponent({
           price: "460300",
           section: "book",
           mainImgSrc: "~assets/images/sarve.png",
-          relatedImg: ["~assets/images/sarve.png", "~assets/images/sarve.png"],
         },
         // Add more slides as needed
       ],
@@ -192,9 +184,7 @@ export default defineComponent({
     },
   },
   computed: {
-    numRelatedImages() {
-      return 3;
-    },
+   
   },
   setup() {
     useMeta(metaData);
@@ -224,6 +214,17 @@ export default defineComponent({
   .title {
     font-size: 1.7rem;
     margin: 2rem 2rem;
+  }
+}
+.related-products {
+  width: 100%;
+  .s-btn {
+    width: 9.5%;
+    margin-top: 2%;
+    float: right;
+    margin-right: 3.6%;
+    height: fit-content;
+    font-size: 0.85rem;
   }
 }
 .swiper-container {
@@ -262,38 +263,33 @@ export default defineComponent({
     align-items: center;
     margin-top: 10px;
     .main-cover {
-      width: 80%;
+      width: 100%;
+      height:230px;
+      padding-top: 1rem;
       background-color: #ebeaea;
-      border-radius: 60px;
+      border-radius: 10px;
       box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-      margin-bottom: 1rem;
-    }
-    .related-images {
-      width: 20%;
-      justify-content: center;
-      display: flex;
-      flex-direction: row;
-      margin: 0 5px;
-      border-radius: 50%;
-      img {
-        border-radius: 10px;
-        background-color: #ebeaea;
-        margin: 0.5rem;
-        box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-      }
+      margin-bottom: 0.2rem;
     }
   }
   .desc {
-    margin-top: 2rem;
-    float: right;
+    margin-top: 0.5rem;
+    margin-left: 1.5rem;
+    // float: right;
     text-align: left;
-    width: 90%;
+    width: 100%;
     line-height: 1.5rem;
     font-size: 0.8rem;
     h4 {
       font-size: 1rem;
       margin-bottom: 1rem;
     }
+  }
+  .delete-product {
+    height: fit-content;
+    font-size: 0.85rem;
+    width: 12%;
+    margin-top: 17%;
   }
 }
 

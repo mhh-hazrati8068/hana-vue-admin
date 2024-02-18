@@ -94,7 +94,7 @@ const linksList = [
     title: "فروشگاه",
     icon: "",
     name: "iranianMerchant",
-    active: true,
+    active: false,
     children: [
       {
         title: "معرفی محصولات",
@@ -153,13 +153,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-.q-card-container {
-  width: 100%;
-  max-height: 50px;
-}
-.header-toolbar {
-  flex: 1;
-}
+  
 .q-card-container p {
   width: 100%;
   margin: 0 auto;
